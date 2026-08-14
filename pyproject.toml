@@ -5,13 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "celery>=5.6.3",
+    "celery[redis]>=5.6.3",
+    "croniter>=6.2.4",
     "fastapi>=0.141.1",
     "httpx>=0.28.1",
     "justhtml>=3.10.1",
     "loguru>=0.7.3",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
+    "sqlalchemy>=2.0.51",
+    "sqlmodel>=0.0.39",
 ]
 
 [project.scripts]
@@ -42,6 +45,8 @@ docstring-code-format = true
 
 [dependency-groups]
 dev = [
+    "ipykernel>=7.3.0",
+    "jupyter>=1.1.1",
     "ruff>=0.16.1",
 ]
 

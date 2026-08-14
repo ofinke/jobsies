@@ -6,6 +6,8 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """test."""
 
+    db_url: str = "sqlite:///jobsies.sqlite"
+
 
 @cache
 def get_settings() -> Settings:

@@ -9,3 +9,9 @@ class BaseJobsie(ABC):
     @abstractmethod
     def execute(self) -> dict:
         """Actually does something."""
+
+
+def get_jobsie_class(name: str) -> type[BaseJobsie]:
+    """Returns a subclass of BaseJobsie by its class name."""
+    mapping = {cls.__name__: cls for cls in BaseJobsie.__subclasses__()}
+    return mapping[name]

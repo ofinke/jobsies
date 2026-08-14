@@ -15,7 +15,7 @@ class TableJobsiesConfig(TableDefaultModel, table=True):
         sa_column=Column(Text, nullable=False),
         description="Name of the jobsie",
     )
-    class_name: str = Field(
+    subclass_name: str = Field(
         sa_column=Column(Text, nullable=False),
         description="Name of the class which the jobsie uses",
     )

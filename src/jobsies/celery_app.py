@@ -1,6 +1,6 @@
 from celery import Celery
 
-from jobsies.runner import execute_save_jobsie
+from jobsies.runner import run_jobsie
 
 app = Celery(
     "jobsies",
@@ -10,6 +10,6 @@ app = Celery(
 
 
 @app.task()
-def task_wrapper_jobsie_execute(jid: int = 1) -> dict:
+def task_wrapper_run_jobsie(jid: int = 1) -> dict:
     """Wrap execute_save_jobsie as a Celery task."""
-    return execute_save_jobsie(jid)
+    return run_jobsie(jid)

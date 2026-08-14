@@ -19,6 +19,7 @@ dependencies = [
 
 [project.scripts]
 jobsies = "jobsies:main"
+populate-db = "jobsies.scripts.populate_db:main"
 
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]

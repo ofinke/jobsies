@@ -14,6 +14,3 @@ class ExampleJobsie(BaseJobsie):
             "status_code": response.status_code,
             "content": JustHTML(response.text).to_text(),
         }
-
-
-# TODO: update the return so it returns only the text of the page

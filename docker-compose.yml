@@ -8,3 +8,9 @@ services:
       resources:
         limits:
           memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 3

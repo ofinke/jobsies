@@ -13,6 +13,8 @@ JSON_SCRIPT_TYPES = {
     "application/geo+json",
 }
 
+# Define Pydantic class as an output
+
 
 class ZalandoJobsie(BaseJobsie):
     """Jobsie for retrieving current price and stock of an item from Zalando."""

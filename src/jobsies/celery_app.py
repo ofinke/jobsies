@@ -9,7 +9,9 @@ app = Celery(
 )
 
 
-@app.task()
-def task_wrapper_run_jobsie(jid: int = 1) -> dict:
+@app.task(
+    bind=True,
+)
+def task_wrapper_run_jobsie(self, jid: int = 1) -> dict:
     """Wrap execute_save_jobsie as a Celery task."""
     return run_jobsie(jid)

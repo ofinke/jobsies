@@ -23,6 +23,11 @@ class TableJobsiesConfig(TableDefaultModel, table=True):
         sa_column=Column(Text, nullable=False),
         description="Cron tab",
     )
+    retention: str = Field(
+        sa_column=Column(Text, nullable=False),
+        default="0",
+        description="Retention configuration in the format 30d, etc..",
+    )
     input_kwargs: dict = Field(
         sa_column=Column(JSON, nullable=False),
         description="Dictionary of input variables for the jobsie",

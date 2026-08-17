@@ -1,16 +1,16 @@
-import httpx
-from justhtml import JustHTML
+from loguru import logger
+
+from jobsies.schemas.jobs import ExampleJobsieOutput
 
 from .base import BaseJobsie
 
 
 class ExampleJobsie(BaseJobsie):
-    """An example jobsie calls example.com domain and returns status message and page content."""
+    """An example jobsie returns string 'Hello World!'."""
 
-    def execute(self) -> dict:
+    output_schema = ExampleJobsieOutput
+
+    def execute(self) -> ExampleJobsieOutput:
         """Retrieves status and content of example.com."""
-        response = httpx.get("https://example.com/")
-        return {
-            "status_code": response.status_code,
-            "content": JustHTML(response.text).to_text(),
-        }
+        logger.debug("Example jobsie executed!")
+        return self.output_schema(content="Hello World!")

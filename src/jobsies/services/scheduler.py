@@ -16,7 +16,8 @@ class SchedulingService:
     and duplicate prevention using Redis locks.
     """
 
-    def __init__(self, lookahead_seconds: int = 30):
+    def __init__(self, lookahead_seconds: int):
+        """Initiates Redis client and how far into the future scheduler should schedule."""
         self.redis = RedisClient()
         self.lookahead_seconds = lookahead_seconds
 
@@ -37,9 +38,8 @@ class SchedulingService:
         lock_key = f"lock:task_run:{task_id}:{epoch_timestamp}"
         logger.debug(f"Locking key: {lock_key}")
 
-        # Set a 45-minute TTL so keys clean themselves up automatically.
-        # NX=True ensures we only write if the key doesn't already exist.
-        return bool(self.redis.set(lock_key, "enqueued", nx=True, ex=2700))
+        # Keys expire after 1.2 multiple of the lookahead_seconds
+        return bool(self.redis.set(lock_key, "enqueued", nx=True, ex=int(self.lookahead_seconds * 1.2)))
 
     def calculate_executions_in_window(self, cron_string: str, start_time: datetime, end_time: datetime) -> list:
         """Calculates all scheduled execution times for a cron pattern within a given window."""
@@ -83,6 +83,6 @@ class SchedulingService:
                     logger.info(f"Enqueued jobsie ID: '{task_id}', name: '{config.name}' for ETA: {run_time}")
                 else:
                     results["skipped"] += 1
-                    logger.warning(f"Double-fire blocked: Jobsie with ID {task_id} already scheduled for {run_time}")
+                    logger.warning(f"Jobsie with ID {task_id} already scheduled for {run_time}")
 
         return results

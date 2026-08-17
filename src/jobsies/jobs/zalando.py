@@ -5,6 +5,8 @@ import httpx
 from justhtml import JustHTML
 from loguru import logger
 
+from jobsies.schemas.jobs import ZalandoJobsieOutput
+
 from .base import BaseJobsie
 
 JSON_SCRIPT_TYPES = {
@@ -13,11 +15,11 @@ JSON_SCRIPT_TYPES = {
     "application/geo+json",
 }
 
-# Define Pydantic class as an output
-
 
 class ZalandoJobsie(BaseJobsie):
     """Jobsie for retrieving current price and stock of an item from Zalando."""
+
+    output_schema = ZalandoJobsieOutput
 
     def __init__(self, url: str, size: str) -> None:
         """
@@ -30,7 +32,6 @@ class ZalandoJobsie(BaseJobsie):
         """
         self.url = str(url)
         self.size = str(size)
-        self.output = {}
 
     def _get_content_from_url(self) -> JustHTML:
         """Retrieves HTML content from URL."""
@@ -42,7 +43,7 @@ class ZalandoJobsie(BaseJobsie):
         response = httpx.get(self.url, headers=headers)
         response.raise_for_status()
 
-        logger.debug(f"{self.url[:40]}... responded with {response.status_code}")
+        logger.debug(f"{self.url[:20]}... responded with {response.status_code}")
 
         return JustHTML(response.text, sanitize=False)
 
@@ -94,7 +95,7 @@ class ZalandoJobsie(BaseJobsie):
                 try:
                     results.append(json.loads(source))
                 except json.JSONDecodeError as error:
-                    logger.error(f"Failed to decode JSON script: {error}")
+                    logger.warning(f"Failed to decode JSON script: {error}")
                 continue
 
             results.extend(self._embedded_json_values(source))
@@ -229,13 +230,10 @@ class ZalandoJobsie(BaseJobsie):
 
         return None
 
-    def execute(self) -> dict:
+    def execute(self) -> ZalandoJobsieOutput:
         """Retrieves status and content of example.com."""
         # Retrieve content from the URL
         content = self._get_content_from_url()
-
-        # Extract data
-        self.output["item_name"] = self._extract_item_name(content)
 
         # The HTML contains a lot of complex jsons, we go through them in sequence
         data = self._extract_jsons_from_html(content)
@@ -246,8 +244,11 @@ class ZalandoJobsie(BaseJobsie):
         logger.debug(f"Extracted {len(stock)} JSONs with '{self.size}' size value.")
 
         # Extract final data we are interested in
-        self.output["price_czk"] = self._extract_price(stock)
-        self.output["stock"] = self._extract_stock(stock)
-        logger.debug(f"Extracted price and stock: price_czk={self.output['price_czk']}, stock={self.output['stock']}")
+        output = {
+            "item_name": self._extract_item_name(content),
+            "price_czk": self._extract_price(stock),
+            "stock": self._extract_stock(stock),
+        }
+        logger.debug(f"Extracted price and stock: price_czk={output['price_czk']}, stock={output['stock']}")
 
-        return self.output
+        return self.output_schema(**output)

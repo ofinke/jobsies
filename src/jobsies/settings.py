@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """test."""
 
-    db_url: str = "sqlite:///jobsies.sqlite"
+    db_url: str = "sqlite:///data/jobsies.sqlite"
     redis_url: str = "redis://localhost:6379/0"
 
 

@@ -67,13 +67,12 @@ def run_dynamic_jobsie(jobsie_id: int, *, execution_metadata: dict | None = None
     try:
         # selects correct class to execute
         jobsie_config = _get_jobsie_configuration(jobsie_id)
-        logger.debug(f"Jobsie {jobsie_config=}")
         cls = get_jobsie_class(jobsie_config.subclass_name)
         instance = cls(**jobsie_config.input_kwargs)
 
         # executes the jobsie
         output = instance.execute()
-        logger.debug(f"Jobsie finished with output: {output=}")
+        logger.debug(f"Jobsie ID: '{jobsie_config.id}', name: '{jobsie_config.name}' finished succesfful")
 
     except Exception as err:
         logger.error(f"Jobsie execution failed with {err!s}")
@@ -82,5 +81,7 @@ def run_dynamic_jobsie(jobsie_id: int, *, execution_metadata: dict | None = None
         raise
 
     finally:
+        # Convert model to dict for DB storage
+        output_data = output.model_dump() if not isinstance(output, dict) else output
         # Store result in database
-        _upload_result_to_db(jobsie_config, output, execution_metadata)
+        _upload_result_to_db(jobsie_config, output_data, execution_metadata)

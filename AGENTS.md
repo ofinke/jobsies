@@ -1,4 +1,4 @@
-Jobsies is a self-hosted tool designed to run automatically simple jobs on the internet, scrape price of a product you are interested in, or anything you are willing to program yourself.
+Jobsies is a self-hosted tool designed to automatically run simple jobs on the internet or locally. Like scraping product prices or others.
 
 # Coding style
 - Use good practices for python version defined in `.python-version` file

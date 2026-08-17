@@ -1,11 +1,12 @@
 [project]
 name = "jobsies"
 version = "0.1.0"
-description = "Add your description here"
+description = "Run small jobs automatically on your home server"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "celery[redis]>=5.6.3",
+    "click>=8.4.2",
     "croniter>=6.2.4",
     "fastapi>=0.141.1",
     "httpx>=0.28.1",

@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     """test."""
 
     db_url: str = "sqlite:///jobsies.sqlite"
+    redis_url: str = "redis://localhost:6379/0"
 
 
 @cache

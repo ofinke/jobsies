@@ -46,7 +46,7 @@ class DatabaseHandler:
                 if statement is None:
                     statement = Select(data_schema)
                 results = session.exec(statement)
-                return list(results.all())
+                return list(results.scalars().all())
             except Exception:
                 session.rollback()
                 raise

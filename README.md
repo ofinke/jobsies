@@ -11,5 +11,5 @@ uv sync
 # Running Celery worker
 
 ```bash
-uv run celery -A src.jobsies.celery_app worker --loglevel=info
+uv run celery -A src.jobsies.celery_app worker --loglevel=info --beat
 ```

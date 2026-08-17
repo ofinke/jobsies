@@ -48,10 +48,10 @@ def _get_jobsie_configuration(jobsie_id: int) -> TableJobsiesConfig:
         msg = f"No jobsie config found with id {jobsie_id}"
         logger.error(msg)
         raise ValueError(msg)
-    return jobsie_configs[0][0]
+    return jobsie_configs[0]
 
 
-def run_jobsie(jobsie_id: int, *, execution_metadata: dict | None = None) -> None:
+def run_dynamic_jobsie(jobsie_id: int, *, execution_metadata: dict | None = None) -> None:
     """Executes jobsie based on its configuration ID and stores the output into database."""
     # If the execution layer doesn't provide execution_metadata, generate default ones or validate the input.
     if not execution_metadata:
@@ -66,7 +66,6 @@ def run_jobsie(jobsie_id: int, *, execution_metadata: dict | None = None) -> Non
     # Whole jobsie execution is done in a single Try / Except block so if anything fails, the attempt is logged
     try:
         # selects correct class to execute
-        int("s")
         jobsie_config = _get_jobsie_configuration(jobsie_id)
         logger.debug(f"Jobsie {jobsie_config=}")
         cls = get_jobsie_class(jobsie_config.subclass_name)

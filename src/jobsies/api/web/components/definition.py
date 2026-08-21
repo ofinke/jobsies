@@ -1,6 +1,6 @@
 from urllib.parse import parse_qs
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from loguru import logger
@@ -61,14 +61,20 @@ async def create_definition(request: Request) -> HTMLResponse:
         service.create_definition(definition_in)
     except (KeyError, ValueError, ValidationError) as err:
         logger.error(str(err))
-        raise HTTPException(status_code=400, detail=str(err)) from None
+        subclasses = service.list_jobsie_types()
+        return templates.TemplateResponse(
+            request=request,
+            name="components/definition_create_form.html",
+            context={"subclasses": subclasses, "errors": [f"{err!s}"], "form_data": form_data},
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        )
 
     definitions = service.list_definitions()
     return templates.TemplateResponse(
         request=request,
         name="components/definition_table.html",
         context={"definitions": definitions},
-        headers={"HX-Trigger": "definition-created"},
+        headers={"HX-Retarget": "#definitions-table", "HX-Trigger": "definition-created"},
     )
 
 
@@ -79,11 +85,10 @@ async def get_update_definitions_form(request: Request, definition_id: int) -> H
     definition = service.get_definition(definition_id)
     if not definition:
         raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
-    subclasses = service.list_jobsie_types()
     return templates.TemplateResponse(
         request=request,
         name="components/definition_update_form.html",
-        context={"definition": definition, "subclasses": subclasses},
+        context={"definition": definition},
     )
 
 
@@ -91,27 +96,34 @@ async def get_update_definitions_form(request: Request, definition_id: int) -> H
 @router.put("/{definition_id}", response_class=HTMLResponse)
 async def update_definition(request: Request, definition_id: int) -> HTMLResponse:
     """Update a jobsie definition via HTMX form submission."""
+    service = DefinitionService()
+    definition = service.get_definition(definition_id)
+    if not definition:
+        raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
+
     form_data = await _extract_form_data(request)
     form_data["enabled"] = "enabled" in form_data
+    form_data.pop("subclass_name", None)
     logger.debug(f"Received form data for definition update: {form_data}")
 
-    service = DefinitionService()
     try:
         definition_in = RequestJobsieDefinitionUpdate(**form_data)
-        updated = service.update_definition(definition_id, definition_in)
+        service.update_definition(definition_id, definition_in)
     except (KeyError, ValueError, ValidationError) as err:
         logger.error(str(err))
-        raise HTTPException(status_code=400, detail=str(err)) from None
-
-    if not updated:
-        raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
+        return templates.TemplateResponse(
+            request=request,
+            name="components/definition_update_form.html",
+            context={"definition": definition, "errors": [f"{err!s}"], "form_data": form_data},
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        )
 
     definitions = service.list_definitions()
     return templates.TemplateResponse(
         request=request,
         name="components/definition_table.html",
         context={"definitions": definitions},
-        headers={"HX-Trigger": "definition-updated"},
+        headers={"HX-Retarget": "#definitions-table", "HX-Trigger": "definition-updated"},
     )
 
 

@@ -13,6 +13,7 @@ async def page_results(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="results.html",
+        context={"active_page": "results"},
     )
 
 
@@ -22,4 +23,5 @@ async def page_definitions(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="definition.html",
+        context={"active_page": "definitions"},
     )

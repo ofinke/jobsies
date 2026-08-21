@@ -4,15 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Jobsies{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/colors.css">
   <link rel="stylesheet" href="/static/css/style.css">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>
+    document.addEventListener('htmx:beforeSwap', function(evt) {
+      if (evt.detail.xhr.status === 422) {
+        evt.detail.shouldSwap = true;
+      }
+    });
+  </script>
 </head>
 <body>
   <div class="layout">
     <nav class="sidebar">
       <ul>
-        <li><a href="/">Results</a></li>
-        <li><a href="/definition">Definition</a></li>
+        <li><a href="/" class="nav-link{% if active_page == 'results' %} active{% endif %}">
+          <span class="nav-icon-circle"><img src="/static/img/bulb.svg" alt=""></span>
+          Results
+        </a></li>
+        <li><a href="/definition" class="nav-link{% if active_page == 'definitions' %} active{% endif %}">
+          <span class="nav-icon-circle"><img src="/static/img/briefcase.svg" alt=""></span>
+          Jobsies
+        </a></li>
       </ul>
     </nav>
     <main class="content">

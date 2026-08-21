@@ -7,7 +7,7 @@ from sqlalchemy.sql import Select
 
 from jobsies.database import get_db_handler
 from jobsies.schemas.tables import TableJobsiesDefinition
-from jobsies.services import RedisClient
+from jobsies.services import RedisService
 
 
 class SchedulingService:
@@ -18,7 +18,7 @@ class SchedulingService:
 
     def __init__(self, lookahead_seconds: int) -> None:
         """Initiates Redis client and how far into the future scheduler should schedule."""
-        self.redis = RedisClient()
+        self.redis = RedisService()
         self.lookahead_seconds = lookahead_seconds
 
     def get_active_task_configs(self) -> list[TableJobsiesDefinition]:

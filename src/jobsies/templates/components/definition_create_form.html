@@ -6,13 +6,25 @@
 <form
   id="create-definition-form"
   hx-post="/definition/create"
-  hx-target="#definitions-table"
-  hx-swap="outerHTML"
+  hx-target="#dialog-container"
+  hx-swap="innerHTML"
+  hx-on::before-swap="if(event.detail.xhr.status === 422) event.detail.shouldSwap = true"
   hx-on::after-request="if(event.detail.successful) document.getElementById('dialog').remove()"
 >
+  {% set form_data = form_data | default({}) %}
+  {% set errors = errors | default([]) %}
+
+  {% if errors %}
+  <div class="form-errors">
+    {% for error in errors %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="form-group">
     <label for="name">Name</label>
-    <input type="text" id="name" name="name" required class="form-control" placeholder="e.g. Zalando Camper">
+    <input type="text" id="name" name="name" required class="form-control" placeholder="e.g. Zalando Camper" value="{{ form_data.get('name', '') }}">
   </div>
 
   <div class="form-group">
@@ -20,28 +32,28 @@
     <select id="subclass_name" name="subclass_name" required class="form-control">
       <option value="">-- Select a type --</option>
       {% for subclass in subclasses %}
-      <option value="{{ subclass }}">{{ subclass }}</option>
+      <option value="{{ subclass }}"{% if form_data.get('subclass_name') == subclass %} selected{% endif %}>{{ subclass }}</option>
       {% endfor %}
     </select>
   </div>
 
   <div class="form-group">
     <label for="cron">Cron Expression</label>
-    <input type="text" id="cron" name="cron" required class="form-control" placeholder="e.g. 0 0 * * *">
+    <input type="text" id="cron" name="cron" required class="form-control" placeholder="e.g. 0 0 * * *" value="{{ form_data.get('cron', '') }}">
   </div>
 
   <div class="form-group">
     <label for="retention">Retention</label>
-    <input type="text" id="retention" name="retention" class="form-control" placeholder="e.g. 30d (default: 0)">
+    <input type="text" id="retention" name="retention" class="form-control" placeholder="e.g. 30d (default: 0)" value="{{ form_data.get('retention', '') }}">
   </div>
 
   <div class="form-group">
     <label for="input_kwargs">Input Kwargs (JSON)</label>
-    <textarea id="input_kwargs" name="input_kwargs" class="form-control" rows="3" placeholder='{"url": "https://zalando.cz/item"}'>{}</textarea>
+    <textarea id="input_kwargs" name="input_kwargs" class="form-control" rows="3" placeholder='{"url": "https://zalando.cz/item"}'>{{ form_data.get('input_kwargs', '') }}</textarea>
   </div>
 
   <div class="form-group form-check">
-    <input type="checkbox" id="enabled" name="enabled" checked class="form-check-input">
+    <input type="checkbox" id="enabled" name="enabled" class="form-check-input"{% if form_data.get('enabled', True) %} checked{% endif %}>
     <label for="enabled" class="form-check-label">Enabled</label>
   </div>
 

@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 
-from jobsies.schemas.jobs.base import BaseJobsieOutput
+from jobsies.schemas.jobs.base import BaseJobsieInput, BaseJobsieOutput
 
 
 class BaseJobsie(ABC):
     output_schema = BaseJobsieOutput
+    input_schema = BaseJobsieInput
 
     def __init__(self) -> None:
         """Does something."""

@@ -5,7 +5,7 @@ import httpx
 from justhtml import JustHTML
 from loguru import logger
 
-from jobsies.schemas.jobs import ZalandoJobsieOutput
+from jobsies.schemas.jobs import ZalandoJobsieInput, ZalandoJobsieOutput
 
 from .base import BaseJobsie
 
@@ -20,6 +20,7 @@ class ZalandoJobsie(BaseJobsie):
     """Jobsie for retrieving current price and stock of an item from Zalando."""
 
     output_schema = ZalandoJobsieOutput
+    input_schema = ZalandoJobsieInput
 
     def __init__(self, url: str, size: str) -> None:
         """
@@ -30,6 +31,7 @@ class ZalandoJobsie(BaseJobsie):
             size: exact size name as mentioned on the Zalando page
 
         """
+        self.input_schema(url=url, size=size)
         self.url = str(url)
         self.size = str(size)
 

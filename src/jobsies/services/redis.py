@@ -3,7 +3,7 @@ import redis
 from jobsies.settings import get_settings
 
 
-class RedisClient:
+class RedisService:
     """Extremely simple reusable Redis client connected to the application's Redis URL."""
 
     def __new__(cls) -> redis.Redis:

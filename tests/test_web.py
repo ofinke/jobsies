@@ -128,7 +128,7 @@ def test_definitions_create_post_success(client: TestClient) -> None:
 
 
 def test_definitions_create_post_invalid_json(client: TestClient) -> None:
-    """Tests POST /definition/create with invalid JSON in input_kwargs returns 400."""
+    """Tests POST /definition/create with invalid JSON in input_kwargs returns 422 and renders error."""
     form_data = {
         "name": "Invalid JSON Jobsie",
         "subclass_name": "ExampleJobsie",
@@ -138,11 +138,16 @@ def test_definitions_create_post_invalid_json(client: TestClient) -> None:
         "enabled": "on",
     }
     response = client.post("/definition/create", data=form_data)
-    assert response.status_code == 400
+    assert response.status_code == 422
+    html = response.text
+    assert "form-errors" in html
+    assert "alert-error" in html
+    assert "Invalid input_kwargs JSON" in html
+    assert "{invalid_json" in html
 
 
 def test_definitions_create_post_invalid_cron(client: TestClient) -> None:
-    """Tests POST /definition/create with invalid cron expression returns 400."""
+    """Tests POST /definition/create with invalid cron expression returns 422 and renders error."""
     form_data = {
         "name": "Invalid Cron Jobsie",
         "subclass_name": "ExampleJobsie",
@@ -152,7 +157,46 @@ def test_definitions_create_post_invalid_cron(client: TestClient) -> None:
         "enabled": "on",
     }
     response = client.post("/definition/create", data=form_data)
-    assert response.status_code == 400
+    assert response.status_code == 422
+    html = response.text
+    assert "form-errors" in html
+    assert "alert-error" in html
+    assert "Invalid cron expression" in html
+
+
+def test_definitions_update_post_invalid_json(client: TestClient) -> None:
+    """Tests PATCH /definition/{id} with invalid JSON in input_kwargs returns 422 and renders error."""
+    form_data = {
+        "name": "Initial Test Config",
+        "cron": "0 * * * *",
+        "retention": "0",
+        "input_kwargs": "{invalid_json_kwargs",
+        "enabled": "on",
+    }
+    response = client.patch("/definition/1", data=form_data)
+    assert response.status_code == 422
+    html = response.text
+    assert "form-errors" in html
+    assert "alert-error" in html
+    assert "Invalid input_kwargs JSON" in html
+    assert "{invalid_json_kwargs" in html
+
+
+def test_definitions_update_post_invalid_cron(client: TestClient) -> None:
+    """Tests PATCH /definition/{id} with invalid cron expression returns 422 and renders error."""
+    form_data = {
+        "name": "Initial Test Config",
+        "cron": "not-a-valid-cron",
+        "retention": "0",
+        "input_kwargs": "{}",
+        "enabled": "on",
+    }
+    response = client.patch("/definition/1", data=form_data)
+    assert response.status_code == 422
+    html = response.text
+    assert "form-errors" in html
+    assert "alert-error" in html
+    assert "Invalid cron expression" in html
 
 
 def test_definitions_update_dialog_get(client: TestClient) -> None:

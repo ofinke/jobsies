@@ -1,5 +1,5 @@
 from .definition import DefinitionService
-from .redis import RedisClient
+from .redis import RedisService
 from .scheduler import SchedulingService
 
-__all__ = ["DefinitionService", "RedisClient", "SchedulingService"]
+__all__ = ["DefinitionService", "RedisService", "SchedulingService"]

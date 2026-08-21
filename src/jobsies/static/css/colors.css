@@ -1,0 +1,36 @@
+:root {
+  --color-white: #ffffff;
+  --color-black: #111827;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-700: #374151;
+  --color-gray-900: #1f2937;
+
+  --color-blue-500: #2563eb;
+  --color-blue-600: #1d4ed8;
+  --color-blue-400: #3b82f6;
+  --color-blue-ring: rgba(59, 130, 246, 0.15);
+
+  --color-green-100: #d1fae5;
+  --color-green-800: #065f46;
+
+  --color-red-100: #fee2e2;
+  --color-red-800: #991b1b;
+
+  --color-black-full: #000000;
+
+  --color-black-alpha-10: rgba(0, 0, 0, 0.1);
+  --color-black-alpha-06: rgba(0, 0, 0, 0.06);
+  --color-black-alpha-50: rgba(0, 0, 0, 0.5);
+  --color-black-alpha-04: rgba(0, 0, 0, 0.04);
+
+  --sidebar-bg: #d4e5e4;
+  --sidebar-text: #000000;
+  --sidebar-link: #000000;
+  --sidebar-link-hover-bg: #1f2937;
+  --sidebar-link-hover-text: #1c211c;
+}

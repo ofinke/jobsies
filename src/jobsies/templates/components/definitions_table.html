@@ -9,6 +9,7 @@
         <th>Retention</th>
         <th>Status</th>
         <th>Updated At</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -27,10 +28,18 @@
           {% endif %}
         </td>
         <td>{{ definition.updated_at.strftime('%Y-%m-%d %H:%M:%S') if definition.updated_at else '-' }}</td>
+        <td>
+          <button class="btn btn-sm btn-ghost"
+                  hx-delete="/definitions/{{ definition.id }}"
+                  hx-target="#definitions-table"
+                  hx-confirm="Are you sure you want to delete '{{ definition.name }}'?">
+            <img src="{{ url_for('static', path='img/trash.svg') }}" alt="Delete" width="18" height="18">
+          </button>
+        </td>
       </tr>
       {% else %}
       <tr>
-        <td colspan="7" class="text-center">No jobsie definitions found.</td>
+        <td colspan="8" class="text-center">No jobsie definitions found.</td>
       </tr>
       {% endfor %}
     </tbody>

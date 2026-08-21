@@ -37,13 +37,13 @@ async def get_definitions_table(request: Request) -> HTMLResponse:
 
 
 @router.get("/create", response_class=HTMLResponse)
-async def get_create_definition_form(request: Request) -> HTMLResponse:
+async def get_create_definitions_form(request: Request) -> HTMLResponse:
     """Render the jobsie definition creation dialog."""
     service = DefinitionService()
     subclasses = service.list_jobsie_types()
     return templates.TemplateResponse(
         request=request,
-        name="components/definition_create_form.html",
+        name="components/definitions_create_form.html",
         context={"subclasses": subclasses},
     )
 
@@ -68,4 +68,21 @@ async def create_definition(request: Request) -> HTMLResponse:
         name="components/definitions_table.html",
         context={"definitions": definitions},
         headers={"HX-Trigger": "definition-created"},
+    )
+
+
+@router.delete("/{definition_id}", response_class=HTMLResponse)
+async def delete_definition(request: Request, definition_id: int) -> HTMLResponse:
+    """Delete a jobsie definition via HTMX and re-render the table."""
+    service = DefinitionService()
+    deleted = service.delete_definition(definition_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
+
+    definitions = service.list_definitions()
+    return templates.TemplateResponse(
+        request=request,
+        name="components/definitions_table.html",
+        context={"definitions": definitions},
+        headers={"HX-Trigger": "definition-deleted"},
     )

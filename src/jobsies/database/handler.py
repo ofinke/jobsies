@@ -29,7 +29,7 @@ class DatabaseHandler:
             logger.debug("No data to store.")
             return
 
-        with Session(self.engine) as session:
+        with Session(self.engine, expire_on_commit=False) as session:
             try:
                 for item in data:
                     session.add(item)
@@ -41,7 +41,7 @@ class DatabaseHandler:
 
     def load[T: BaseModel](self, data_schema: type[T], *, statement: Select | None = None) -> list[T]:
         """Loads data from the table using a provided SQLAlchemy statement or defaults to full table."""
-        with Session(self.engine) as session:
+        with Session(self.engine, expire_on_commit=False) as session:
             try:
                 if statement is None:
                     statement = Select(data_schema)
@@ -64,15 +64,18 @@ class DatabaseHandler:
             else:
                 return result.rowcount if result else 0
 
-    # def execute(self, statement: Select) -> None:
-    #     """Executes a raw SQL statement."""
-    #     with Session(self.engine) as session:
-    #         try:
-    #             session.execute(statement)
-    #             session.commit()
-    #         except Exception:
-    #             session.rollback()
-    #             raise
+    def delete[T: BaseModel](self, model: type[T], filters: dict[str, object]) -> int:
+        """Deletes rows from the table that match given filters."""
+        with Session(self.engine) as session:
+            try:
+                statement = delete(model).filter_by(**filters)
+                result = session.exec(statement)
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+            else:
+                return result.rowcount if result else 0
 
     def clear_table[T: BaseModel](self, data_schema: type[T]) -> int:
         """Deletes all rows from the table corresponding to the given data_schema."""

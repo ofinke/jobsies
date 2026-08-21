@@ -9,7 +9,7 @@ from sqlalchemy.sql import Select
 from jobsies.database.handler import get_db_handler
 from jobsies.jobs import get_jobsie_class
 from jobsies.schemas.runner import RunnerExecutionMetadata
-from jobsies.schemas.tables import TableJobsiesConfig, TableJobsiesOutputs
+from jobsies.schemas.tables import TableJobsiesDefinition, TableJobsiesOutputs
 
 
 def _upload_result_to_db(jobsie_config: dict, output_data: dict, execution_metadata: RunnerExecutionMetadata) -> None:
@@ -33,7 +33,7 @@ def _get_default_execution_metadata() -> dict:
     return RunnerExecutionMetadata(execution_id=str(uuid4()), execution_method="direct_call")
 
 
-def _get_jobsie_configuration(jobsie_id: int) -> TableJobsiesConfig:
+def _get_jobsie_configuration(jobsie_id: int) -> TableJobsiesDefinition:
     """
     Wrapper for retrieving jobsie configuration.
 
@@ -41,8 +41,8 @@ def _get_jobsie_configuration(jobsie_id: int) -> TableJobsiesConfig:
     """
     db = get_db_handler()
     jobsie_configs = db.load(
-        TableJobsiesConfig,
-        statement=Select(TableJobsiesConfig).where(TableJobsiesConfig.id == jobsie_id),
+        TableJobsiesDefinition,
+        statement=Select(TableJobsiesDefinition).where(TableJobsiesDefinition.id == jobsie_id),
     )
     if not jobsie_configs:
         msg = f"No jobsie config found with id {jobsie_id}"

@@ -9,13 +9,14 @@ dependencies = [
     "click>=8.4.2",
     "croniter>=6.2.4",
     "fastapi>=0.141.1",
-    "httpx>=0.28.1",
+    "httpx2>=2.10.0",
     "justhtml>=3.10.1",
     "loguru>=0.7.3",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "sqlalchemy>=2.0.51",
     "sqlmodel>=0.0.39",
+    "uvicorn>=0.52.3",
 ]
 
 [project.scripts]
@@ -49,6 +50,7 @@ docstring-code-format = true
 dev = [
     "ipykernel>=7.3.0",
     "jupyter>=1.1.1",
+    "pytest>=9.1.1",
     "ruff>=0.16.1",
 ]
 

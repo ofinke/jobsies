@@ -1,0 +1,15 @@
+.git
+.venv
+__pycache__/
+*.py[codz]
+.ruff_cache
+.pytest_cache
+.mypy_cache
+notebooks
+data
+celerybeat-schedule
+celerybeat.pid
+.dockerignore
+Dockerfile
+docker-compose.yml
+.env

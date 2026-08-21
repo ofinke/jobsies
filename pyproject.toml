@@ -1,6 +1,6 @@
 [project]
 name = "jobsies"
-version = "0.1.0"
+version = "0.1.1"
 description = "Run small jobs automatically on your home server"
 readme = "README.md"
 requires-python = ">=3.13"

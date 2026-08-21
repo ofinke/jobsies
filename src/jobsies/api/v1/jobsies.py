@@ -7,11 +7,11 @@ from jobsies.database.handler import get_db_handler
 from jobsies.schemas.api import ResponseJobsieExecute
 from jobsies.schemas.tables import TableJobsiesDefinition
 
-router = APIRouter(prefix="/jobsie", tags=["Jobsies Execution"])
+router = APIRouter(prefix="/jobsie/execute", tags=["Jobsies Execution"])
 
 
-@router.post("/execute/{definition_id}")
-@router.get("/execute/{definition_id}")
+@router.post("/{definition_id}")
+@router.get("/{definition_id}")
 def execute_jobsie(definition_id: int) -> ResponseJobsieExecute:
     """Trigger execution of a jobsie configuration by ID."""
     db = get_db_handler()

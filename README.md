@@ -16,10 +16,10 @@ Populate database with example jobsie config
 uv run populate-db
 ```
 
-To run the application, redis running on a default localhost is required. There is a predefined redis in the docker-compose.yaml, simply run
+To run the application, redis running on a localhost (default port) is required. There is a predefined redis in the docker-compose.yaml, simply run
 
 ```bash
-docker compose up -d
+docker compose up -d redis
 ```
 
 Then the Jobsie worker can be run by running
@@ -30,13 +30,25 @@ uv run celery -A src.jobsies.celery_app worker --loglevel=info --beat
 ```
 ## Containerized 
 
-TBD
+Before running for the first time, build the database into `./data`
+
+```bash
+uv run populate-db
+```
+
+Build and start the whole stack (redis + jobsies worker)
+
+```bash
+docker compose up -d --build
+```
+
+The worker container mounts the local `./data` folder, so the sqlite database persists on the host and can be shared with a locally running instance.
 
 # Roadmap
 
-Goal is to develop dockerized system consisting of celery worker for processing jobsies and simple fastapi frontend to show scraped information. Information is stored in an sqlite database. The development roughly follows this path
+Goal is to develop dockerized system consisting of celery worker for processing and a simple fastapi frontend to show created information. Data are stored in an sqlite database. The development roughly follows this path
 
 - [X] v0.1.0 - Celery worker with sqlite storage
-- [ ] v0.1.1 - Simple containerization for deployment
+- [X] v0.1.1 - Simple containerization for deployment
 - [ ] v0.2.0 - Fastapi serving frontend with showing results from executed jobsies
 - [ ] v0.3.0 - Reusable services and generic configuration template for credentials and other

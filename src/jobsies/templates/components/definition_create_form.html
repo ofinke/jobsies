@@ -5,7 +5,7 @@
 {% block dialog_body %}
 <form
   id="create-definition-form"
-  hx-post="/definitions/create"
+  hx-post="/definition/create"
   hx-target="#definitions-table"
   hx-swap="outerHTML"
   hx-on::after-request="if(event.detail.successful) document.getElementById('dialog').remove()"

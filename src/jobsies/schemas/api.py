@@ -55,31 +55,33 @@ class JobsieDefinitionBase(BaseModel):
             raise ValueError(msg) from None
         return value
 
-
-class RequestJobsieDefinitionCreate(JobsieDefinitionBase):
-    """Schema for creating a new jobsie definition."""
-
     @model_validator(mode="before")
     @classmethod
     def coerce_form_data(cls, data: Any) -> Any:
         """Coerce raw form data (str values, JSON-encoded input_kwargs) into proper types."""
         if not isinstance(data, dict):
             return data
-        raw = data.get("input_kwargs")
-        if isinstance(raw, str) and raw.strip():
-            try:
-                parsed = json.loads(raw.strip())
-            except json.JSONDecodeError as err:
-                msg = f"Invalid input_kwargs JSON: {err}"
-                raise ValueError(msg) from None
-            if not isinstance(parsed, dict):
-                msg = "input_kwargs must be a JSON object"
-                raise ValueError(msg)
-            data["input_kwargs"] = parsed
-        elif raw is None or (isinstance(raw, str) and not raw.strip()):
-            data["input_kwargs"] = {}
-        data["enabled"] = data.get("enabled") in ("on", "true", "True", True) if "enabled" in data else True
+        if "input_kwargs" in data:
+            raw = data.get("input_kwargs")
+            if isinstance(raw, str) and raw.strip():
+                try:
+                    parsed = json.loads(raw.strip())
+                except json.JSONDecodeError as err:
+                    msg = f"Invalid input_kwargs JSON: {err}"
+                    raise ValueError(msg) from None
+                if not isinstance(parsed, dict):
+                    msg = "input_kwargs must be a JSON object"
+                    raise ValueError(msg)
+                data["input_kwargs"] = parsed
+            elif isinstance(raw, str) and not raw.strip():
+                data["input_kwargs"] = {}
+        if "enabled" in data and data["enabled"] is not None:
+            data["enabled"] = data["enabled"] in ("on", "true", "True", True)
         return data
+
+
+class RequestJobsieDefinitionCreate(JobsieDefinitionBase):
+    """Schema for creating a new jobsie definition."""
 
 
 class RequestJobsieDefinitionUpdate(JobsieDefinitionBase):

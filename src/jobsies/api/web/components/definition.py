@@ -6,10 +6,10 @@ from fastapi.templating import Jinja2Templates
 from loguru import logger
 from pydantic import ValidationError
 
-from jobsies.schemas.api import RequestJobsieDefinitionCreate
+from jobsies.schemas.api import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.services import DefinitionService
 
-router = APIRouter(prefix="/definitions", tags=["Web Components"])
+router = APIRouter(prefix="/definition", tags=["Web Components"])
 templates = Jinja2Templates(directory="src/jobsies/templates")
 
 
@@ -31,7 +31,7 @@ async def get_definitions_table(request: Request) -> HTMLResponse:
     definitions = service.list_definitions()
     return templates.TemplateResponse(
         request=request,
-        name="components/definitions_table.html",
+        name="components/definition_table.html",
         context={"definitions": definitions},
     )
 
@@ -43,7 +43,7 @@ async def get_create_definitions_form(request: Request) -> HTMLResponse:
     subclasses = service.list_jobsie_types()
     return templates.TemplateResponse(
         request=request,
-        name="components/definitions_create_form.html",
+        name="components/definition_create_form.html",
         context={"subclasses": subclasses},
     )
 
@@ -52,6 +52,7 @@ async def get_create_definitions_form(request: Request) -> HTMLResponse:
 async def create_definition(request: Request) -> HTMLResponse:
     """Create a new jobsie definition via HTMX form submission."""
     form_data = await _extract_form_data(request)
+    form_data["enabled"] = "enabled" in form_data
     logger.debug(f"Received form data for definition creation: {form_data}")
 
     service = DefinitionService()
@@ -65,9 +66,52 @@ async def create_definition(request: Request) -> HTMLResponse:
     definitions = service.list_definitions()
     return templates.TemplateResponse(
         request=request,
-        name="components/definitions_table.html",
+        name="components/definition_table.html",
         context={"definitions": definitions},
         headers={"HX-Trigger": "definition-created"},
+    )
+
+
+@router.get("/{definition_id}/update", response_class=HTMLResponse)
+async def get_update_definitions_form(request: Request, definition_id: int) -> HTMLResponse:
+    """Render the jobsie definition update dialog with prefilled data."""
+    service = DefinitionService()
+    definition = service.get_definition(definition_id)
+    if not definition:
+        raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
+    subclasses = service.list_jobsie_types()
+    return templates.TemplateResponse(
+        request=request,
+        name="components/definition_update_form.html",
+        context={"definition": definition, "subclasses": subclasses},
+    )
+
+
+@router.patch("/{definition_id}", response_class=HTMLResponse)
+@router.put("/{definition_id}", response_class=HTMLResponse)
+async def update_definition(request: Request, definition_id: int) -> HTMLResponse:
+    """Update a jobsie definition via HTMX form submission."""
+    form_data = await _extract_form_data(request)
+    form_data["enabled"] = "enabled" in form_data
+    logger.debug(f"Received form data for definition update: {form_data}")
+
+    service = DefinitionService()
+    try:
+        definition_in = RequestJobsieDefinitionUpdate(**form_data)
+        updated = service.update_definition(definition_id, definition_in)
+    except (KeyError, ValueError, ValidationError) as err:
+        logger.error(str(err))
+        raise HTTPException(status_code=400, detail=str(err)) from None
+
+    if not updated:
+        raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
+
+    definitions = service.list_definitions()
+    return templates.TemplateResponse(
+        request=request,
+        name="components/definition_table.html",
+        context={"definitions": definitions},
+        headers={"HX-Trigger": "definition-updated"},
     )
 
 
@@ -82,7 +126,7 @@ async def delete_definition(request: Request, definition_id: int) -> HTMLRespons
     definitions = service.list_definitions()
     return templates.TemplateResponse(
         request=request,
-        name="components/definitions_table.html",
+        name="components/definition_table.html",
         context={"definitions": definitions},
         headers={"HX-Trigger": "definition-deleted"},
     )

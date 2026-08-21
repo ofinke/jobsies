@@ -62,11 +62,11 @@ def test_index_page(client: TestClient) -> None:
 
 def test_definitions_page_full_load(client: TestClient) -> None:
     """
-    Tests GET /definitions returns full HTML page skeleton without table data.
+    Tests GET /definition returns full HTML page skeleton without table data.
 
     The definitions table is loaded asynchronously via HTMX after page load.
     """
-    response = client.get("/definitions")
+    response = client.get("/definition")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     html = response.text
@@ -74,14 +74,14 @@ def test_definitions_page_full_load(client: TestClient) -> None:
     assert "Jobsies - Definitions" in html
     assert "sidebar" in html
     assert "definitions-table" in html
-    assert 'hx-get="/definitions/table"' in html
+    assert 'hx-get="/definition/table"' in html
     assert 'hx-trigger="load"' in html
     assert "dialog-container" in html
 
 
 def test_definitions_table_component_partial_load(client: TestClient) -> None:
-    """Tests GET /definitions/table returns only partial table HTML."""
-    response = client.get("/definitions/table")
+    """Tests GET /definition/table returns only partial table HTML."""
+    response = client.get("/definition/table")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     html = response.text
@@ -93,8 +93,8 @@ def test_definitions_table_component_partial_load(client: TestClient) -> None:
 
 
 def test_definitions_create_dialog_get(client: TestClient) -> None:
-    """Tests GET /definitions/create returns the dialog with form and subclass selector."""
-    response = client.get("/definitions/create")
+    """Tests GET /definition/create returns the dialog with form and subclass selector."""
+    response = client.get("/definition/create")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     html = response.text
@@ -109,7 +109,7 @@ def test_definitions_create_dialog_get(client: TestClient) -> None:
 
 
 def test_definitions_create_post_success(client: TestClient) -> None:
-    """Tests POST /definitions/create creates a new definition and returns updated table."""
+    """Tests POST /definition/create creates a new definition and returns updated table."""
     form_data = {
         "name": "New Test Jobsie",
         "subclass_name": "ExampleJobsie",
@@ -118,7 +118,7 @@ def test_definitions_create_post_success(client: TestClient) -> None:
         "input_kwargs": '{"test_key": "test_val"}',
         "enabled": "on",
     }
-    response = client.post("/definitions/create", data=form_data)
+    response = client.post("/definition/create", data=form_data)
     assert response.status_code == 200
     assert response.headers.get("HX-Trigger") == "definition-created"
     html = response.text
@@ -128,7 +128,7 @@ def test_definitions_create_post_success(client: TestClient) -> None:
 
 
 def test_definitions_create_post_invalid_json(client: TestClient) -> None:
-    """Tests POST /definitions/create with invalid JSON in input_kwargs returns 400."""
+    """Tests POST /definition/create with invalid JSON in input_kwargs returns 400."""
     form_data = {
         "name": "Invalid JSON Jobsie",
         "subclass_name": "ExampleJobsie",
@@ -137,12 +137,12 @@ def test_definitions_create_post_invalid_json(client: TestClient) -> None:
         "input_kwargs": "{invalid_json",
         "enabled": "on",
     }
-    response = client.post("/definitions/create", data=form_data)
+    response = client.post("/definition/create", data=form_data)
     assert response.status_code == 400
 
 
 def test_definitions_create_post_invalid_cron(client: TestClient) -> None:
-    """Tests POST /definitions/create with invalid cron expression returns 400."""
+    """Tests POST /definition/create with invalid cron expression returns 400."""
     form_data = {
         "name": "Invalid Cron Jobsie",
         "subclass_name": "ExampleJobsie",
@@ -151,5 +151,50 @@ def test_definitions_create_post_invalid_cron(client: TestClient) -> None:
         "input_kwargs": "{}",
         "enabled": "on",
     }
-    response = client.post("/definitions/create", data=form_data)
+    response = client.post("/definition/create", data=form_data)
     assert response.status_code == 400
+
+
+def test_definitions_update_dialog_get(client: TestClient) -> None:
+    """Tests GET /definition/{id}/update returns update dialog with prefilled data."""
+    response = client.get("/definition/1/update")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    html = response.text
+    assert "<dialog" in html
+    assert "Update Jobsie Definition" in html
+    assert 'value="Initial Test Config"' in html
+    assert 'name="enabled"' in html
+
+
+def test_definitions_update_post_disable(client: TestClient) -> None:
+    """Tests PATCH /definition/{id} with unchecked enabled disables the definition."""
+    form_data = {
+        "name": "Updated Test Config",
+        "subclass_name": "ExampleJobsie",
+        "cron": "0 * * * *",
+        "retention": "0",
+        "input_kwargs": "{}",
+    }
+    response = client.patch("/definition/1", data=form_data)
+    assert response.status_code == 200
+    assert response.headers.get("HX-Trigger") == "definition-updated"
+    html = response.text
+    assert "Disabled" in html
+
+
+def test_definitions_update_post_enable(client: TestClient) -> None:
+    """Tests PATCH /definition/{id} with checked enabled enables the definition."""
+    form_data = {
+        "name": "Updated Test Config",
+        "subclass_name": "ExampleJobsie",
+        "cron": "0 * * * *",
+        "retention": "0",
+        "input_kwargs": "{}",
+        "enabled": "on",
+    }
+    response = client.patch("/definition/1", data=form_data)
+    assert response.status_code == 200
+    assert response.headers.get("HX-Trigger") == "definition-updated"
+    html = response.text
+    assert "Enabled" in html

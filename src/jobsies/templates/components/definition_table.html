@@ -30,10 +30,16 @@
         <td>{{ definition.updated_at.strftime('%Y-%m-%d %H:%M:%S') if definition.updated_at else '-' }}</td>
         <td>
           <button class="btn btn-sm btn-ghost"
-                  hx-delete="/definitions/{{ definition.id }}"
+                  hx-delete="/definition/{{ definition.id }}"
                   hx-target="#definitions-table"
                   hx-confirm="Are you sure you want to delete '{{ definition.name }}'?">
             <img src="{{ url_for('static', path='img/trash.svg') }}" alt="Delete" width="18" height="18">
+          </button>
+          <button class="btn btn-sm btn-ghost"
+                  hx-get="/definition/{{ definition.id }}/update"
+                  hx-target="#dialog-container"
+                  hx-swap="innerHTML">
+            <img src="{{ url_for('static', path='img/edit.svg') }}" alt="Edit" width="18" height="18">
           </button>
         </td>
       </tr>

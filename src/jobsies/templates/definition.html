@@ -11,7 +11,7 @@
   <div class="actions">
     <button
       class="btn btn-secondary"
-      hx-get="/definitions/table"
+      hx-get="/definition/table"
       hx-target="#definitions-table"
       hx-swap="outerHTML"
     >
@@ -19,7 +19,7 @@
     </button>
     <button
       class="btn btn-primary"
-      hx-get="/definitions/create"
+      hx-get="/definition/create"
       hx-target="#dialog-container"
       hx-swap="innerHTML"
     >
@@ -30,7 +30,7 @@
 
 <div
   id="definitions-table"
-  hx-get="/definitions/table"
+  hx-get="/definition/table"
   hx-trigger="load"
   hx-swap="outerHTML"
 ></div>

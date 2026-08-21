@@ -16,10 +16,10 @@ async def page_results(request: Request) -> HTMLResponse:
     )
 
 
-@router.get("/definitions", response_class=HTMLResponse)
+@router.get("/definition", response_class=HTMLResponse)
 async def page_definitions(request: Request) -> HTMLResponse:
     """Render the jobsie definitions full page."""
     return templates.TemplateResponse(
         request=request,
-        name="definitions.html",
+        name="definition.html",
     )

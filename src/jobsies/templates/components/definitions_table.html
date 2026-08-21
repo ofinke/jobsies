@@ -1,0 +1,38 @@
+<div id="definitions-table">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Subclass</th>
+        <th>Cron</th>
+        <th>Retention</th>
+        <th>Status</th>
+        <th>Updated At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for definition in definitions %}
+      <tr>
+        <td>{{ definition.id }}</td>
+        <td><strong>{{ definition.name }}</strong></td>
+        <td><code>{{ definition.subclass_name }}</code></td>
+        <td><code>{{ definition.cron }}</code></td>
+        <td>{{ definition.retention }}</td>
+        <td>
+          {% if definition.enabled %}
+          <span class="badge badge-success">Enabled</span>
+          {% else %}
+          <span class="badge badge-danger">Disabled</span>
+          {% endif %}
+        </td>
+        <td>{{ definition.updated_at.strftime('%Y-%m-%d %H:%M:%S') if definition.updated_at else '-' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" class="text-center">No jobsie definitions found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

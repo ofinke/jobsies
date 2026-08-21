@@ -8,5 +8,12 @@ Jobsies is a self-hosted tool designed to automatically run simple jobs on the i
 
 # Architecture considerations
 
+## Worker
+
+Celery worker is responsible for executing all jobsies. Jobsie is derived from `BaseJobsie` class and output of the `execute` method is a json seriazible object based on a `BaseJobsieOutput` model.
+
+## Frontend
+
+Frontend combines fastapi application with jinja templates and HTMX.
 
 

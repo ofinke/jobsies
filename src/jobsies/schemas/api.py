@@ -1,8 +1,9 @@
+import json
 from typing import Any
 
 from croniter import croniter
 from loguru import logger
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class JobsieDefinitionBase(BaseModel):
@@ -14,11 +15,11 @@ class JobsieDefinitionBase(BaseModel):
 
     name: str = Field(
         description="Name of the jobsie",
-        examples=["Zalando Camper"],
+        examples=["Testing Jobsie"],
     )
     subclass_name: str = Field(
         description="Name of the class which the jobsie uses",
-        examples=["ZalandoJobsie"],
+        examples=["ExampleJobsie"],
     )
     cron: str = Field(
         description="Cron expression for scheduling",
@@ -57,6 +58,28 @@ class JobsieDefinitionBase(BaseModel):
 
 class RequestJobsieDefinitionCreate(JobsieDefinitionBase):
     """Schema for creating a new jobsie definition."""
+
+    @model_validator(mode="before")
+    @classmethod
+    def coerce_form_data(cls, data: Any) -> Any:
+        """Coerce raw form data (str values, JSON-encoded input_kwargs) into proper types."""
+        if not isinstance(data, dict):
+            return data
+        raw = data.get("input_kwargs")
+        if isinstance(raw, str) and raw.strip():
+            try:
+                parsed = json.loads(raw.strip())
+            except json.JSONDecodeError as err:
+                msg = f"Invalid input_kwargs JSON: {err}"
+                raise ValueError(msg) from None
+            if not isinstance(parsed, dict):
+                msg = "input_kwargs must be a JSON object"
+                raise ValueError(msg)
+            data["input_kwargs"] = parsed
+        elif raw is None or (isinstance(raw, str) and not raw.strip()):
+            data["input_kwargs"] = {}
+        data["enabled"] = data.get("enabled") in ("on", "true", "True", True) if "enabled" in data else True
+        return data
 
 
 class RequestJobsieDefinitionUpdate(JobsieDefinitionBase):

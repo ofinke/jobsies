@@ -1,0 +1,59 @@
+{% extends "components/dialog.html" %}
+
+{% block dialog_title %}Create Jobsie Definition{% endblock %}
+
+{% block dialog_body %}
+<form
+  id="create-definition-form"
+  hx-post="/definitions/create"
+  hx-target="#definitions-table"
+  hx-swap="outerHTML"
+  hx-on::after-request="if(event.detail.successful) document.getElementById('dialog').remove()"
+>
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required class="form-control" placeholder="e.g. Zalando Camper">
+  </div>
+
+  <div class="form-group">
+    <label for="subclass_name">Jobsie Type</label>
+    <select id="subclass_name" name="subclass_name" required class="form-control">
+      <option value="">-- Select a type --</option>
+      {% for subclass in subclasses %}
+      <option value="{{ subclass }}">{{ subclass }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="cron">Cron Expression</label>
+    <input type="text" id="cron" name="cron" required class="form-control" placeholder="e.g. 0 0 * * *">
+  </div>
+
+  <div class="form-group">
+    <label for="retention">Retention</label>
+    <input type="text" id="retention" name="retention" class="form-control" placeholder="e.g. 30d (default: 0)">
+  </div>
+
+  <div class="form-group">
+    <label for="input_kwargs">Input Kwargs (JSON)</label>
+    <textarea id="input_kwargs" name="input_kwargs" class="form-control" rows="3" placeholder='{"url": "https://zalando.cz/item"}'>{}</textarea>
+  </div>
+
+  <div class="form-group form-check">
+    <input type="checkbox" id="enabled" name="enabled" checked class="form-check-input">
+    <label for="enabled" class="form-check-label">Enabled</label>
+  </div>
+
+  <div class="form-actions">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      onclick="this.closest('dialog').remove()"
+    >
+      Cancel
+    </button>
+    <button type="submit" class="btn btn-primary">Create Definition</button>
+  </div>
+</form>
+{% endblock %}

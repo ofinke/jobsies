@@ -1,0 +1,39 @@
+{% extends "menu.html" %}
+
+{% block title %}Jobsies - Definitions{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Jobsie Definitions</h1>
+    <p class="subtitle">Manage and view registered jobsie tasks and schedules.</p>
+  </div>
+  <div class="actions">
+    <button
+      class="btn btn-secondary"
+      hx-get="/definitions/table"
+      hx-target="#definitions-table"
+      hx-swap="outerHTML"
+    >
+      Refresh
+    </button>
+    <button
+      class="btn btn-primary"
+      hx-get="/definitions/create"
+      hx-target="#dialog-container"
+      hx-swap="innerHTML"
+    >
+      Create
+    </button>
+  </div>
+</div>
+
+<div
+  id="definitions-table"
+  hx-get="/definitions/table"
+  hx-trigger="load"
+  hx-swap="outerHTML"
+></div>
+
+<div id="dialog-container"></div>
+{% endblock %}

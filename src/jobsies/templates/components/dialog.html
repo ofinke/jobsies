@@ -1,0 +1,18 @@
+<dialog id="dialog" class="dialog" open onkeydown="if(event.key === 'Escape') this.remove()">
+  <div class="dialog-backdrop" onclick="this.closest('dialog').remove()"></div>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      <h3 class="dialog-title">{% block dialog_title %}{{ dialog_title | default("Dialog") }}{% endblock %}</h3>
+      <button
+        type="button"
+        class="dialog-close"
+        onclick="this.closest('dialog').remove()"
+        aria-label="Close"
+      >&times;</button>
+    </div>
+    <div class="dialog-body">
+      {% block dialog_body %}{{ dialog_body | default("") }}{% endblock %}
+    </div>
+    {% block dialog_footer %}{% endblock %}
+  </div>
+</dialog>

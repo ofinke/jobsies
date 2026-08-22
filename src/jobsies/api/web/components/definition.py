@@ -2,15 +2,15 @@ from urllib.parse import parse_qs
 
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from loguru import logger
 from pydantic import ValidationError
 
-from jobsies.schemas.api import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
+from jobsies.config import get_templates
+from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.services import DefinitionService
 
 router = APIRouter(prefix="/definition", tags=["Web Components"])
-templates = Jinja2Templates(directory="src/jobsies/templates")
+templates = get_templates()
 
 
 async def _extract_form_data(request: Request) -> dict:

@@ -1,4 +1,4 @@
-from .api import (
+from .api.definition import (
     JobsieDefinitionBase,
     RequestJobsieDefinitionCreate,
     RequestJobsieDefinitionUpdate,

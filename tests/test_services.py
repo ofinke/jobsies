@@ -3,7 +3,7 @@ from collections.abc import Generator
 import pytest
 from jobsies.database.handler import get_db_handler
 from jobsies.jobs import ExampleJobsie, ZalandoJobsie
-from jobsies.schemas.api import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
+from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.services import DefinitionService
 from sqlalchemy.pool import StaticPool

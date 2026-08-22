@@ -1,14 +1,15 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
+from jobsies.config import get_templates
+
 router = APIRouter(tags=["Web Pages"])
-templates = Jinja2Templates(directory="src/jobsies/templates")
+templates = get_templates()
 
 
 @router.get("/", response_class=HTMLResponse)
-async def page_results(request: Request) -> HTMLResponse:
+async def page_output(request: Request) -> HTMLResponse:
     """Render the index landing page."""
     return templates.TemplateResponse(
         request=request,

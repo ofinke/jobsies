@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from loguru import logger
 
 from jobsies.celery_app import wrapper_run_dynamic_jobsie
-from jobsies.schemas.api import ResponseJobsieExecute
+from jobsies.schemas.api.definition import ResponseJobsieExecute
 from jobsies.services import DefinitionService
 
 router = APIRouter(prefix="/jobsie/execute", tags=["Jobsies Execution"])

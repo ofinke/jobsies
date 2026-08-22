@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from loguru import logger
 
-from jobsies.schemas.api import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
+from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.services import DefinitionService
 

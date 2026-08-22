@@ -27,7 +27,7 @@
           <span class="badge badge-danger">Disabled</span>
           {% endif %}
         </td>
-        <td>{{ definition.updated_at.strftime('%H:%M:%S') if definition.updated_at else '-' }}</td>
+        <td>{{ definition.updated_at.strftime('%Y-%m-%d %H:%M:%S') if definition.updated_at else '-' }}</td>
         <td>
           <button class="btn btn-sm btn-ghost"
                   hx-delete="/definition/{{ definition.id }}"

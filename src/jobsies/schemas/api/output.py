@@ -31,3 +31,26 @@ class JobsieOutputBase(BaseModel):
     execution_metadata: dict = Field(
         description="Metadata about the execution",
     )
+
+
+class JobsieOutputInterface(BaseModel):
+    """Model representing for showing what data are presented to the user."""
+
+    created_at: datetime = Field(
+        description="Timestamp of the jobsie execution",
+    )
+    jobsie_name: str = Field(
+        description="Name of the jobsie that produced this output",
+    )
+    jobsie_id: int = Field(
+        description="ID of the jobsie which produced the output",
+    )
+    execution_id: str = Field(
+        description="Unique identifier of the execution run",
+    )
+    success: bool = Field(
+        description="Whether the execution succeeded",
+    )
+    output_data: dict = Field(
+        description="Output data produced by the jobsie execution",
+    )

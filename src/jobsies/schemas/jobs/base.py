@@ -8,3 +8,7 @@ class BaseJobsieOutput(BaseModel):
     def validate_json_serializable(self) -> "BaseJobsieOutput":
         self.model_dump(mode="json")
         return self
+
+
+class BaseJobsieInput(BaseModel):
+    """Base model for all Jobsies inputs."""

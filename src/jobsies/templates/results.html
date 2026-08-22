@@ -1,0 +1,39 @@
+{% extends "menu.html" %}
+
+{% block title %}Jobsies - Results{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Latest Results</h1>
+        <p class="subtitle">Overview of the results from latest runs for each jobsie.</p>
+    </div>
+    <div class="actions">
+        {% include "components/status_bar.html" %}
+        <button class="btn btn-sm btn-ghost btn-action"
+                hx-get="/results/latest"
+                hx-target="#results-grid"
+                hx-swap="outerHTML"
+                title="Refresh"
+                aria-label="Refresh">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>
+            Refresh
+        </button>
+    </div>
+</div>
+<div id="results-grid" class="results-grid" hx-get="/results/latest" hx-trigger="load" hx-swap="outerHTML">
+    <p class="text-center">Loading...</p>
+</div>
+
+<script>
+    document.addEventListener('htmx:afterSettle', function() {
+        const bar = document.getElementById('status-bar');
+        if (bar && bar.classList.contains('show')) {
+            clearTimeout(bar._hideTimer);
+            bar._hideTimer = setTimeout(() => {
+                bar.classList.remove('show');
+            }, 10000);
+        }
+    });
+</script>
+{% endblock %}

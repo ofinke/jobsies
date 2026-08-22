@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from .base import BaseJobsieOutput
+from .base import BaseJobsieInput, BaseJobsieOutput
 
 
 class ZalandoJobsieOutput(BaseJobsieOutput):
@@ -15,3 +15,10 @@ class ZalandoJobsieOutput(BaseJobsieOutput):
     stock: str = Field(
         description="Current stock as a string value literal, example: 'one'",
     )
+
+
+class ZalandoJobsieInput(BaseJobsieInput):
+    """Data model for input for the Zalando Jobsie."""
+
+    url: str
+    size: str

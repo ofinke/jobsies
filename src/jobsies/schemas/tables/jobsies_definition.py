@@ -8,8 +8,8 @@ from sqlmodel import Field
 from .base import TableDefaultModel
 
 
-class TableJobsiesConfig(TableDefaultModel, table=True):
-    __tablename__ = "config_jobsies"
+class TableJobsiesDefinition(TableDefaultModel, table=True):
+    __tablename__ = "definitions_jobsies"
 
     name: str = Field(
         sa_column=Column(Text, nullable=False),

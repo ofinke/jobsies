@@ -5,7 +5,7 @@ import click
 
 from jobsies.database.handler import get_db_handler
 from jobsies.jobs.base import BaseJobsie
-from jobsies.schemas.tables import TableJobsiesConfig
+from jobsies.schemas.tables import TableJobsiesDefinition
 
 DEFAULT_DATA_PATH = Path(__file__).resolve().parents[3] / "data" / "default_jobsies_configs.json"
 DATA_DIR = DEFAULT_DATA_PATH.parent
@@ -39,7 +39,7 @@ def main(file: str) -> None:
     for config in config_raw:
         config["output_vars"] = _get_output_schema_for_subclass(config["subclass_name"])
 
-    configs = [TableJobsiesConfig(**config) for config in config_raw]
+    configs = [TableJobsiesDefinition(**config) for config in config_raw]
 
     db = get_db_handler()
     db.store(configs)

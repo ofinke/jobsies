@@ -1,4 +1,4 @@
-from .jobsies_config import TableJobsiesConfig
+from .jobsies_definition import TableJobsiesDefinition
 from .jobsies_output import TableJobsiesOutputs
 
-__all__ = ["TableJobsiesConfig", "TableJobsiesOutputs"]
+__all__ = ["TableJobsiesDefinition", "TableJobsiesOutputs"]

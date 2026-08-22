@@ -3,11 +3,11 @@ from datetime import UTC, datetime, timedelta
 
 from croniter import croniter
 from loguru import logger
-from sqlalchemy.sql import Select
+from sqlmodel import select
 
 from jobsies.database import get_db_handler
-from jobsies.schemas.tables import TableJobsiesConfig
-from jobsies.services import RedisClient
+from jobsies.schemas.tables import TableJobsiesDefinition
+from jobsies.services import RedisService
 
 
 class SchedulingService:
@@ -16,17 +16,17 @@ class SchedulingService:
     and duplicate prevention using Redis locks.
     """
 
-    def __init__(self, lookahead_seconds: int):
+    def __init__(self, lookahead_seconds: int) -> None:
         """Initiates Redis client and how far into the future scheduler should schedule."""
-        self.redis = RedisClient()
+        self.redis = RedisService()
         self.lookahead_seconds = lookahead_seconds
 
-    def get_active_task_configs(self) -> list[TableJobsiesConfig]:
+    def get_active_task_configs(self) -> list[TableJobsiesDefinition]:
         """Returns a list of active jobsies configurations."""
         db = get_db_handler()
         return db.load(
-            TableJobsiesConfig,
-            statement=Select(TableJobsiesConfig).where(TableJobsiesConfig.enabled.is_(True)),
+            TableJobsiesDefinition,
+            statement=select(TableJobsiesDefinition).where(TableJobsiesDefinition.enabled.is_(True)),
         )
 
     def acquire_enqueue_lock(self, task_id: int, scheduled_time: datetime) -> bool:

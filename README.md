@@ -63,5 +63,6 @@ Goal is to develop dockerized system consisting of celery worker for processing 
   - [ ] v0.2.1 - Expansion of docker image with entrypoint.sh if container is executed as app / image
   - [ ] v0.2.2 - Testing for celery worker (including plan and instructions for unification)
   - [ ] v0.2.3 - Testing suite for the fastapi (including plan and instructions for unification)
-  - [ ] v0.2.4 - Page for monitoring celery worker and jobsies scheduling
+  - [ ] v0.2.4 - Update Jobsies definition UI with better input_kwargs validation
+  - [ ] v0.2.5 - Page for monitoring celery worker and jobsies scheduling
 - [ ] v0.3.0 - Reusable services and generic configuration template for credentials and others

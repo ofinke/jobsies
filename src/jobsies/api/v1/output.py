@@ -10,4 +10,4 @@ router = APIRouter(prefix="/output", tags=["Jobsies Outputs"])
 def get_latest_results() -> list[JobsieOutputBase]:
     """Return the latest output for every jobsie."""
     raw_data = OutputService().get_latest_results()
-    return [JobsieOutputBase(**row) for row in raw_data]
+    return [JobsieOutputBase(**row.model_dump()) for row in raw_data]

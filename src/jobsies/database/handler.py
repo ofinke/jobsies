@@ -3,7 +3,7 @@ import functools
 
 from loguru import logger
 from pydantic import BaseModel
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy import update as sql_update
 from sqlalchemy.sql import Select
 from sqlmodel import Session, SQLModel, delete
@@ -40,13 +40,21 @@ class DatabaseHandler:
         logger.debug(f"Stored {len(data)} into '{data[0].__tablename__}' table.")
 
     def load[T: BaseModel](self, data_schema: type[T], *, statement: Select | None = None) -> list[T]:
-        """Loads data from the table using a provided SQLAlchemy statement or defaults to full table."""
+        """
+        Loads data from the table using a provided SQLAlchemy statement or defaults to full table.
+
+        Handles both sqlmodel.select (returns scalars) and sqlalchemy Select (returns Row tuples).¨
+        """
+        # TODO: when writing tests, handle both cases with the Select and sqlmodel.select.
         with Session(self.engine, expire_on_commit=False) as session:
             try:
                 if statement is None:
-                    statement = Select(data_schema)
+                    statement = select(data_schema)
                 results = session.exec(statement)
-                return list(results.scalars().all())
+                rows = results.all()
+                if rows and hasattr(rows[0], "_mapping"):
+                    return [row[0] for row in rows]
+                return list(rows)
             except Exception:
                 session.rollback()
                 raise

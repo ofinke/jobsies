@@ -5,10 +5,11 @@
 {% block content %}
 <div class="page-header">
   <div>
-    <h1>Jobsie Definitions</h1>
+    <h1>Jobsies Definitions</h1>
     <p class="subtitle">Manage and view registered jobsie tasks and schedules.</p>
   </div>
   <div class="actions">
+    {% include "components/status_bar.html" %}
     <button class="btn btn-sm btn-ghost btn-action"
             hx-get="/definition/table"
             hx-target="#definitions-table"
@@ -38,4 +39,16 @@
 ></div>
 
 <div id="dialog-container"></div>
+
+<script>
+  document.addEventListener('htmx:afterSettle', function() {
+    const bar = document.getElementById('status-bar');
+    if (bar && bar.classList.contains('show')) {
+      clearTimeout(bar._hideTimer);
+      bar._hideTimer = setTimeout(() => {
+        bar.classList.remove('show');
+      }, 10000);
+    }
+  });
+</script>
 {% endblock %}

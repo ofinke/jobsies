@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 from croniter import croniter
 from loguru import logger
-from sqlalchemy.sql import Select
+from sqlmodel import select
 
 from jobsies.database import get_db_handler
 from jobsies.schemas.tables import TableJobsiesDefinition
@@ -26,7 +26,7 @@ class SchedulingService:
         db = get_db_handler()
         return db.load(
             TableJobsiesDefinition,
-            statement=Select(TableJobsiesDefinition).where(TableJobsiesDefinition.enabled.is_(True)),
+            statement=select(TableJobsiesDefinition).where(TableJobsiesDefinition.enabled.is_(True)),
         )
 
     def acquire_enqueue_lock(self, task_id: int, scheduled_time: datetime) -> bool:

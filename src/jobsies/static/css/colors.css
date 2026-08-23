@@ -28,9 +28,14 @@
   --color-black-alpha-50: rgba(0, 0, 0, 0.5);
   --color-black-alpha-04: rgba(0, 0, 0, 0.04);
 
-  --sidebar-bg: #d4e5e4;
+  /* Content */
+  --content-main-bg: #EEEEEB;
+
+  /* Sidebar */
+  --sidebar-bg: #B8B8AA;
   --sidebar-text: #000000;
-  --sidebar-link: #000000;
-  --sidebar-link-hover-bg: #1f2937;
-  --sidebar-link-hover-text: #1c211c;
+  --sidebar-link: #2F2F29;
+  --sidebar-title: #586F6B;
+  --sidebar-icon-bg-active: #586F6B;
+  --sidebar-icon-bg-hover: #7F9183;
 }

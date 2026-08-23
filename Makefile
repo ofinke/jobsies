@@ -11,6 +11,12 @@ fix:  ## Run ruff fix on the codebase
 test:  ## Run pytest
 	uv run pytest
 
+populate: ## Populate database with default values
+	docker compose up -d redis
+
+redis: ## Run redis in docker
+	docker compose up -d redis
+
 run-worker:  ## Start Celery worker with beat scheduler
 	uv run celery -A src.jobsies.celery_app worker --loglevel=info --beat
 

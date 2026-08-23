@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class Config(BaseModel):
     """Application configuration."""
 
-    scheduler_lookahead: int = 180
+    scheduler_lookahead: int = 18000
 
     templates_location: str = "src/jobsies/templates"
 

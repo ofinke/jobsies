@@ -45,13 +45,19 @@ Before running for the first time, build the database into `./data`
 uv run populate-db
 ```
 
-Build and start the whole stack (redis + jobsies worker)
+Build and start the whole stack (redis + worker + app)
 
 ```bash
 docker compose up -d --build
 ```
 
-The worker container mounts the local `./data` folder, so the sqlite database persists on the host and can be shared with a locally running instance.
+The worker container mounts the local `./data` folder, so the database persists on the host. By default, the APP is available at [http://127.0.0.1:8777](http://127.0.0.1:8000).
+
+Stop the whole stack bu running
+
+```bash
+docker stop jobsies-redis jobsies-app jobsies-worker
+```
 
 # Roadmap
 
@@ -60,10 +66,11 @@ Goal is to develop dockerized system consisting of celery worker for processing 
 - [X] v0.1.0 - Celery worker with sqlite storage
 - [X] v0.1.1 - Simple containerization for deployment
 - [X] v0.2.0 - Fastapi serving frontend with showing results from executed jobsies
-  - [ ] v0.2.1 - Expansion of docker image with entrypoint.sh if container is executed as app / image
-  - [ ] v0.2.2 - Testing for celery worker (including plan and instructions for unification)
-  - [ ] v0.2.3 - Testing suite for the fastapi (including plan and instructions for unification)
-  - [ ] v0.2.4 - Update Jobsies definition UI with better input_kwargs validation
-  - [ ] v0.2.5 - Page for monitoring celery worker and jobsies scheduling
-  - [ ] v0.2.6 - Cleaner and unified UI styling
+  - [X] v0.2.1 - Add entrypoint.sh into docker image to determine if image should be started as app or worker
+  - [ ] v0.2.2 - Add TZ env variable and ensure that timestamps are correctly handled everywhere
+  - [ ] v0.2.3 - Testing for celery worker (including plan and instructions for unification)
+  - [ ] v0.2.4 - Testing suite for the fastapi (including plan and instructions for unification)
+  - [ ] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
+  - [ ] v0.2.6 - Page for monitoring celery worker and jobsies scheduling
+  - [ ] v0.2.7 - Cleaner and unified UI styling
 - [ ] v0.3.0 - Reusable services and generic configuration template for credentials and others

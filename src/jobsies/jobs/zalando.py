@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-import httpx
+import httpx2
 from justhtml import JustHTML
 from loguru import logger
 
@@ -42,7 +42,7 @@ class ZalandoJobsie(BaseJobsie):
             "User-Agent": "curl/8.11.1",
             "Accept": "*/*",
         }
-        response = httpx.get(self.url, headers=headers)
+        response = httpx2.get(self.url, headers=headers)
         response.raise_for_status()
 
         logger.debug(f"{self.url[:20]}... responded with {response.status_code}")

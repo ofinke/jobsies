@@ -1,4 +1,5 @@
 import functools
+from importlib.metadata import version
 
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -6,6 +7,8 @@ from pydantic import BaseModel
 
 class Config(BaseModel):
     """Application configuration."""
+
+    app_version: str = version("jobsies")
 
     scheduler_lookahead: int = 1800
 
@@ -20,4 +23,6 @@ def get_config() -> Config:
 
 @functools.cache
 def get_templates() -> Jinja2Templates:
-    return Jinja2Templates(directory=get_config().templates_location)
+    templates = Jinja2Templates(directory=get_config().templates_location)
+    templates.env.globals["app_version"] = get_config().app_version
+    return templates

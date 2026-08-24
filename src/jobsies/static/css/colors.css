@@ -33,9 +33,11 @@
 
   /* Sidebar */
   --sidebar-bg: #B8B8AA;
+  --sidebar-hr: #d3d3cb;
   --sidebar-text: #000000;
   --sidebar-link: #2F2F29;
   --sidebar-title: #586F6B;
+  --sidebar-title-shadow: #444f4a;
   --sidebar-icon-bg-active: #586F6B;
   --sidebar-icon-bg-hover: #7F9183;
 }

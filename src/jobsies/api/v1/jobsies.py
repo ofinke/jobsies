@@ -4,7 +4,7 @@ from loguru import logger
 from jobsies.celery_app import wrapper_run_dynamic_jobsie
 from jobsies.schemas.api.definition import ResponseJobsieExecute
 
-router = APIRouter(prefix="/jobsie/execute", tags=["Jobsies Execution"])
+router = APIRouter(prefix="/api/v1/jobsie/execute", tags=["Jobsies Execution"])
 
 
 @router.post("/{definition_id}")

@@ -22,6 +22,7 @@ services:
     restart: unless-stopped
     environment:
       REDIS_URL: redis://redis:6379/0
+      TZ_INFO: Europe/Prague
     volumes:
       - ./data:/app/data
     depends_on:
@@ -41,6 +42,7 @@ services:
       - "8777:8000"
     environment:
       REDIS_URL: redis://redis:6379/0
+      TZ_INFO: Europe/Prague
     volumes:
       - ./data:/app/data
     depends_on:

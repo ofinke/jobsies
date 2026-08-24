@@ -1,13 +1,15 @@
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 
 from croniter import croniter
 from loguru import logger
+from pytz import timezone
 from sqlmodel import select
 
 from jobsies.database import get_db_handler
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.services import RedisService
+from jobsies.settings import get_settings
 
 
 class SchedulingService:
@@ -20,6 +22,7 @@ class SchedulingService:
         """Initiates Redis client and how far into the future scheduler should schedule."""
         self.redis = RedisService()
         self.lookahead_seconds = lookahead_seconds
+        self.settings = get_settings()
 
     def get_active_task_configs(self) -> list[TableJobsiesDefinition]:
         """Returns a list of active jobsies configurations."""
@@ -60,7 +63,7 @@ class SchedulingService:
         Core orchestration loop. Finds upcoming tasks, verifies locks,
         and triggers the Celery tasks with an ETA.
         """
-        now = datetime.now(UTC)
+        now = datetime.now(timezone(self.settings.tz_info))
         window_end = now + timedelta(seconds=self.lookahead_seconds)
 
         configs = self.get_active_task_configs()

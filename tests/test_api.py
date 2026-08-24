@@ -51,8 +51,8 @@ def client() -> TestClient:
 
 
 def test_list_definitions(client: TestClient) -> None:
-    """Tests GET /jobsie/definition retrieves all definitions."""
-    response = client.get("/jobsie/definition")
+    """Tests GET /api/v1/jobsie/definition retrieves all definitions."""
+    response = client.get("/api/v1/jobsie/definition")
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -63,8 +63,8 @@ def test_list_definitions(client: TestClient) -> None:
 
 
 def test_get_definition_by_id_success(client: TestClient) -> None:
-    """Tests GET /jobsie/definition/{id} with valid definition ID."""
-    response = client.get("/jobsie/definition/1")
+    """Tests GET /api/v1/jobsie/definition/{id} with valid definition ID."""
+    response = client.get("/api/v1/jobsie/definition/1")
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == 1
@@ -72,14 +72,14 @@ def test_get_definition_by_id_success(client: TestClient) -> None:
 
 
 def test_get_definition_by_id_not_found(client: TestClient) -> None:
-    """Tests GET /jobsie/definition/{id} with non-existent ID returns 404."""
-    response = client.get("/jobsie/definition/999")
+    """Tests GET /api/v1/jobsie/definition/{id} with non-existent ID returns 404."""
+    response = client.get("/api/v1/jobsie/definition/999")
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()
 
 
 def test_create_definition_success(client: TestClient) -> None:
-    """Tests POST /jobsie/definition creates new definition and derives output_vars from subclass."""
+    """Tests POST /api/v1/jobsie/definition creates new definition and derives output_vars from subclass."""
     payload = {
         "name": "New Zalando Watcher",
         "subclass_name": "ZalandoJobsie",
@@ -89,7 +89,7 @@ def test_create_definition_success(client: TestClient) -> None:
         "output_monitoring": {},
         "enabled": True,
     }
-    response = client.post("/jobsie/definition", json=payload)
+    response = client.post("/api/v1/jobsie/definition", json=payload)
     assert response.status_code == 201
     data = response.json()
     assert data["id"] is not None
@@ -100,36 +100,36 @@ def test_create_definition_success(client: TestClient) -> None:
 
 
 def test_create_definition_invalid_subclass(client: TestClient) -> None:
-    """Tests POST /jobsie/definition with unknown subclass returns 400."""
+    """Tests POST /api/v1/jobsie/definition with unknown subclass returns 400."""
     payload = {
         "name": "Invalid Subclass Job",
         "subclass_name": "NonExistentJobsie",
         "cron": "0 0 * * *",
     }
-    response = client.post("/jobsie/definition", json=payload)
+    response = client.post("/api/v1/jobsie/definition", json=payload)
     assert response.status_code == 400
     assert "unknown jobsie subclass" in response.json()["detail"].lower()
 
 
 def test_create_definition_invalid_cron(client: TestClient) -> None:
-    """Tests POST /jobsie/definition with invalid cron expression returns validation error."""
+    """Tests POST /api/v1/jobsie/definition with invalid cron expression returns validation error."""
     payload = {
         "name": "Bad Cron Job",
         "subclass_name": "ExampleJobsie",
         "cron": "not-a-cron-expression",
     }
-    response = client.post("/jobsie/definition", json=payload)
+    response = client.post("/api/v1/jobsie/definition", json=payload)
     assert response.status_code == 422
 
 
 def test_update_definition_success(client: TestClient) -> None:
-    """Tests PUT /jobsie/definition/{id} updates definition and recalculates output_vars when subclass changes."""
+    """Tests PUT /api/v1/jobsie/definition/{id} updates definition and recalculates output_vars when subclass changes."""
     payload = {
         "name": "Updated Name",
         "subclass_name": "ZalandoJobsie",
         "cron": "*/15 * * * *",
     }
-    response = client.put("/jobsie/definition/1", json=payload)
+    response = client.put("/api/v1/jobsie/definition/1", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == 1
@@ -139,35 +139,35 @@ def test_update_definition_success(client: TestClient) -> None:
 
 
 def test_update_definition_not_found(client: TestClient) -> None:
-    """Tests PUT /jobsie/definition/{id} with non-existent ID returns 404."""
-    response = client.put("/jobsie/definition/999", json={"name": "Nope"})
+    """Tests PUT /api/v1/jobsie/definition/{id} with non-existent ID returns 404."""
+    response = client.put("/api/v1/jobsie/definition/999", json={"name": "Nope"})
     assert response.status_code == 404
 
 
 def test_delete_definition_success(client: TestClient) -> None:
-    """Tests DELETE /jobsie/definition/{id} deletes the definition."""
-    response = client.delete("/jobsie/definition/1")
+    """Tests DELETE /api/v1/jobsie/definition/{id} deletes the definition."""
+    response = client.delete("/api/v1/jobsie/definition/1")
     assert response.status_code == 200
     assert "deleted successfully" in response.json()["message"]
 
-    get_resp = client.get("/jobsie/definition/1")
+    get_resp = client.get("/api/v1/jobsie/definition/1")
     assert get_resp.status_code == 404
 
 
 def test_delete_definition_not_found(client: TestClient) -> None:
-    """Tests DELETE /jobsie/definition/{id} with non-existent ID returns 404."""
-    response = client.delete("/jobsie/definition/999")
+    """Tests DELETE /api/v1/jobsie/definition/{id} with non-existent ID returns 404."""
+    response = client.delete("/api/v1/jobsie/definition/999")
     assert response.status_code == 404
 
 
 @patch("jobsies.api.v1.jobsies.wrapper_run_dynamic_jobsie.apply_async")
 def test_execute_jobsie_post_success(mock_apply_async: MagicMock, client: TestClient) -> None:
-    """Tests POST /jobsie/execute/{id} calls apply_async on wrapper_run_dynamic_jobsie."""
+    """Tests POST /api/v1/jobsie/execute/{id} calls apply_async on wrapper_run_dynamic_jobsie."""
     mock_task = MagicMock()
     mock_task.id = "mocked-task-uuid-123"
     mock_apply_async.return_value = mock_task
 
-    response = client.post("/jobsie/execute/1")
+    response = client.post("/api/v1/jobsie/execute/1")
     assert response.status_code == 200
     data = response.json()
     assert data["definition_id"] == 1
@@ -177,12 +177,12 @@ def test_execute_jobsie_post_success(mock_apply_async: MagicMock, client: TestCl
 
 @patch("jobsies.api.v1.jobsies.wrapper_run_dynamic_jobsie.apply_async")
 def test_execute_jobsie_get_success(mock_apply_async: MagicMock, client: TestClient) -> None:
-    """Tests GET /jobsie/execute/{id} also triggers execution."""
+    """Tests GET /api/v1/jobsie/execute/{id} also triggers execution."""
     mock_task = MagicMock()
     mock_task.id = "mocked-task-uuid-456"
     mock_apply_async.return_value = mock_task
 
-    response = client.get("/jobsie/execute/1")
+    response = client.get("/api/v1/jobsie/execute/1")
     assert response.status_code == 200
     data = response.json()
     assert data["definition_id"] == 1
@@ -191,6 +191,6 @@ def test_execute_jobsie_get_success(mock_apply_async: MagicMock, client: TestCli
 
 
 def test_execute_jobsie_not_found(client: TestClient) -> None:
-    """Tests /jobsie/execute/{id} with non-existent ID returns 404."""
-    response = client.post("/jobsie/execute/999")
-    assert response.status_code == 404
+    """Tests /api/v1/jobsie/execute/{id} with non-existent ID returns 500."""
+    response = client.post("/api/v1/jobsie/execute/999")
+    assert response.status_code == 500

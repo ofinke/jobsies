@@ -65,6 +65,7 @@ class DefinitionService:
         if "subclass_name" in update_data and update_data["subclass_name"] is not None:
             update_data["output_vars"] = self.get_output_schema(update_data["subclass_name"])
 
+        # datetime values are stored in UTC in the database, therefore we use UTC here
         update_data["updated_at"] = datetime.now(UTC)
         self.db.update(
             TableJobsiesDefinition,

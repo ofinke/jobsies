@@ -3,14 +3,16 @@ from datetime import datetime
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 from loguru import logger
-from pytz import timezone as pytz_timezone
+from pytz import timezone
 
 from jobsies.config import get_templates
 from jobsies.schemas.api.output import JobsieOutputInterface
 from jobsies.services.output import OutputService
+from jobsies.settings import get_settings
 
 router = APIRouter(prefix="/results", tags=["Web Components"])
 templates = get_templates()
+settings = get_settings()
 
 
 def _status_bar_html(message: str, status_type: str = "success") -> str:
@@ -36,7 +38,6 @@ async def results_get_latest() -> HTMLResponse:
     widget_html = templates.get_template("components/results_widget.html").render(
         {"results": results},
     )
-    prague_tz = pytz_timezone("Europe/Prague")
-    now = datetime.now(prague_tz).strftime("%H:%M:%S")
+    now = datetime.now(timezone(settings.tz_info)).strftime("%H:%M:%S")
     status_bar = _status_bar_html(f"Results refreshed at {now}")
     return HTMLResponse(widget_html + "\n" + status_bar)

@@ -8,7 +8,7 @@ from sqlmodel import select
 
 from jobsies.database import get_db_handler
 from jobsies.schemas.tables import TableJobsiesDefinition
-from jobsies.services import RedisService
+from jobsies.services import RedisHandler
 from jobsies.settings import get_settings
 
 
@@ -20,7 +20,7 @@ class SchedulingService:
 
     def __init__(self, lookahead_seconds: int) -> None:
         """Initiates Redis client and how far into the future scheduler should schedule."""
-        self.redis = RedisService()
+        self.redis = RedisHandler()
         self.lookahead_seconds = lookahead_seconds
         self.settings = get_settings()
 

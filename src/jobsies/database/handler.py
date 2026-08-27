@@ -43,9 +43,10 @@ class DatabaseHandler:
 
     def load[T: TableDefaultModel](self, data_schema: type[T], *, statement: Select | None = None) -> list[T]:
         """
-        Loads data from the table using a provided SQLAlchemy statement or defaults to full table.
+        Loads data from the SQLModel table using a provided SQLAlchemy statement or defaults to full table.
 
-        Handles both sqlmodel.select (returns scalars) and sqlalchemy Select (returns Row tuples).
+        Handles both sqlmodel.select (returns scalars) and sqlalchemy Select (returns Row tuples) and ensures, that all
+        datetime values are converted into local timezone.
         """
         # TODO: when writing tests, handle both cases with the Select and sqlmodel.select.
         with Session(self.engine, expire_on_commit=False) as session:
@@ -108,5 +109,5 @@ class DatabaseHandler:
 
 @functools.cache
 def get_db_handler() -> DatabaseHandler:
-    """Return database handler."""
+    """Return reusable database handler."""
     return DatabaseHandler()

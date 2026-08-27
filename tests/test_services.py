@@ -1,7 +1,7 @@
 from collections.abc import Generator
 
 import pytest
-from jobsies.database.handler import get_db_handler
+from jobsies.database import get_db_handler
 from jobsies.jobs import ExampleJobsie, ZalandoJobsie
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.tables import TableJobsiesDefinition

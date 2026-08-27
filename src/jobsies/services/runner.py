@@ -4,7 +4,7 @@ from uuid import uuid4
 from loguru import logger
 from sqlalchemy.sql import Select
 
-from jobsies.database.handler import get_db_handler
+from jobsies.database import get_db_handler
 from jobsies.jobs import get_jobsie_class
 from jobsies.schemas.runner import RunnerExecutionMetadata
 from jobsies.schemas.tables import TableJobsiesDefinition, TableJobsiesOutputs

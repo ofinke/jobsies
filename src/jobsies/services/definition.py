@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from loguru import logger
 from sqlalchemy.sql import Select
 
-from jobsies.database.handler import DatabaseHandler, get_db_handler
+from jobsies.database import DatabaseHandler, get_db_handler
 from jobsies.jobs import BaseJobsie, get_jobsie_class
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.tables import TableJobsiesDefinition

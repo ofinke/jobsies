@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from jobsies.database.handler import get_db_handler
+from jobsies.database import get_db_handler
 from jobsies.jobs.base import BaseJobsie
 from jobsies.schemas.tables import TableJobsiesDefinition
 

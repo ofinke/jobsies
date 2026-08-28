@@ -2,17 +2,24 @@ import functools
 from importlib.metadata import version
 
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Config(BaseModel):
     """Application configuration."""
 
-    app_version: str = version("jobsies")
-
-    scheduler_lookahead: int = 1800
-
-    templates_location: str = "src/jobsies/templates"
+    app_version: str = Field(
+        default=version("jobsies"),
+        description="Application version extracted from the pyproject",
+    )
+    scheduler_lookahead: int = Field(
+        default=1800,
+        description="How often the worker schedules tasks ahead",
+    )
+    templates_location: str = Field(
+        default="src/jobsies/templates",
+        description="Location of Jinja templates",
+    )
 
 
 @functools.cache

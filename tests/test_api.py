@@ -123,7 +123,7 @@ def test_create_definition_invalid_cron(client: TestClient) -> None:
 
 
 def test_update_definition_success(client: TestClient) -> None:
-    """Tests PUT /api/v1/jobsie/definition/{id} updates definition and recalculates output_vars when subclass changes."""
+    """Tests PUT /api/v1/jobsie/definition/{id} updates definition and output_vars when subclass changes."""
     payload = {
         "name": "Updated Name",
         "subclass_name": "ZalandoJobsie",

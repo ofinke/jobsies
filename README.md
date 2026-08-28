@@ -1,4 +1,4 @@
-🛠️ Jobsies is a self-hosted tool designed to automatically run simple jobs on the internet; scrape price of a product you are interested in, or anything you are willing to program yourself.
+🛠️ Jobsies is a self-hosted tool designed to automatically run simple jobs on the internet; scrape price of a product you are interested in, monitor websites for new events, or anything you are willing to program yourself.
 
 # Quickstart
 
@@ -14,22 +14,28 @@ Use make tools to run the application, follow these commands:
 
 ```bash
 make populate   # populates database with example jobsie, good before first run
-make redis      # starts redis in a container
-make run-worker # starts worker
-make run-app    # starts app
+make run        # starts the application fully
 ```
 
-Interactive Swagger documentation is then available at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+This command creates redis instance using docker and starts both the worker and app in a single shell. Application is then available at [localhost:8000](http://127.0.0.1:8000). Swagger documentation is then available at [/docs](http://127.0.0.1:8000/docs). 
+
+You can run run the app components separately by these commands
+
+```bash
+make redis
+make run-worker
+make run-app
+```
 
 ## Containerized 
 
-Build and start the whole stack (redis + worker + app)
+Build and start the whole stack in docker (redis + worker + app) using
 
 ```bash
 docker compose up -d --build
 ```
 
-The worker container mounts the local `./data` folder, so the database persists on the host. By default, the APP is available at [http://127.0.0.1:8777](http://127.0.0.1:8000).
+The worker container mounts the local `./data` folder, so the database persists on the host. By default, the docker exposes app at the port 8777 - [http://127.0.0.1:8777](http://127.0.0.1:8777).
 
 Stop the whole stack by running
 

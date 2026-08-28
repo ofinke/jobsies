@@ -5,7 +5,7 @@ from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, Reques
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.services import DefinitionService
 
-router = APIRouter(prefix="/jobsie/definition", tags=["Jobsie Definition"])
+router = APIRouter(prefix="/api/v1/jobsie/definition", tags=["Jobsies Definition"])
 
 
 @router.get("")

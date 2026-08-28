@@ -5,15 +5,18 @@ from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from loguru import logger
 from pydantic import ValidationError
-from pytz import timezone as pytz_timezone
+from pytz import timezone
 
 from jobsies.celery_app import wrapper_run_dynamic_jobsie
 from jobsies.config import get_templates
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.services import DefinitionService
+from jobsies.settings import get_settings
 
+# Static values
 router = APIRouter(prefix="/definition", tags=["Web Components"])
 templates = get_templates()
+settings = get_settings()
 
 
 def _status_bar_html(message: str, status_type: str = "success") -> str:
@@ -43,8 +46,7 @@ async def definition_get_table() -> HTMLResponse:
     table_html = templates.get_template("components/definition_table.html").render(
         {"definitions": definitions},
     )
-    prague_tz = pytz_timezone("Europe/Prague")
-    now = datetime.now(prague_tz).strftime("%H:%M:%S")
+    now = datetime.now(timezone(settings.tz_info)).strftime("%H:%M:%S")
     status_bar = _status_bar_html(f"Definitions refreshed at {now}")
     logger.debug("Endpoint executed: GET /definition/table")
     return HTMLResponse(table_html + "\n" + status_bar)

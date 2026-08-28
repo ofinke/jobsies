@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from loguru import logger
 from sqlalchemy.sql import Select
 
-from jobsies.database.handler import DatabaseHandler, get_db_handler
+from jobsies.database import DatabaseHandler, get_db_handler
 from jobsies.jobs import BaseJobsie, get_jobsie_class
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.tables import TableJobsiesDefinition
@@ -65,6 +65,7 @@ class DefinitionService:
         if "subclass_name" in update_data and update_data["subclass_name"] is not None:
             update_data["output_vars"] = self.get_output_schema(update_data["subclass_name"])
 
+        # datetime values are stored in UTC in the database, therefore we use UTC here
         update_data["updated_at"] = datetime.now(UTC)
         self.db.update(
             TableJobsiesDefinition,

@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from jobsies.schemas.api.output import JobsieOutputBase
 from jobsies.services.output import OutputService
 
-router = APIRouter(prefix="/output", tags=["Jobsies Outputs"])
+router = APIRouter(prefix="/api/v1/output", tags=["Jobsies Outputs"])
 
 
 @router.get("/latest")

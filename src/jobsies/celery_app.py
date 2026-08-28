@@ -2,21 +2,23 @@ from celery import Celery
 from loguru import logger
 
 from jobsies.config import get_config
-from jobsies.runner import run_dynamic_jobsie
-from jobsies.services import SchedulingService
+from jobsies.services import RunnerService, SchedulingService
 from jobsies.settings import get_settings
 
 settings = get_settings()
 config = get_config()
 
+# Celery worker definition
 app = Celery(
     "jobsies",
     broker=settings.redis_url,
     include=["jobsies.celery_app"],
 )
 
-app.conf.timezone = "Europe/Prague"
+# Celery worker configuration
+app.conf.timezone = settings.tz_info
 
+# Scheduler for cron jobs
 app.conf.beat_schedule = {
     "schedule-upcoming-jobsies": {
         "task": "task.schedule_upcoming_jobsies",
@@ -25,14 +27,15 @@ app.conf.beat_schedule = {
 }
 
 
+# Celery worker tasks
 @app.task(
     name="task.run_dynamic_jobsie",
     bind=True,
 )
 def wrapper_run_dynamic_jobsie(self, jobsie_id: int) -> dict:  # noqa: ANN001
-    """Wrap execute_save_jobsie as a Celery task."""
+    """Execution layer for the RunnerService as a celery task."""
     execution_metadata = {"execution_id": self.request.id, "execution_method": "celery"}
-    return run_dynamic_jobsie(jobsie_id, execution_metadata=execution_metadata)
+    return RunnerService().run_dynamic_jobsie(jobsie_id, execution_metadata=execution_metadata)
 
 
 @app.task(

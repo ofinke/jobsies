@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from sqlmodel import select
 
-from jobsies.database.handler import DatabaseHandler, get_db_handler
+from jobsies.database import DatabaseHandler, get_db_handler
 from jobsies.schemas.tables import TableJobsiesOutputs
 
 

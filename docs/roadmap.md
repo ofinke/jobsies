@@ -22,7 +22,7 @@ Here is a list of features which I would like to include. Some will be later inc
 ### Small
 
 - Define color scheme for the application and follow it 
-- Move app config into database and include initialization of it when app is first started (included in 0.3.0)
+- Move app config into database and include initialization of it when app is first started (included in 0.3.0). Include this in the entrypoint.sh script which will initialize the database first time the app is started (not worker)
 - Add tasks for cleaning up database and implement the retention mechanism
 - Make Redis handling better (password protection, don´t use everything with default ports and others).
 

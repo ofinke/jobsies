@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from jobsies.database.handler import get_db_handler
+from jobsies.database import get_db_handler
 from jobsies.fastapi_app import app
 from jobsies.jobs import ExampleJobsie
 from jobsies.schemas.tables import TableJobsiesDefinition

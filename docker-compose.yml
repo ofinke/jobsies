@@ -2,8 +2,6 @@ services:
   redis:
     container_name: jobsies-redis
     image: redis:alpine
-    ports:
-      - "6379:6379"
     deploy:
       resources:
         limits:
@@ -21,7 +19,7 @@ services:
     command: ["worker"]
     restart: unless-stopped
     environment:
-      REDIS_URL: redis://redis:6379/0
+      TZ_INFO: Europe/Prague
     volumes:
       - ./data:/app/data
     depends_on:
@@ -40,7 +38,7 @@ services:
     ports:
       - "8777:8000"
     environment:
-      REDIS_URL: redis://redis:6379/0
+      TZ_INFO: Europe/Prague
     volumes:
       - ./data:/app/data
     depends_on:

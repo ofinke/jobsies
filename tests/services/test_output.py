@@ -1,35 +1,18 @@
-from collections.abc import Generator
-
 import pytest
 from jobsies.database import get_db_handler
 from jobsies.schemas.tables import TableJobsiesOutputs
 from jobsies.services import OutputService
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
-
-
-@pytest.fixture(autouse=True)
-def test_db() -> Generator[None]:
-    """Sets up an in-memory database for testing and overrides the database handler engine."""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    SQLModel.metadata.create_all(bind=engine)
-
-    handler = get_db_handler()
-    original_engine = handler.engine
-    handler.engine = engine
-
-    yield
-
-    handler.engine = original_engine
+from sqlmodel import Session
 
 
 @pytest.fixture
 def seeded_outputs() -> None:
     """Seeds three output rows from two jobsies into the test database."""
+    create_output_rows()
+
+
+def create_output_rows() -> None:
+    """Creates three output rows from two jobsies in the test database."""
     with Session(get_db_handler().engine) as session:
         session.add(
             TableJobsiesOutputs(

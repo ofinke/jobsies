@@ -1,4 +1,3 @@
-from collections.abc import Generator
 from datetime import UTC, datetime
 from typing import Any
 
@@ -11,27 +10,7 @@ from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, Reques
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.schemas.tables.base import settings as base_settings
 from jobsies.services import DefinitionService
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
-
-
-@pytest.fixture(autouse=True)
-def test_db() -> Generator[None]:
-    """Sets up an in-memory database for testing and overrides the database handler engine."""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    SQLModel.metadata.create_all(bind=engine)
-
-    handler = get_db_handler()
-    original_engine = handler.engine
-    handler.engine = engine
-
-    yield
-
-    handler.engine = original_engine
+from sqlmodel import Session
 
 
 @pytest.fixture

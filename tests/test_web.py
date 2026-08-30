@@ -1,46 +1,11 @@
-from collections.abc import Generator
-
 import pytest
 from fastapi.testclient import TestClient
-from jobsies.database import get_db_handler
 from jobsies.fastapi_app import app
-from jobsies.jobs import ExampleJobsie
-from jobsies.schemas.tables import TableJobsiesDefinition
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
 
 
 @pytest.fixture(autouse=True)
-def test_db() -> Generator[None]:
-    """Sets up an in-memory database for testing and overrides the database handler engine."""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    SQLModel.metadata.create_all(bind=engine)
-
-    handler = get_db_handler()
-    original_engine = handler.engine
-    handler.engine = engine
-
-    with Session(engine) as session:
-        definition = TableJobsiesDefinition(
-            name="Initial Test Config",
-            subclass_name="ExampleJobsie",
-            cron="0 * * * *",
-            retention="0",
-            input_kwargs={},
-            output_vars=ExampleJobsie.output_schema.model_json_schema(),
-            output_monitoring={},
-            enabled=True,
-        )
-        session.add(definition)
-        session.commit()
-
-    yield
-
-    handler.engine = original_engine
+def seed_database(seeded_definition: None) -> None:
+    """Seeds the initial definition for web tests."""
 
 
 @pytest.fixture

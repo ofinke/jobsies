@@ -6,13 +6,13 @@ REDIS_CONTAINER := jobsies-redis-dev
 .DEFAULT_GOAL := help
 
 init:  ## Initialize project (sync dependencies)
-	uv sync
+	uv sync --all-groups
 
 fix:  ## Run ruff fix on the codebase
 	uv run ruff check --fix
 
 test:  ## Run pytest
-	uv run pytest
+	uv run pytest --cov=jobsies
 
 populate: ## Populate database with default values
 	docker compose up -d redis

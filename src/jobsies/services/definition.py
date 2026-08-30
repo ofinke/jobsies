@@ -10,7 +10,7 @@ from jobsies.schemas.tables import TableJobsiesDefinition
 
 
 class DefinitionService:
-    """Service layer for jobsie definition operations."""
+    """Service layer for interaction with database related to jobsie definition."""
 
     def __init__(self, db_handler: DatabaseHandler | None = None) -> None:
         """Initialize definition service."""

@@ -7,17 +7,44 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: var(--color-gray-900);
-  background-color: var(--content-main-bg);
+  background-color: var(--sidebar-hr);
+}
+
+:root {
+  --shell-inset: 1rem;
 }
 
 .layout {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - (var(--shell-inset) * 2));
+  margin: var(--shell-inset);
+  gap: var(--shell-inset);
 }
 
 .content {
   flex: 1;
   padding: 2rem;
+  background-color: var(--content-main-bg);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 8px 24px var(--color-black-alpha-10);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --shell-inset: 0.625rem;
+  }
+
+  .layout {
+    min-height: calc(100vh - (var(--shell-inset) * 2));
+    margin: var(--shell-inset);
+    gap: var(--shell-inset);
+  }
+
+  .content {
+    padding: 1.25rem;
+    border-radius: 1rem;
+  }
 }
 
 .page-header {
@@ -30,7 +57,7 @@ body {
 .page-header h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-black);
+  color: var(--sidebar-title);
 }
 
 .page-header .subtitle {
@@ -117,16 +144,14 @@ body {
 
 .btn-ghost {
   background: transparent;
-  background-color: transparent;
   border-color: transparent;
-  color: var(--color-gray-500);
+  color: var(--color-blue-500);
 }
 
 .btn-ghost:hover {
   background: transparent;
-  background-color: transparent;
   border-color: transparent;
-  color: var(--color-black);
+  color: var(--color-blue-600);
 }
 
 .icon {
@@ -135,6 +160,7 @@ body {
 
 .btn-action {
   border: 1px solid var(--color-gray-300);
+  color: var(--color-blue-500);
 }
 
 .btn-action .icon {
@@ -149,7 +175,7 @@ body {
 .table {
   width: 100%;
   border-collapse: collapse;
-  background-color: var(--color-white);
+  background-color: var(--content-main-bg);
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 1px 3px 0 var(--color-black-alpha-10), 0 1px 2px 0 var(--color-black-alpha-06);
@@ -163,7 +189,7 @@ body {
 }
 
 .table th {
-  background-color: var(--color-gray-50);
+  background-color: var(--sidebar-hr);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -176,7 +202,7 @@ body {
 }
 
 .table tr:hover td {
-  background-color: var(--color-gray-50);
+  background-color: var(--color-gray-100);
 }
 
 .table code {
@@ -238,7 +264,7 @@ dialog.dialog[open] {
 }
 
 .dialog-container {
-  background-color: var(--color-white);
+  background-color: var(--content-main-bg);
   border-radius: 0.5rem;
   box-shadow: 0 20px 25px -5px var(--color-black-alpha-10), 0 10px 10px -5px var(--color-black-alpha-04);
   width: 100%;
@@ -260,7 +286,7 @@ dialog.dialog[open] {
 .dialog-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--color-black);
+  color: var(--sidebar-title);
 }
 
 .dialog-close {
@@ -289,7 +315,7 @@ dialog.dialog[open] {
 .dialog-footer {
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--color-gray-200);
-  background-color: var(--color-gray-50);
+  background-color: var(--sidebar-hr);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
@@ -316,7 +342,7 @@ dialog.dialog[open] {
 .alert-error {
   background-color: var(--color-red-100);
   color: var(--color-red-800);
-  border-color: #fca5a5;
+  border-color: var(--color-red-800);
 }
 
 .form-group {
@@ -347,6 +373,11 @@ dialog.dialog[open] {
   outline: none;
   border-color: var(--color-blue-400);
   box-shadow: 0 0 0 3px var(--color-blue-ring);
+}
+
+.form-control-disabled {
+  background-color: var(--color-gray-100);
+  cursor: not-allowed;
 }
 
 textarea.form-control {
@@ -388,7 +419,7 @@ textarea.form-control {
 
 .result-card {
   background: var(--color-white);
-  border: 1px solid var(--color-gray-200);
+  border: none;
   border-radius: 0.75rem;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -464,8 +495,8 @@ textarea.form-control {
 }
 
 .result-card-output {
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-200);
+  background: var(--content-main-bg);
+  border: none;
   border-radius: 0.5rem;
   padding: 0.875rem 1rem;
   font-size: 0.85rem;

@@ -6,7 +6,16 @@
   padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
-  border-right: 10px solid var(--sidebar-hr);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 24px var(--color-black-alpha-10);
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    width: 190px;
+    padding: 1.25rem 0.75rem;
+    border-radius: 1rem;
+  }
 }
 
 .sidebar-title {
@@ -51,10 +60,11 @@
   transition: background-color 0.15s ease;
 }
 
-.nav-icon-circle img {
+.nav-icon {
   width: 20px;
   height: 20px;
-  filter: brightness(0);
+  color: var(--sidebar-link);
+  flex-shrink: 0;
 }
 
 .nav-link:hover .nav-icon-circle {
@@ -65,8 +75,9 @@
   background-color: var(--sidebar-icon-bg-active);
 }
 
-.nav-link.active .nav-icon-circle img {
-  filter: brightness(0) invert(1);
+.nav-link:hover .nav-icon,
+.nav-link.active .nav-icon {
+  color: var(--sidebar-icon-color-active);
 }
 
 .sidebar-footer {
@@ -93,10 +104,8 @@
   font-size: 0.85rem;
 }
 
-.sidebar-footer .github-link img {
-  width: 20px;
-  height: 20px;
-  filter: brightness(0);
+.sidebar-footer .github-link .nav-icon {
+  color: var(--sidebar-link);
 }
 
 .sidebar-footer .github-link:hover {

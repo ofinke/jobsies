@@ -1,5 +1,5 @@
 .sidebar {
-  width: 250px;
+  width: 260px;
   flex-shrink: 0;
   background-color: var(--sidebar-bg);
   color: var(--sidebar-text);
@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 1.25rem;
-  box-shadow: 0 8px 24px var(--color-black-alpha-10);
+  box-shadow: 0 8px 24px var(--shadow-subtle);
 }
 
 @media (max-width: 640px) {
@@ -26,13 +26,13 @@
   padding: 0 0.875rem 1.5rem;
   text-transform: uppercase;
   text-align: center;
-  text-shadow: 1px 1px 2px var(--sidebar-title-shadow);
 }
 
 .sidebar ul {
   list-style: none;
   display: flex;
   flex-direction: column;
+  gap: 0.4rem;
 }
 
 .sidebar a {

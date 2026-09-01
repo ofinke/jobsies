@@ -107,7 +107,10 @@ async def definition_create(request: Request) -> HTMLResponse:
         {"definitions": definitions},
     )
     logger.debug("Endpoint executed: POST /definition/create")
-    return HTMLResponse(table_html + "\n" + status_bar, headers={"HX-Retarget": "#definitions-table"})
+    return HTMLResponse(
+        table_html + "\n" + status_bar,
+        headers={"HX-Retarget": "#definitions-table", "HX-Trigger": "definition-created"},
+    )
 
 
 @router.patch("/{definition_id}", response_class=HTMLResponse)
@@ -142,7 +145,10 @@ async def definintion_update(request: Request, definition_id: int) -> HTMLRespon
         {"definitions": definitions},
     )
     logger.debug(f"Endpoint executed: PATCH|PUT /definition/{definition_id}")
-    return HTMLResponse(table_html + "\n" + status_bar, headers={"HX-Retarget": "#definitions-table"})
+    return HTMLResponse(
+        table_html + "\n" + status_bar,
+        headers={"HX-Retarget": "#definitions-table", "HX-Trigger": "definition-updated"},
+    )
 
 
 @router.delete("/{definition_id}", response_class=HTMLResponse)

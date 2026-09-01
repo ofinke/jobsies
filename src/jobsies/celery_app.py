@@ -17,6 +17,10 @@ app = Celery(
 
 # Celery worker configuration
 app.conf.timezone = settings.tz_info
+app.conf.task_soft_time_limit = 300
+app.conf.task_time_limit = 360
+app.conf.task_ignore_result = True
+app.conf.worker_concurrency = 2
 
 # Scheduler for cron jobs
 app.conf.beat_schedule = {
@@ -31,11 +35,14 @@ app.conf.beat_schedule = {
 @app.task(
     name="task.run_dynamic_jobsie",
     bind=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 3},
+    retry_backoff=True
 )
-def wrapper_run_dynamic_jobsie(self, jobsie_id: int) -> dict:  # noqa: ANN001
+def wrapper_run_dynamic_jobsie(self, jobsie_id: int) -> None:  # noqa: ANN001
     """Execution layer for the RunnerService as a celery task."""
     execution_metadata = {"execution_id": self.request.id, "execution_method": "celery"}
-    return RunnerService().run_dynamic_jobsie(jobsie_id, execution_metadata=execution_metadata)
+    RunnerService().run_dynamic_jobsie(jobsie_id, execution_metadata=execution_metadata)
 
 
 @app.task(

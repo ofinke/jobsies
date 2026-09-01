@@ -6,9 +6,9 @@
 - [X] v0.1.1 - Simple containerization for deployment
 - [X] v0.2.0 - Fastapi serving frontend with showing results from executed jobsies
   - [X] v0.2.1 - Add entrypoint.sh into docker image to determine if image should be started as app or worker
-  - [ ] v0.2.2 - Add TZ env variable and ensure that timestamps are correctly handled everywhere
-  - [ ] v0.2.3 - Testing for celery worker (including plan and instructions for unification)
-  - [ ] v0.2.4 - Testing suite for the fastapi (including plan and instructions for unification)
+  - [X] v0.2.2 - Add TZ env variable and ensure that timestamps are correctly handled everywhere
+  - [X] v0.2.3 - Testing for celery worker 
+  - [ ] v0.2.4 - Testing suite for the fastapi and Jobsie for scraping airpline ticket prices from google flights
   - [ ] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
   - [ ] v0.2.6 - Page for monitoring celery worker and jobsies scheduling
   - [ ] v0.2.7 - Cleaner and unified UI styling

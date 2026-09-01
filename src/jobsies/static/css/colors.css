@@ -1,43 +1,39 @@
 :root {
-  --color-white: #ffffff;
-  --color-black: #111827;
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-700: #374151;
-  --color-gray-900: #1f2937;
+  /* Shadows */
+  --shadow-subtle: rgba(0, 0, 0, 0.1);
+  --shadow-light: rgba(0, 0, 0, 0.06);
+  --overlay-backdrop: rgba(0, 0, 0, 0.5);
+  --shadow-lightest: rgba(0, 0, 0, 0.04);
 
-  --color-blue-500: #2563eb;
-  --color-blue-600: #1d4ed8;
-  --color-blue-400: #3b82f6;
-  --color-blue-ring: rgba(59, 130, 246, 0.15);
+  /* Text */
+  --text-main: #EBD1B7;
+  --text-subtle: #b9a993;
+  --text-title: #F8BB39;
+  --text-title-shadow: #26221E;
 
-  --color-green-100: #d1fae5;
-  --color-green-800: #065f46;
+  /* Content Block */
+  --content-main-bg: #45403B;
+  --content-second-bg: #26221E;
+  --content-widget-bg: #36312C;
+  --content-hover-bg: #3b3a32;
+  --content-border-subtle: #7A7267;
+  --content-action-text: var(--text-main);
+  --content-action-hover: var(--text-title);
 
-  --color-red-100: #fee2e2;
-  --color-red-800: #991b1b;
+  /* Sidebar Block */
+  --sidebar-bg: #2F2B26;
+  --sidebar-icon-bg-active: #60A365;
+  --sidebar-icon-bg-hover: #95CC5E;
+  --sidebar-icon-color-active: #26221E;
 
-  --color-black-full: #000000;
+  /* Table */
+  --row: var(--content-widget-bg);
+  --row-hover: var(--content-main-bg);
 
-  --color-black-alpha-10: rgba(0, 0, 0, 0.1);
-  --color-black-alpha-06: rgba(0, 0, 0, 0.06);
-  --color-black-alpha-50: rgba(0, 0, 0, 0.5);
-  --color-black-alpha-04: rgba(0, 0, 0, 0.04);
+  /* Negative and positive interactions */
+  --negative-main: #ec6543;
+  --negative-dim: #381e13;
+  --positive-main: #95CC5E;
+  --positive-dim: #23281e;
 
-  /* Content */
-  --content-main-bg: #EEEEEB;
-
-  /* Sidebar */
-  --sidebar-bg: #B8B8AA;
-  --sidebar-hr: #d3d3cb;
-  --sidebar-text: #000000;
-  --sidebar-link: #2F2F29;
-  --sidebar-title: #586F6B;
-  --sidebar-title-shadow: #444f4a;
-  --sidebar-icon-bg-active: #586F6B;
-  --sidebar-icon-bg-hover: #7F9183;
 }

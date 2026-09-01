@@ -1,6 +1,6 @@
 [project]
 name = "jobsies"
-version = "0.2.2"
+version = "0.2.3"
 description = "Run small jobs automatically on your home server"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -50,10 +50,15 @@ docstring-code-format = true
 
 [dependency-groups]
 dev = [
+    "freezegun>=1.5.5",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "radon>=6.0.1",
+    "ruff>=0.16.1",
+]
+notebooks = [
     "ipykernel>=7.3.0",
     "jupyter>=1.1.1",
-    "pytest>=9.1.1",
-    "ruff>=0.16.1",
 ]
 
 [tool.ruff.lint]

@@ -57,7 +57,7 @@ body {
 .page-header h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--content-title);
+  color: var(--text-title);
 }
 
 .page-header .subtitle {
@@ -122,8 +122,8 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--content-action);
-  border-color: var(--content-action);
+  background-color: var(--content-action-text);
+  border-color: var(--content-action-text);
 }
 
 .btn-primary:hover {
@@ -134,12 +134,11 @@ body {
 .btn-ghost {
   background: transparent;
   border-color: transparent;
-  color: var(--content-action);
+  color: var(--content-action-text);
 }
 
 .btn-ghost:hover {
   background: transparent;
-  border-color: transparent;
   color: var(--content-action-hover);
 }
 
@@ -149,7 +148,7 @@ body {
 
 .btn-action {
   border: 1px solid var(--content-border-subtle);
-  color: var(--content-action);
+  color: var(--content-action-text);
 }
 
 .btn-action .icon {
@@ -291,7 +290,7 @@ dialog.dialog[open] {
 .dialog-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--content-title);
+  color: var(--text-title);
 }
 
 .dialog-close {
@@ -367,7 +366,7 @@ dialog.dialog[open] {
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--text-main);
-  background-color: var(--neutral-strong);
+  background-color: var(--content-widget-bg);
   border: 1px solid var(--content-hover-bg);
   border-radius: 0.375rem;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;

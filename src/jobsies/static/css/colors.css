@@ -1,28 +1,34 @@
 :root {
-  --neutral-strong: #36312C;
-
+  /* Shadows */
   --shadow-subtle: rgba(0, 0, 0, 0.1);
   --shadow-light: rgba(0, 0, 0, 0.06);
   --overlay-backdrop: rgba(0, 0, 0, 0.5);
   --shadow-lightest: rgba(0, 0, 0, 0.04);
 
-  /* Content */
+  /* Text */
+  --text-main: #EBD1B7;
+  --text-subtle: #b9a993;
+  --text-title: #F8BB39;
+  --text-title-shadow: #26221E;
+
+  /* Content Block */
   --content-main-bg: #45403B;
   --content-second-bg: #26221E;
   --content-widget-bg: #36312C;
   --content-hover-bg: #3b3a32;
   --content-border-subtle: #7A7267;
-  --content-title: #F8BB39;
-  --content-action: #60A365;
-  --content-action-hover: #95CC5E;
+  --content-action-text: var(--text-main);
+  --content-action-hover: var(--text-title);
+
+  /* Sidebar Block */
+  --sidebar-bg: #2F2B26;
+  --sidebar-icon-bg-active: #60A365;
+  --sidebar-icon-bg-hover: #95CC5E;
+  --sidebar-icon-color-active: #26221E;
 
   /* Table */
-  --row: #36312C;
-  --row-hover: #45403B;
-
-  /* Text */
-  --text-main: #EBD1B7;
-  --text-subtle: #b9a993;
+  --row: var(--content-widget-bg);
+  --row-hover: var(--content-main-bg);
 
   /* Negative and positive interactions */
   --negative-main: #ec6543;
@@ -31,13 +37,4 @@
   --positive-main: #95CC5E;
   --positive-dim: #23281e;
 
-  /* Sidebar */
-  --sidebar-bg: #2F2B26;
-  --sidebar-text: #EBD1B7;
-  --sidebar-link: #EBD1B7;
-  --sidebar-title: #F8BB39;
-  --sidebar-title-shadow: #26221E;
-  --sidebar-icon-bg-active: #60A365;
-  --sidebar-icon-bg-hover: #95CC5E;
-  --sidebar-icon-color-active: #26221E;
 }

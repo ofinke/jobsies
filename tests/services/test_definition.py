@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import pytest
@@ -162,7 +162,7 @@ def test_update_definition_updated_at_in_utc_and_returned_in_app_timezone(
     assert before.updated_at is not None
     assert before.updated_at.tzinfo is None
 
-    expected_utc = datetime(2026, 8, 30, 12, 34, 56, tzinfo=UTC)
+    expected_utc = datetime.now(UTC).replace(microsecond=0) + timedelta(days=1)
     with freeze_time(expected_utc):
         updated = service.update_definition(definition.id, RequestJobsieDefinitionUpdate(name="Tokyo Updated"))
 

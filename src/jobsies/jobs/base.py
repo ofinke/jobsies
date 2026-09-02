@@ -4,6 +4,8 @@ from jobsies.schemas.jobs.base import BaseJobsieInput, BaseJobsieOutput
 
 
 class BaseJobsie(ABC):
+    """Base abstract class for Jobsies, all jobsies are children of this class."""
+    
     output_schema = BaseJobsieOutput
     input_schema = BaseJobsieInput
 

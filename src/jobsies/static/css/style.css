@@ -121,16 +121,6 @@ body {
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.btn-primary {
-  background-color: var(--content-action-text);
-  border-color: var(--content-action-text);
-}
-
-.btn-primary:hover {
-  background-color: var(--content-action-hover);
-  border-color: var(--content-action-hover);
-}
-
 .btn-ghost {
   background: transparent;
   border-color: transparent;
@@ -407,11 +397,6 @@ textarea.form-control {
   display: flex;
   justify-content: flex-end;
   margin-top: 1.5rem;
-}
-
-.form-actions .btn {
-  height: 2.25rem;
-  border: none;
 }
 
 /* Results Grid / Widget Cards */

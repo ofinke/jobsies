@@ -155,13 +155,14 @@ class ZalandoJobsie(BaseJobsie):
 
     @staticmethod
     def _extract_price_amount(offer: dict) -> float | None:
-        """Extracts promotional price in CZK from an offer dict."""
+        """Extracts current price in CZK from an offer dict, preferring promotional price over original."""
         price_data = offer.get("price")
         if not isinstance(price_data, dict):
             return None
-        promo = price_data.get("promotional")
-        if isinstance(promo, dict) and "amount" in promo:
-            return promo["amount"] / 100
+        for key in ("promotional", "original"):
+            amount = price_data.get(key)
+            if isinstance(amount, dict) and "amount" in amount:
+                return amount["amount"] / 100
         return None
 
     @staticmethod

@@ -31,7 +31,7 @@ async def results_get_latest() -> HTMLResponse:
         data = row.model_dump()
         if not data["success"]:
             traceback = data.get("execution_metadata", {}).get("traceback", "No traceback available")
-            last_line = traceback.strip().split("\n")[-1] if traceback else "No traceback available"
+            last_line = traceback.strip() if traceback else "No traceback available"
             data["output_data"] = {"traceback": last_line}
         results.append(JobsieOutputInterface(**data))
     logger.debug("Endpoint executed: GET /results/latest")

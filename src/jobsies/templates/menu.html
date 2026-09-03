@@ -9,10 +9,27 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script>
+    const savedTheme = localStorage.getItem('jobsies-theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      document.documentElement.dataset.theme = savedTheme;
+    }
+
     document.addEventListener('htmx:beforeSwap', function(evt) {
       if (evt.detail.xhr.status === 422) {
         evt.detail.shouldSwap = true;
       }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeToggle = document.querySelector('#theme-toggle');
+
+      themeToggle.addEventListener('click', function() {
+        const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = nextTheme;
+        localStorage.setItem('jobsies-theme', nextTheme);
+        themeToggle.setAttribute('aria-label', `Switch to ${nextTheme} theme`);
+        themeToggle.setAttribute('title', `Switch to ${nextTheme} theme`);
+      });
     });
   </script>
 </head>
@@ -36,6 +53,11 @@
       </ul>
       <div class="sidebar-footer">
         <hr>
+        <button id="theme-toggle" class="btn btn-sm btn-ghost btn-action theme-toggle"
+                type="button" aria-label="Switch to light theme" title="Switch to light theme">
+          <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" /></svg>
+          <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" /></svg>
+        </button>
         <a href="https://github.com/ofinke/jobsies" target="_blank" class="github-link">
           <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l-4 4l4 4" /><path d="M17 8l4 4l-4 4" /><path d="M14 4l-4 16" /></svg>
           <span>v{{ app_version }}</span>

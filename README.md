@@ -2,37 +2,44 @@
 
 # Quickstart
 
-## Local development
-
-Clone the repository and install dependencies
+To run the project locally, docker installation is assumed. The project can be run fully locally without it, but you need to supply redis instance and include it in `.env` file. Project is mainly controlled via the included `Makefile`, run
 
 ```bash
-uv sync
+make
 ```
 
-Use make tools to run the application, follow these commands:
+to see the available commands or, if you don't have make tools installed, just read the file.
+
+## Local development
+
+Clone the repository, install dependencies
+
+```bash
+make init
+```
+
+To run the application, first populate database with example jobsie
 
 ```bash
 make populate   # populates database with example jobsie, good before first run
-make run        # starts the application fully
 ```
 
-This command creates redis instance using docker and starts both the worker and app in a single shell. Application is then available at [localhost:8000](http://127.0.0.1:8000). Swagger documentation is then available at [/docs](http://127.0.0.1:8000/docs). 
-
-You can run run the app components separately by these commands
+Then, you can run run the app components separately (in different shells) by these commands
 
 ```bash
-make redis
+make redis-up
 make run-worker
 make run-app
 ```
+
+These commands creates redis instance using docker and starts both the worker and app. Application is then available at [localhost:8000](http://127.0.0.1:8000). Swagger documentation is available at [/docs](http://127.0.0.1:8000/docs). 
 
 ## Containerized 
 
 Build and start the whole stack in docker (redis + worker + app) using
 
 ```bash
-docker compose up -d --build
+make up
 ```
 
 The worker container mounts the local `./data` folder, so the database persists on the host. By default, the docker exposes app at the port 8777 - [http://127.0.0.1:8777](http://127.0.0.1:8777).
@@ -40,7 +47,7 @@ The worker container mounts the local `./data` folder, so the database persists 
 Stop the whole stack by running
 
 ```bash
-docker stop jobsies-redis jobsies-app jobsies-worker
+make down
 ```
 # How to
 

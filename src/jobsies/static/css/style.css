@@ -66,6 +66,102 @@ body {
   font-size: 0.875rem;
 }
 
+.about-content {
+  max-width: 90ch;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.about-content h1,
+.about-content h2,
+.about-content h3,
+.about-content h4 {
+  color: var(--text-title);
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.about-content h1 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.4rem;
+}
+
+.about-content h2 {
+  margin: 1.75rem 0 0.625rem;
+  font-size: 1.2rem;
+}
+
+.about-content h3,
+.about-content h4 {
+  margin: 1.3rem 0 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.about-content h1:first-child {
+  margin-top: 0;
+}
+
+.about-content p {
+  margin-bottom: 1rem;
+}
+
+.about-content ul,
+.about-content ol {
+  margin: 0 0 1rem 1.5rem;
+}
+
+.about-content li + li {
+  margin-top: 0.35rem;
+}
+
+.about-content a {
+  color: var(--content-action-hover);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.15em;
+}
+
+.about-content strong {
+  font-weight: 650;
+}
+
+.about-content code {
+  padding: 0.125rem 0.35rem;
+  background-color: var(--content-hover-bg);
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.about-content pre {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background-color: var(--content-widget-bg);
+  border-radius: 0.5rem;
+}
+
+.about-content pre code {
+  padding: 0;
+  background: transparent;
+  font-size: 0.875rem;
+}
+
+.about-content blockquote {
+  margin: 1.25rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--content-border-subtle);
+  color: var(--text-subtle);
+}
+
+@media (max-width: 640px) {
+  .about-content {
+    font-size: 0.9375rem;
+  }
+
+  .about-content h1 {
+    font-size: 1.375rem;
+  }
+}
+
 .actions {
   display: flex;
   gap: 0.5rem;

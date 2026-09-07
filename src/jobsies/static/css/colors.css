@@ -69,8 +69,8 @@
   /* Content Block */
   --content-main-bg: #ebe3e1;
   --content-second-bg: #c2a79f;
-  --content-widget-bg: #f9f9f7;
-  --content-hover-bg: #f3f4f6;
+  --content-widget-bg: #F5F1EF;
+  --content-hover-bg: #FFFFFF;
   --content-border-subtle: #d1d5db;
   --content-action-text: var(--text-primary);
   --content-action-hover: var(--tertiary);
@@ -78,7 +78,7 @@
   /* Sidebar Block */
   --sidebar-bg: var(--primary);
   --sidebar-icon-bg-active: var(--tertiary);
-  --sidebar-icon-bg-hover: #7F9183;
+  --sidebar-icon-bg-hover: #59B9C9;
   --sidebar-icon-color-active: #ffffff;
 
   /* Table */
@@ -87,7 +87,7 @@
 
   /* Negative and positive interactions */
   --negative-main: #991b1b;
-  --negative-dim: #fee2e2;
+  --negative-dim: #FBE9E9;
   --positive-main: #065f46;
-  --positive-dim: #d1fae5;
+  --positive-dim: #D3EDE9;
 }

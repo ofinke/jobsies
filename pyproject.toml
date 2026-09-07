@@ -11,6 +11,7 @@ dependencies = [
     "fast-flights>=3.1.0",
     "fastapi>=0.141.1",
     "httpx2>=2.10.0",
+    "humanize>=4.16.0",
     "jinja2>=3.1.6",
     "justhtml>=3.10.1",
     "loguru>=0.7.3",

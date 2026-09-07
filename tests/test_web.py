@@ -1,6 +1,10 @@
+from datetime import UTC, datetime
+
 import pytest
 from fastapi.testclient import TestClient
+from freezegun import freeze_time
 from jobsies.fastapi_app import app
+from jobsies.schemas.tables import TableJobsiesOutputs
 
 
 @pytest.fixture(autouse=True)
@@ -23,6 +27,29 @@ def test_index_page(client: TestClient) -> None:
     assert "<!DOCTYPE html>" in html
     assert "Jobsies" in html
     assert "sidebar" in html
+
+
+@freeze_time("2026-09-07 12:00:00")
+def test_latest_results_formats_created_at(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests latest results include a humanized and formatted creation timestamp."""
+    result = TableJobsiesOutputs(
+        id=1,
+        created_at=datetime(2026, 9, 7, 11, 59, tzinfo=UTC),
+        jobsie_name="ExampleJobsie",
+        jobsie_id=1,
+        execution_id="exec-1",
+        output_data={"price": 10},
+        execution_metadata={},
+    )
+    monkeypatch.setattr(
+        "jobsies.api.web.components.output.OutputService.get_latest_results",
+        lambda _service: [result],
+    )
+
+    response = client.get("/results/latest")
+
+    assert response.status_code == 200
+    assert "a minute ago (2026-09-07 11:59:00)" in response.text
 
 
 def test_definitions_page_full_load(client: TestClient) -> None:

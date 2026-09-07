@@ -36,8 +36,8 @@ class JobsieOutputBase(BaseModel):
 class JobsieOutputInterface(BaseModel):
     """Model representing for showing what data are presented to the user."""
 
-    created_at: datetime = Field(
-        description="Timestamp of the jobsie execution",
+    created_at: str = Field(
+        description="Humanized and formatted timestamp of the jobsie execution",
     )
     jobsie_name: str = Field(
         description="Name of the jobsie that produced this output",

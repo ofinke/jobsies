@@ -82,18 +82,18 @@ body {
 }
 
 .about-content h1 {
-  margin: 2rem 0 0.75rem;
+  margin: 1rem 0 0.75rem;
   font-size: 1.4rem;
 }
 
 .about-content h2 {
-  margin: 1.75rem 0 0.625rem;
+  margin: 1rem 0 0.625rem;
   font-size: 1.2rem;
 }
 
 .about-content h3,
 .about-content h4 {
-  margin: 1.3rem 0 0.5rem;
+  margin: 1rem 0 0.5rem;
   font-size: 1.0625rem;
 }
 

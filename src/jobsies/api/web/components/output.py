@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
+from humanize import naturaltime
 from loguru import logger
 from pytz import timezone
 
@@ -29,6 +30,8 @@ async def results_get_latest() -> HTMLResponse:
     results = []
     for row in raw_data:
         data = row.model_dump()
+        created_at = data["created_at"]
+        data["created_at"] = f"{naturaltime(created_at)} ({created_at.strftime('%Y-%m-%d %H:%M:%S')})"
         if not data["success"]:
             traceback = data.get("execution_metadata", {}).get("traceback", "No traceback available")
             traceback_text = traceback.strip() if traceback else "No traceback available"

@@ -19,8 +19,9 @@
 }
 
 .sidebar-title {
+  font-family: "DejaVu Sans", "Arial Black", "Noto Sans Display", sans-serif;
   font-size: 2.2rem;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0.08em;
   color: var(--text-title);
   padding: 0 0.875rem 1.5rem;

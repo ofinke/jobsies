@@ -70,4 +70,25 @@
     </button>
   </div>
 </form>
+
+<script>
+  (() => {
+    const typeSelect = document.getElementById("subclass_name");
+    const inputKwargs = document.getElementById("input_kwargs");
+    const inputExamples = {{ input_examples | default({}) | tojson }};
+    let lastLoadedValue = inputKwargs.value;
+
+    typeSelect.addEventListener("change", () => {
+      const example = JSON.stringify(inputExamples[typeSelect.value] || {}, null, 2);
+      const hasUserChanges = inputKwargs.value !== lastLoadedValue;
+
+      if (hasUserChanges && inputKwargs.value.trim() && !window.confirm("Replace the current input kwargs with the selected Jobsie example?")) {
+        return;
+      }
+
+      inputKwargs.value = example;
+      lastLoadedValue = example;
+    });
+  })();
+</script>
 {% endblock %}

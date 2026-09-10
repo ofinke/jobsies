@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from .base import BaseJobsieInput, BaseJobsieOutput
 
@@ -36,7 +36,30 @@ class PassengersInput(BaseJobsieInput):
 class FlightPriceJobsieInput(BaseJobsieInput):
     """Data model for the complete fast-flights query."""
 
-    # TODO: Update that the input is expecting only single flight.
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "flights": [
+                        {
+                            "date": "2026-01-01",
+                            "from_airport": "PRG",
+                            "to_airport": "LHR",
+                        }
+                    ],
+                    "seat": "economy",
+                    "trip": "one-way",
+                    "passengers": {
+                        "adults": 1,
+                        "children": 0,
+                        "infants_in_seat": 0,
+                        "infants_on_lap": 0,
+                    },
+                }
+            ]
+        }
+    )
+
     flights: list[FlightQueryInput] = Field(min_length=1)
     seat: Literal["economy", "premium-economy", "business", "first"] = "economy"
     trip: Literal["round-trip", "one-way", "multi-city"] = "one-way"

@@ -1,4 +1,4 @@
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from .base import BaseJobsieInput, BaseJobsieOutput
 
@@ -19,6 +19,17 @@ class ZalandoJobsieOutput(BaseJobsieOutput):
 
 class ZalandoJobsieInput(BaseJobsieInput):
     """Data model for input for the Zalando Jobsie."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "url": "https://www.zalando.cz/example",
+                    "size": "M",
+                }
+            ]
+        }
+    )
 
     url: str
     size: str

@@ -25,6 +25,13 @@ class DefinitionService:
         cls = get_jobsie_class(subclass_name)
         return cls.output_schema.model_json_schema()
 
+    def get_input_examples(self) -> dict[str, dict]:
+        """Retrieve example input values for all Jobsie subclasses."""
+        return {
+            cls.__name__: cls.input_schema.model_json_schema().get("examples", [{}])[0]
+            for cls in BaseJobsie.__subclasses__()
+        }
+
     def list_definitions(self) -> list[TableJobsiesDefinition]:
         """Retrieve all jobsie definitions."""
         return self.db.load(TableJobsiesDefinition)

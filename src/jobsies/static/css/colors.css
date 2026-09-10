@@ -1,4 +1,11 @@
 :root {
+  /* Primary colors of the theme,
+  uses as a background of the menu, title texts
+  and highlighted menu icon*/
+  --primary: #2F2B26;
+  --secondary: #F8BB39;
+  --tertiary: #60A365;
+
   /* Shadows */
   --shadow-subtle: rgba(0, 0, 0, 0.1);
   --shadow-light: rgba(0, 0, 0, 0.06);
@@ -8,7 +15,7 @@
   /* Text */
   --text-main: #EBD1B7;
   --text-subtle: #b9a993;
-  --text-title: #F8BB39;
+  --text-title: var(--secondary);
   --text-title-shadow: #26221E;
 
   /* Content Block */
@@ -18,11 +25,11 @@
   --content-hover-bg: #3b3a32;
   --content-border-subtle: #7A7267;
   --content-action-text: var(--text-main);
-  --content-action-hover: var(--text-title);
+  --content-action-hover: var(--secondary);
 
   /* Sidebar Block */
-  --sidebar-bg: #2F2B26;
-  --sidebar-icon-bg-active: #60A365;
+  --sidebar-bg: var(--primary);
+  --sidebar-icon-bg-active: var(--tertiary);
   --sidebar-icon-bg-hover: #95CC5E;
   --sidebar-icon-color-active: #26221E;
 
@@ -36,4 +43,51 @@
   --positive-main: #95CC5E;
   --positive-dim: #23281e;
 
+}
+
+:root[data-theme="light"] {
+  /* Primary colors of the theme,
+  uses as a background of the menu, title texts
+  and highlighted menu icon*/
+
+  --primary: #d1b0a7;
+  --secondary: #40456a;
+  --tertiary: #0093a5;
+
+  /* Shadows */
+  --shadow-subtle: rgba(0, 0, 0, 0.1);
+  --shadow-light: rgba(0, 0, 0, 0.06);
+  --overlay-backdrop: rgba(0, 0, 0, 0.5);
+  --shadow-lightest: rgba(0, 0, 0, 0.04);
+
+  /* Text */
+  --text-main: #292c25;
+  --text-subtle: #303030;
+  --text-title: var(--secondary);
+  --text-title-shadow: #444f4a;
+
+  /* Content Block */
+  --content-main-bg: #ebe3e1;
+  --content-second-bg: #c2a79f;
+  --content-widget-bg: #F5F1EF;
+  --content-hover-bg: #FFFFFF;
+  --content-border-subtle: #d1d5db;
+  --content-action-text: var(--text-primary);
+  --content-action-hover: var(--tertiary);
+
+  /* Sidebar Block */
+  --sidebar-bg: var(--primary);
+  --sidebar-icon-bg-active: var(--tertiary);
+  --sidebar-icon-bg-hover: #59B9C9;
+  --sidebar-icon-color-active: #ffffff;
+
+  /* Table */
+  --row: var(--content-widget-bg);
+  --row-hover: var(--content-main-bg);
+
+  /* Negative and positive interactions */
+  --negative-main: #991b1b;
+  --negative-dim: #FBE9E9;
+  --positive-main: #065f46;
+  --positive-dim: #D3EDE9;
 }

@@ -1,0 +1,15 @@
+{% extends "menu.html" %}
+
+{% block title %}Jobsies - About{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>About</h1>
+        <p class="subtitle">What are Jobsies and how to set them up.</p>
+    </div>
+</div>
+<div class="about-content">
+    {{ about_content | safe }}
+</div>
+{% endblock %}

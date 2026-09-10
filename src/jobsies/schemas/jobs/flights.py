@@ -1,77 +1,119 @@
 from typing import Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
 from .base import BaseJobsieInput, BaseJobsieOutput
+
+# INPUTS
 
 
 class FlightQueryInput(BaseJobsieInput):
     """Data model for a single flight leg query."""
 
-    date: str
-    from_airport: str = Field(min_length=3, max_length=3)
-    to_airport: str = Field(min_length=3, max_length=3)
-    max_stops: int | None = Field(default=None, ge=0)
-    airlines: list[str] | None = None
-    earliest_departure_hour: int | None = Field(default=None, ge=0, le=23)
-    latest_departure_hour: int | None = Field(default=None, ge=0, le=23)
-    earliest_arrival_hour: int | None = Field(default=None, ge=0, le=23)
-    latest_arrival_hour: int | None = Field(default=None, ge=0, le=23)
-    max_duration_minutes: int | None = Field(default=None, ge=0)
-    connecting_airports: list[str] | None = None
-    min_layover_minutes: int | None = Field(default=None, ge=0)
-    max_layover_minutes: int | None = Field(default=None, ge=0)
-    less_emissions_only: bool = False
+    date: str = Field(
+        examples=["2027-01-01"],
+    )
+    from_airport: str = Field(
+        min_length=3,
+        max_length=3,
+        examples=["JFK"],
+    )
+    to_airport: str = Field(
+        min_length=3,
+        max_length=3,
+        examples=["LHR"],
+    )
+    max_stops: int | None = Field(
+        default=None,
+        ge=0,
+        examples=[None],
+    )
+
+    # Disabled for now
+    # airlines: list[str] | None = None
+    # earliest_departure_hour: int | None = Field(default=None, ge=0, le=23)
+    # latest_departure_hour: int | None = Field(default=None, ge=0, le=23)
+    # earliest_arrival_hour: int | None = Field(default=None, ge=0, le=23)
+    # latest_arrival_hour: int | None = Field(default=None, ge=0, le=23)
+    # max_duration_minutes: int | None = Field(default=None, ge=0)
+    # connecting_airports: list[str] | None = None
+    # min_layover_minutes: int | None = Field(default=None, ge=0)
+    # max_layover_minutes: int | None = Field(default=None, ge=0)
+    # less_emissions_only: bool = False
 
 
 class PassengersInput(BaseJobsieInput):
     """Data model for passenger counts used in a flight query."""
 
-    adults: int = Field(default=0, ge=0)
-    children: int = Field(default=0, ge=0)
-    infants_in_seat: int = Field(default=0, ge=0)
-    infants_on_lap: int = Field(default=0, ge=0)
+    adults: int = Field(
+        default=0,
+        ge=0,
+        examples=[1],
+    )
+    children: int = Field(
+        default=0,
+        ge=0,
+        examples=[0],
+    )
+    infants_in_seat: int = Field(
+        default=0,
+        ge=0,
+        examples=[0],
+    )
+    infants_on_lap: int = Field(
+        default=0,
+        ge=0,
+        examples=[0],
+    )
 
 
 class FlightPriceJobsieInput(BaseJobsieInput):
     """Data model for the complete fast-flights query."""
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "examples": [
-                {
-                    "flights": [
-                        {
-                            "date": "2026-01-01",
-                            "from_airport": "PRG",
-                            "to_airport": "LHR",
-                        }
-                    ],
-                    "seat": "economy",
-                    "trip": "one-way",
-                    "passengers": {
-                        "adults": 1,
-                        "children": 0,
-                        "infants_in_seat": 0,
-                        "infants_on_lap": 0,
-                    },
-                }
-            ]
-        }
-    )
-
     flights: list[FlightQueryInput] = Field(min_length=1)
-    seat: Literal["economy", "premium-economy", "business", "first"] = "economy"
-    trip: Literal["round-trip", "one-way", "multi-city"] = "one-way"
+
+    seat: Literal["economy", "premium-economy", "business", "first"] = Field(
+        default="economy",
+        examples=["economy"],
+    )
+    trip: Literal["round-trip", "one-way", "multi-city"] = Field(
+        default="one-way",
+        examples=["round-trip", "one-way", "multi-city"],
+    )
     passengers: PassengersInput | None = None
     language: str = ""
     currency: str = ""
-    max_stops: int | None = Field(default=None, ge=0)
-    max_price: int | None = Field(default=None, ge=0)
-    carry_on_bags: int = Field(default=0, ge=0)
-    checked_bags: int = Field(default=0, ge=0)
-    hide_separate_and_self_transfer: bool = False
-    exclude_basic_economy: bool = False
+
+    max_stops: int | None = Field(
+        default=None,
+        ge=0,
+    )
+    max_price: int | None = Field(
+        default=None,
+        ge=0,
+        examples=[None],
+    )
+    carry_on_bags: int = Field(
+        default=0,
+        ge=0,
+        examples=[0],
+    )
+    checked_bags: int = Field(
+        default=0,
+        ge=0,
+        examples=[0],
+    )
+    hide_separate_and_self_transfer: bool = Field(
+        default=False,
+        examples=[False],
+    )
+    exclude_basic_economy: bool = Field(
+        default=False,
+        examples=[False],
+    )
+
+
+# OUTPUTS
 
 
 class AirlineOutput(BaseJobsieOutput):
@@ -141,20 +183,20 @@ class FlightPriceJobsieOutput(BaseJobsieOutput):
     """Data model for the output of FlightPriceJobsie."""
 
     cheapest_price: int = Field(
-        description="Price of the cheapest flight found"
+        description="Price of the cheapest flight found",
     )
     cheapest_airline: list[str] = Field(
-        description="Airlines handling cheapest options"
+        description="Airlines handling cheapest options",
     )
     cheapest_length: int = Field(
-        description="Total length of flights including layover for cheapest option"
+        description="Total length of flights including layover for cheapest option",
     )
     cheapest_flights: int = Field(
-        description="Number of flights for cheapest option"
+        description="Number of flights for cheapest option",
     )
     cheapest_times: str = Field(
-        description="Human readable time of departure to time of arrival in local timezones"
+        description="Human readable time of departure to time of arrival in local timezones",
     )
     flights: list[FlightsOutput] = Field(
-        description="List of all found flights"
+        description="List of all found flights",
     )

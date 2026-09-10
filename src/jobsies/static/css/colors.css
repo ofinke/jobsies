@@ -72,7 +72,7 @@
   --content-widget-bg: #F5F1EF;
   --content-hover-bg: #FFFFFF;
   --content-border-subtle: #d1d5db;
-  --content-action-text: var(--text-primary);
+  --content-action-text: var(--text-main);
   --content-action-hover: var(--tertiary);
 
   /* Sidebar Block */

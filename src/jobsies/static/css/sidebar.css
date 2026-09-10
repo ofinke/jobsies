@@ -10,11 +10,31 @@
   box-shadow: 0 8px 24px var(--shadow-subtle);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .sidebar {
-    width: 190px;
+    width: 220px;
     padding: 1.25rem 0.75rem;
     border-radius: 1rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .sidebar {
+    width: 100%;
+    padding: 1rem 0.75rem;
+  }
+
+  .sidebar-title {
+    padding-bottom: 1rem;
+  }
+
+  .sidebar ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-footer {
+    margin-top: 1rem;
   }
 }
 

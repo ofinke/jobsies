@@ -23,6 +23,7 @@ body {
 
 .content {
   flex: 1;
+  min-width: 0;
   padding: 2rem;
   background-color: var(--content-main-bg);
   border-radius: 1.25rem;
@@ -52,6 +53,12 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .page-header h1 {
@@ -259,6 +266,7 @@ body {
 
 .table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   background-color: var(--content-main-bg);
   border-radius: 0.5rem;
@@ -490,7 +498,15 @@ dialog.dialog[open] {
 }
 
 .form-control:focus {
-  outline: none;
+  outline: 3px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible,
+a:focus-visible,
+.dialog-close:focus-visible {
+  outline: 3px solid var(--secondary);
+  outline-offset: 2px;
 }
 
 .form-control-disabled {
@@ -636,4 +652,81 @@ textarea.form-control {
   overflow-y: auto;
   width: 66%;
   flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .definition-form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .result-card {
+    flex-direction: column;
+  }
+
+  .result-card-output {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .layout {
+    display: block;
+  }
+
+  .content {
+    margin-top: var(--shell-inset);
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .status-bar {
+    white-space: normal;
+    height: auto;
+    min-height: 36px;
+  }
+
+  dialog.dialog[open] {
+    padding: 0.625rem;
+  }
+
+  .dialog-container {
+    max-width: 100%;
+    max-height: calc(100vh - 1.25rem);
+    max-height: calc(100dvh - 1.25rem);
+  }
+
+  .dialog-header,
+  .dialog-body {
+    padding: 1rem;
+  }
+
+  .dialog-footer {
+    padding: 0.75rem 1rem;
+  }
+
+  .result-card {
+    padding: 1rem;
+  }
+
+  .result-card-title-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .result-card-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
 }

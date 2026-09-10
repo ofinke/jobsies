@@ -1,13 +1,18 @@
 import html
 import re
 from dataclasses import asdict
+from datetime import UTC, datetime
 
 from fast_flights import FlightQuery, Passengers, Query, ResultList, create_query, get_flights
 from fast_flights.parser import parse
 from loguru import logger
 from primp import Client
 
-from jobsies.schemas.jobs import FlightPriceJobsieInput, FlightPriceJobsieOutput
+from jobsies.schemas.jobs import (
+    FlightPriceJobsieInput,
+    FlightPriceJobsieOutput,
+    FlightsOutput,
+)
 
 from .base import BaseJobsie
 
@@ -66,6 +71,20 @@ class FlightPriceJobsie(BaseJobsie):
             raise TypeError(msg)
         return result
 
+    @staticmethod
+    def _calculate_cheapest(flights: list[FlightsOutput]) -> dict[str, object]:
+        """Derive price, airlines, length (including layovers), times and segment count for the cheapest itinerary."""
+        cheapest = min(flights, key=lambda flight: flight.price)
+        departure = datetime(*cheapest.flights[0].departure.date, *cheapest.flights[0].departure.time, tzinfo=UTC)
+        arrival = datetime(*cheapest.flights[-1].arrival.date, *cheapest.flights[-1].arrival.time, tzinfo=UTC)
+        return {
+            "cheapest_price": cheapest.price,
+            "cheapest_airline": cheapest.airlines,
+            "cheapest_length": int((arrival - departure).total_seconds() // 60),
+            "cheapest_flights": len(cheapest.flights),
+            "cheapest_times": f"{departure:%Y-%m-%d %H:%M} - {arrival:%Y-%m-%d %H:%M}",
+        }
+
     def execute(self) -> FlightPriceJobsieOutput:
         """Retrieve flight prices for the configured routes and filters."""
         query_data = self.input.model_dump()
@@ -78,7 +97,8 @@ class FlightPriceJobsie(BaseJobsie):
         query = create_query(flights=flights, passengers=passengers, **query_data)
         result = self._get_flights(query)
 
+        found_flights = [FlightsOutput(**asdict(flight)) for flight in result]
         return self.output_schema(
-            flights=[asdict(flight) for flight in result],
-            metadata=asdict(result.metadata),
+            **self._calculate_cheapest(found_flights),
+            flights=found_flights,
         )

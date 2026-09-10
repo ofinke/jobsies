@@ -36,6 +36,7 @@ class PassengersInput(BaseJobsieInput):
 class FlightPriceJobsieInput(BaseJobsieInput):
     """Data model for the complete fast-flights query."""
 
+    # TODO: Update that the input is expecting only single flight.
     flights: list[FlightQueryInput] = Field(min_length=1)
     seat: Literal["economy", "premium-economy", "business", "first"] = "economy"
     trip: Literal["round-trip", "one-way", "multi-city"] = "one-way"
@@ -116,5 +117,21 @@ class FlightsOutput(BaseJobsieOutput):
 class FlightPriceJobsieOutput(BaseJobsieOutput):
     """Data model for the output of FlightPriceJobsie."""
 
-    flights: list[FlightsOutput]
-    metadata: FlightMetadataOutput
+    cheapest_price: int = Field(
+        description="Price of the cheapest flight found"
+    )
+    cheapest_airline: list[str] = Field(
+        description="Airlines handling cheapest options"
+    )
+    cheapest_length: int = Field(
+        description="Total length of flights including layover for cheapest option"
+    )
+    cheapest_flights: int = Field(
+        description="Number of flights for cheapest option"
+    )
+    cheapest_times: str = Field(
+        description="Human readable time of departure to time of arrival in local timezones"
+    )
+    flights: list[FlightsOutput] = Field(
+        description="List of all found flights"
+    )

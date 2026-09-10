@@ -25,9 +25,7 @@ def test_page_endpoint_renders_expected_template_and_active_page(
     """Test each page route selects its template and active navigation page."""
     rendered: list[tuple[Request, str, dict[str, object]]] = []
 
-    def render_template(
-        *, request: Request, name: str, context: dict[str, object]
-    ) -> HTMLResponse:
+    def render_template(*, request: Request, name: str, context: dict[str, object]) -> HTMLResponse:
         rendered.append((request, name, context))
         return HTMLResponse("rendered page")
 

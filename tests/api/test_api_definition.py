@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from jobsies.jobs import ZalandoJobsie
+from jobsies.services import DefinitionService
 
 
 @pytest.fixture(autouse=True)
@@ -80,6 +81,26 @@ def test_create_definition_invalid_cron(client: TestClient) -> None:
     assert response.status_code == 422
 
 
+def test_create_definition_value_error_returns_400(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Tests POST /api/v1/jobsie/definition returns 400 when the service raises a ValueError."""
+
+    def fake_create(_self: DefinitionService, _definition_in: object) -> object:
+        msg = "Definition conflict occurred"
+        raise ValueError(msg)
+
+    monkeypatch.setattr(DefinitionService, "create_definition", fake_create)
+    payload = {
+        "name": "Conflict Job",
+        "subclass_name": "ExampleJobsie",
+        "cron": "0 0 * * *",
+    }
+    response = client.post("/api/v1/jobsie/definition", json=payload)
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Definition conflict occurred"
+
+
 def test_update_definition_success(client: TestClient) -> None:
     """Tests PUT /api/v1/jobsie/definition/{id} updates definition and output_vars when subclass changes."""
     payload = {
@@ -100,6 +121,28 @@ def test_update_definition_not_found(client: TestClient) -> None:
     """Tests PUT /api/v1/jobsie/definition/{id} with non-existent ID returns 404."""
     response = client.put("/api/v1/jobsie/definition/999", json={"name": "Nope"})
     assert response.status_code == 404
+
+
+def test_update_definition_invalid_subclass_returns_400(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Tests PUT /api/v1/jobsie/definition/{id} returns 400 when the subclass is unknown."""
+
+    def fake_update(
+        _self: DefinitionService, _definition_id: int, _definition_in: object
+    ) -> object:
+        msg = "Update failed"
+        raise KeyError(msg)
+
+    monkeypatch.setattr(DefinitionService, "update_definition", fake_update)
+    payload = {
+        "name": "Updated Name",
+        "subclass_name": "NonExistentJobsie",
+        "cron": "0 0 * * *",
+    }
+    response = client.put("/api/v1/jobsie/definition/1", json=payload)
+    assert response.status_code == 400
+    assert "unknown jobsie subclass" in response.json()["detail"].lower()
 
 
 def test_delete_definition_success(client: TestClient) -> None:

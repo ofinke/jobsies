@@ -40,7 +40,9 @@ def test_latest_results_formats_created_at(client: TestClient, monkeypatch: pyte
         execution_id="exec-1",
         output_data={"price": 10},
         execution_metadata={},
-    )
+    ).datetimes_to_local_tz()
+    assert result.created_at is not None
+    created_at_formatted = result.created_at.strftime("%Y-%m-%d %H:%M:%S")
     monkeypatch.setattr(
         "jobsies.api.web.components.output.OutputService.get_latest_results",
         lambda _service: [result],
@@ -49,7 +51,7 @@ def test_latest_results_formats_created_at(client: TestClient, monkeypatch: pyte
     response = client.get("/results/latest")
 
     assert response.status_code == 200
-    assert "a minute ago (2026-09-07 11:59:00)" in response.text
+    assert f"a minute ago ({created_at_formatted})" in response.text
 
 
 def test_definitions_page_full_load(client: TestClient) -> None:

@@ -1,6 +1,6 @@
 from .base import BaseJobsieInput, BaseJobsieOutput
 from .example import ExampleJobsieOutput
-from .flights import FlightPriceJobsieInput, FlightPriceJobsieOutput
+from .flights import FlightPriceJobsieInput, FlightPriceJobsieOutput, FlightsOutput
 from .zalando import ZalandoJobsieInput, ZalandoJobsieOutput
 
 __all__ = [
@@ -9,6 +9,7 @@ __all__ = [
     "ExampleJobsieOutput",
     "FlightPriceJobsieInput",
     "FlightPriceJobsieOutput",
+    "FlightsOutput",
     "ZalandoJobsieInput",
     "ZalandoJobsieOutput",
 ]

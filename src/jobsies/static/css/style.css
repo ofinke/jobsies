@@ -365,6 +365,10 @@ dialog.dialog[open] {
   flex-direction: column;
 }
 
+.definition-dialog .dialog-container {
+  max-width: 900px;
+}
+
 .dialog-header {
   display: flex;
   justify-content: space-between;
@@ -413,6 +417,33 @@ dialog.dialog[open] {
 }
 
 /* Forms */
+.definition-form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.definition-form-fields,
+.definition-form-inputs {
+  min-width: 0;
+}
+
+.definition-form-inputs {
+  display: flex;
+}
+
+.definition-form-inputs .form-group {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.definition-form-inputs textarea.form-control {
+  flex: 1;
+  min-height: 0;
+}
+
 .form-errors {
   margin-bottom: 1.25rem;
   display: flex;
@@ -493,6 +524,16 @@ textarea.form-control {
   display: flex;
   justify-content: flex-end;
   margin-top: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .definition-dialog .dialog-container {
+    max-width: 100%;
+  }
+
+  .definition-form-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Results Grid / Widget Cards */

@@ -1,12 +1,41 @@
 from datetime import UTC, datetime
+from types import UnionType
+from typing import Any, Union, get_args, get_origin
 
 from loguru import logger
+from pydantic import BaseModel
 from sqlalchemy.sql import Select
 
 from jobsies.database import DatabaseHandler, get_db_handler
 from jobsies.jobs import BaseJobsie, get_jobsie_class
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.tables import TableJobsiesDefinition
+
+
+def _unwrap_optional(annotation: Any) -> Any:
+    """Return the non-None member of an Optional annotation, otherwise the annotation itself."""
+    if get_origin(annotation) in (Union, UnionType):
+        args = [arg for arg in get_args(annotation) if arg is not type(None)]
+        if len(args) == 1:
+            return args[0]
+    return annotation
+
+
+def _build_example(model: type[BaseModel]) -> dict:
+    """Build an example input dict from Field examples, recursing into nested input models."""
+    example: dict = {}
+    for name, field in model.model_fields.items():
+        if field.examples:
+            example[name] = field.examples[0]
+            continue
+        annotation = _unwrap_optional(field.annotation)
+        is_list = get_origin(annotation) is list
+        if is_list:
+            annotation = get_args(annotation)[0]
+        if isinstance(annotation, type) and issubclass(annotation, BaseModel):
+            nested = _build_example(annotation)
+            example[name] = [nested] if is_list else nested
+    return example
 
 
 class DefinitionService:
@@ -24,6 +53,10 @@ class DefinitionService:
         """Retrieve output schema from the matching BaseJobsie subclass."""
         cls = get_jobsie_class(subclass_name)
         return cls.output_schema.model_json_schema()
+
+    def get_input_examples(self) -> dict[str, dict]:
+        """Retrieve example input values for all Jobsie subclasses."""
+        return {cls.__name__: _build_example(cls.input_schema) for cls in BaseJobsie.__subclasses__()}
 
     def list_definitions(self) -> list[TableJobsiesDefinition]:
         """Retrieve all jobsie definitions."""

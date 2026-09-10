@@ -20,5 +20,9 @@ class ZalandoJobsieOutput(BaseJobsieOutput):
 class ZalandoJobsieInput(BaseJobsieInput):
     """Data model for input for the Zalando Jobsie."""
 
-    url: str
-    size: str
+    url: str = Field(
+        examples=["https://www.zalando.cz/"],
+    )
+    size: str = Field(
+        examples=["M"],
+    )

@@ -8,10 +8,10 @@
   - [X] v0.2.1 - Add entrypoint.sh into docker image to determine if image should be started as app or worker
   - [X] v0.2.2 - Add TZ env variable and ensure that timestamps are correctly handled everywhere
   - [X] v0.2.3 - Testing for celery worker 
-  - [ ] v0.2.4 - Testing suite for the fastapi and Jobsie for scraping airpline ticket prices from google flights
-  - [ ] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
+  - [X] v0.2.4 - Testing suite for the fastapi and Jobsie for scraping airpline ticket prices from google flights
+  - [X] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
   - [ ] v0.2.6 - Page for monitoring celery worker and jobsies scheduling (look at /sibson/redbeat as a celery scheduler)
-- [ ] v0.3.0 - Reusable services, generic configuration template for credentials, jobsies as a plugin system, and monitoring results as charts
+- [ ] v0.3.0 - Reusable services, generic configuration template for credentials, jobsies as a plugin system, monitoring results as charts, and db population on first start as part of entrypoint.sh script
   - [ ] v O.3.1 - cleanup of the project and figuring out what next
 
 # Features

@@ -57,11 +57,12 @@ async def definition_get_create_form(request: Request) -> HTMLResponse:
     """Render the jobsie definition creation dialog."""
     service = DefinitionService()
     subclasses = service.list_jobsie_types()
+    input_examples = service.get_input_examples()
     logger.debug("Endpoint executed: GET /definition/create")
     return templates.TemplateResponse(
         request=request,
         name="components/definition_create_form.html",
-        context={"subclasses": subclasses},
+        context={"subclasses": subclasses, "input_examples": input_examples},
     )
 
 
@@ -94,10 +95,16 @@ async def definition_create(request: Request) -> HTMLResponse:
     except (KeyError, ValueError, ValidationError) as err:
         logger.error(str(err))
         subclasses = service.list_jobsie_types()
+        input_examples = service.get_input_examples()
         return templates.TemplateResponse(
             request=request,
             name="components/definition_create_form.html",
-            context={"subclasses": subclasses, "errors": [f"{err!s}"], "form_data": form_data},
+            context={
+                "subclasses": subclasses,
+                "input_examples": input_examples,
+                "errors": [f"{err!s}"],
+                "form_data": form_data,
+            },
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
 

@@ -3,7 +3,12 @@ from fastapi import APIRouter
 from fastapi.testclient import TestClient
 from jobsies.api.health import router as health_router
 from jobsies.api.v1 import jobsies_definition_router, jobsies_execution_router, jobsies_output_router
-from jobsies.api.web import definition_component_router, results_component_router, web_pages_router
+from jobsies.api.web import (
+    definition_component_router,
+    results_component_router,
+    web_pages_router,
+    worker_component_router,
+)
 from jobsies.fastapi_app import app
 from starlette.routing import Mount
 
@@ -24,6 +29,7 @@ def client() -> TestClient:
         web_pages_router,
         definition_component_router,
         results_component_router,
+        worker_component_router,
     ],
 )
 def test_all_router_routes_are_included(router: APIRouter) -> None:

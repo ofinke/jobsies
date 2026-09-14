@@ -8,11 +8,52 @@
         <h1>Worker Status</h1>
         <p class="subtitle">Health and current status of the application worker.</p>
     </div>
+    <div class="actions">
+        {% include "components/status_bar.html" %}
+        <button class="btn btn-sm btn-ghost btn-action"
+                hx-on:click="htmx.ajax('GET', '/worker/next_task', {target: '#worker-next-tasks', swap: 'outerHTML'}); htmx.ajax('GET', '/worker/redis_status', {target: '#worker-redis-status', swap: 'outerHTML'})"
+                title="Refresh"
+                aria-label="Refresh">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>
+            Refresh
+        </button>
+    </div>
 </div>
 <div class="worker-grid">
-    <div id="worker-widget-primary" class="worker-widget"><p>list of task scheduled for next 24 hours ordered by timestamp. Or just next 25 tasks</p></div>
-    <div id="worker-widget-secondary" class="worker-widget"><p>Status of the celery worker (alive, redis memory, something else, tasks in queue)?)</p></div>
-    <div id="worker-widget-tertiary" class="worker-widget">Status of the redbeat scheduler / scheduled tasks in redis / next scheduled check?</div>
-    <div id="worker-widget-bottom" class="worker-widget">List of successful / failed tasks</div>
+    <div id="worker-widget-primary" class="worker-widget">
+        <div class="worker-widget-inner text-content">
+            <h1>Upcoming Tasks</h1>
+            <p>Next 14 tasks scheduled for execution during the next 24 hours.</p>
+            <div id="worker-next-tasks" hx-get="/worker/next_task" hx-trigger="load" hx-swap="outerHTML"></div>
+        </div>
+    </div>
+    <div id="worker-widget-secondary" class="worker-widget">
+        <div class="worker-widget-inner text-content">
+            <h1>Worker Status</h1>
+            <p>Status of the celery worker (alive, redis memory, something else, tasks in queue)?)</p>
+        </div>
+    </div>
+    <div id="worker-widget-tertiary" class="worker-widget">
+        <div class="worker-widget-inner text-content">
+            <h1>Redis Broker</h1>
+            <div id="worker-redis-status" hx-get="/worker/redis_status" hx-trigger="load" hx-swap="outerHTML"></div>
+        </div>
+    </div>
+    <div id="worker-widget-bottom" class="worker-widget">
+        <div class="worker-widget-inner text-content">
+            List of successful / failed tasks
+        </div>
+    </div>
 </div>
+<script>
+    document.addEventListener('htmx:afterSettle', function() {
+        const bar = document.getElementById('status-bar');
+        if (bar && bar.classList.contains('show')) {
+            clearTimeout(bar._hideTimer);
+            bar._hideTimer = setTimeout(() => {
+                bar.classList.remove('show');
+            }, 10000);
+        }
+    });
+</script>
 {% endblock %}

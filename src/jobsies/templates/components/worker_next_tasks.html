@@ -1,0 +1,26 @@
+<div id="worker-next-tasks">
+  <div class="table-wrapper">
+    <table class="table-def">
+      <thead>
+        <tr>
+          <th>Jobsie</th>
+          <th>Name</th>
+          <th>Next execution</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>{{ task.id }}</td>
+          <td>{{ task.name }}</td>
+          <td>{{ task.scheduled_at }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" class="text-center">No tasks scheduled in the next 24 hours.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

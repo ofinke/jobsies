@@ -1,0 +1,24 @@
+<div id="worker-redis-status">
+  <div class="table-wrapper">
+    <table class="table-def">
+      <tbody>
+        <tr>
+          <td>Redis status:</td>
+          <td>
+            <span class="badge {{ 'badge-success' if status.alive else 'badge-danger' }}">
+              {{ 'Alive' if status.alive else 'Dead' }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td>Memory usage:</td>
+          <td>{{ status.memory_usage }}</td>
+        </tr>
+        <tr>
+          <td>Tasks in queue:</td>
+          <td>{{ status.tasks_in_queue }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

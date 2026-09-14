@@ -3,7 +3,12 @@ from fastapi.staticfiles import StaticFiles
 
 from jobsies.api.health import router as health_router
 from jobsies.api.v1 import jobsies_definition_router, jobsies_execution_router, jobsies_output_router
-from jobsies.api.web import definition_component_router, results_component_router, web_pages_router
+from jobsies.api.web import (
+    definition_component_router,
+    results_component_router,
+    web_pages_router,
+    worker_component_router,
+)
 from jobsies.config import get_config
 
 config = get_config()
@@ -37,3 +42,4 @@ app.include_router(jobsies_execution_router)
 app.include_router(web_pages_router)
 app.include_router(definition_component_router)
 app.include_router(results_component_router)
+app.include_router(worker_component_router)

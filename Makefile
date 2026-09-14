@@ -26,7 +26,7 @@ redis-stop: ## Stop the locally managed Redis container
 	docker stop $(REDIS_CONTAINER) 2>/dev/null || true
 
 run-worker:  ## Start Celery worker with beat scheduler
-	uv run celery -A src.jobsies.celery_app worker --loglevel=info --beat
+	uv run celery -A src.jobsies.celery_app worker --loglevel=info --beat --scheduler redbeat.RedBeatScheduler
 
 run-app:  ## Start FastAPI dev server via uvicorn
 	uv run uvicorn jobsies.fastapi_app:app --reload

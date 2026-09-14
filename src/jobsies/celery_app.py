@@ -2,7 +2,7 @@ from celery import Celery
 from loguru import logger
 
 from jobsies.config import get_config
-from jobsies.services import RunnerService, SchedulingService
+from jobsies.services import RunnerService, SchedulingService, get_redis_handler
 from jobsies.settings import get_settings
 
 settings = get_settings()
@@ -11,7 +11,7 @@ config = get_config()
 # Celery worker definition
 app = Celery(
     "jobsies",
-    broker=settings.redis_url,
+    broker=settings.broker_redis_url,
     include=["jobsies.celery_app"],
 )
 
@@ -21,6 +21,7 @@ app.conf.task_soft_time_limit = 300
 app.conf.task_time_limit = 360
 app.conf.task_ignore_result = True
 app.conf.worker_concurrency = 2
+app.conf.redbeat_redis_url = settings.redbeat_redis_url
 
 # Scheduler for cron jobs
 app.conf.beat_schedule = {
@@ -37,7 +38,7 @@ app.conf.beat_schedule = {
     bind=True,
     autoretry_for=(Exception,),
     retry_kwargs={"max_retries": 3},
-    retry_backoff=True
+    retry_backoff=True,
 )
 def wrapper_run_dynamic_jobsie(self, jobsie_id: int) -> None:  # noqa: ANN001
     """Execution layer for the RunnerService as a celery task."""
@@ -50,6 +51,27 @@ def wrapper_run_dynamic_jobsie(self, jobsie_id: int) -> None:  # noqa: ANN001
 )
 def schedule_upcoming_jobsies() -> None:
     """Schedules upcoming jobsies based on configuration using SchedulingService."""
-    service = SchedulingService(lookahead_seconds=config.scheduler_lookahead)
-    results = service.process_and_schedule(wrapper_run_dynamic_jobsie)
+    # inti services
+    scheduler = SchedulingService()
+    redis = get_redis_handler(settings.broker_redis_url)
+
+    # get which jobsies should be started
+    jobsies = scheduler.define_next_jobsies(config.scheduler_lookahead)
+    results = {"enqueued": 0, "skipped": 0}
+
+    # add jobsies into redis queue
+    for jobsie_id, upcoming_runs in jobsies.items():
+        for run_time in upcoming_runs:
+            epoch_timestamp = int(run_time.timestamp()) // 60
+            lock_key = f"lock:task_run:{jobsie_id}:{epoch_timestamp}"
+            logger.debug(f"Locking key: {lock_key}")
+
+            if redis.acquire_enqueue_lock(lock_key, int(config.scheduler_lookahead * 1.2)):
+                wrapper_run_dynamic_jobsie.apply_async(args=[jobsie_id], eta=run_time)
+                results["enqueued"] += 1
+                logger.info(f"Enqueued jobsie ID: '{jobsie_id}' for ETA: {run_time}")
+            else:
+                results["skipped"] += 1
+                logger.warning(f"Jobsie with ID {jobsie_id} already scheduled for {run_time}")
+
     logger.info(f"Scheduled {results['enqueued']} jobsies (skipped {results['skipped']} duplicates)")

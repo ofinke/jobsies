@@ -34,3 +34,4 @@ Here is a list of features which I would like to include. Some will be later inc
 
 - Advanced UI for showing results from jobsies, allowing show output variables as charts, or something else.
 - Alerting system using whatsapp / email or maybe something else.
+- Plugins v2: could the plugin installation be done through interface? Probably still requires app restart.

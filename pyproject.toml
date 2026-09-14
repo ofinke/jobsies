@@ -5,6 +5,7 @@ description = "Run small jobs automatically on your home server"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "celery-redbeat>=2.4.2",
     "celery[redis]>=5.6.3",
     "click>=8.4.2",
     "croniter>=6.2.4",

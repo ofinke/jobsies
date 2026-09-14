@@ -2,7 +2,7 @@
 set -e
 
 if [ "$1" = "worker" ]; then
-    exec celery -A jobsies.celery_app worker --loglevel=info --beat
+    exec celery -A jobsies.celery_app worker --loglevel=info --beat --scheduler redbeat.RedBeatScheduler
 elif [ "$1" = "app" ]; then
     exec uvicorn jobsies.fastapi_app:app --host 0.0.0.0 --port 8000
 else

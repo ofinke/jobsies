@@ -9,7 +9,10 @@
         <p class="subtitle">Health and current status of the application worker.</p>
     </div>
 </div>
-<p>
-    To be implemented
-</p>
+<div class="worker-grid">
+    <div id="worker-widget-primary" class="worker-widget"><p>list of task scheduled for next 24 hours ordered by timestamp. Or just next 25 tasks</p></div>
+    <div id="worker-widget-secondary" class="worker-widget"><p>Status of the celery worker (alive, redis memory, something else, tasks in queue)?)</p></div>
+    <div id="worker-widget-tertiary" class="worker-widget">Status of the redbeat scheduler / scheduled tasks in redis / next scheduled check?</div>
+    <div id="worker-widget-bottom" class="worker-widget">List of successful / failed tasks</div>
+</div>
 {% endblock %}

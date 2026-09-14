@@ -2,20 +2,17 @@ import functools
 
 import redis
 
-from jobsies.settings import get_settings
-
 
 class RedisHandler:
     """
     Redis client for the application.
 
-    Provides access to a single Redis client backed by a connection pool.
+    Provides access to a Redis client backed by a connection pool.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, url: str) -> None:
         """Initialize the Redis client and its connection pool."""
-        settings = get_settings()
-        self.client = redis.from_url(settings.redis_url)
+        self.client = redis.from_url(url)
 
     def acquire_enqueue_lock(self, lock_key: str, lock_timeout: int) -> bool:
         """Attempt to acquire an enqueue lock for the specified timeout."""
@@ -23,6 +20,6 @@ class RedisHandler:
 
 
 @functools.cache
-def get_redis_handler() -> RedisHandler:
+def get_redis_handler(url: str) -> RedisHandler:
     """Return the reusable Redis handler."""
-    return RedisHandler()
+    return RedisHandler(url)

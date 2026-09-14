@@ -8,10 +8,22 @@ from jobsies.config import get_config
 
 config = get_config()
 
+tags_metadata = [
+    {
+        "name": "Health",
+        "description": "Running status of the application.",
+    },
+    {
+        "name": "Jobsies Definition",
+        "description": "Define jobsies and theirs schedule.",
+    },
+]
+
 app = FastAPI(
     title="Jobsies",
     version=config.app_version,
     docs_url="/docs",
+    openapi_tags=tags_metadata,
 )
 
 app.mount("/static", StaticFiles(directory="src/jobsies/static"), name="static")

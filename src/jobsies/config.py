@@ -13,8 +13,16 @@ class Config(BaseModel):
         description="Application version extracted from the pyproject",
     )
     scheduler_lookahead: int = Field(
-        default=1800,
+        default=900,
         description="How often the worker schedules tasks ahead",
+    )
+    scheduler_interval: int = Field(
+            default=450,
+            description="How often the scheduler runs",
+        )
+    task_queue_name: str = Field(
+        default="celery",
+        description="Redis queue used by Celery tasks",
     )
     templates_location: str = Field(
         default="src/jobsies/templates",

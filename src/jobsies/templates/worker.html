@@ -1,6 +1,6 @@
 {% extends "menu.html" %}
 
-{% block title %}Jobsies - Results{% endblock %}
+{% block title %}Jobsies - Worker{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -8,8 +8,59 @@
         <h1>Worker Status</h1>
         <p class="subtitle">Health and current status of the application worker.</p>
     </div>
+    <div class="actions">
+        {% include "components/status_bar.html" %}
+        <button class="btn btn-sm btn-ghost btn-action"
+                type="button"
+                hx-get="/worker/status"
+                hx-trigger="click"
+                hx-swap="none"
+                title="Refresh"
+                aria-label="Refresh">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>
+            Refresh
+        </button>
+    </div>
 </div>
-<p>
-    To be implemented
-</p>
+<div class="worker-grid">
+    <div id="worker-widget-primary" class="worker-widget worker-widget-primary">
+        <div class="worker-widget-inner text-content">
+            <h1>Upcoming Tasks</h1>
+            <p>Next 15 tasks scheduled for execution (limit 24 hours).</p>
+            <div id="worker-next-tasks"></div>
+            <p class="footnote">
+                <strong>Acknowledged:</strong> The worker knows about these tasks and will process them at their ETA.<br>
+                <strong>Defined:</strong> The next execution according to the cron schedule in the jobsie definition.
+            </p>
+        </div>
+    </div>
+    <div id="worker-widget-status" class="worker-widget worker-widget-right">
+        <div class="worker-widget-inner text-content">
+            <h1>Components</h1>
+            <div id="worker-app-status"></div>
+        </div>
+    </div>
+    <div id="worker-widget-bottom" class="worker-widget worker-widget-right">
+        <div class="worker-widget-inner text-content">
+            <h1>Exceptions</h1>
+            <p>Jobsies run exceptions in the last 24 hours.</p>
+            <div id="worker-exceptions"></div>
+            <p class="footnote">
+                Jobsies get retried on failures and these repetitions are not removed.
+            </p>
+        </div>
+    </div>
+</div>
+<div id="worker-status-loader" hx-get="/worker/status" hx-trigger="load" hx-swap="none"></div>
+<script>
+    document.addEventListener('htmx:afterSettle', function() {
+        const bar = document.getElementById('status-bar');
+        if (bar && bar.classList.contains('show')) {
+            clearTimeout(bar._hideTimer);
+            bar._hideTimer = setTimeout(() => {
+                bar.classList.remove('show');
+            }, 10000);
+        }
+    });
+</script>
 {% endblock %}

@@ -12,9 +12,10 @@ def seed_database(seeded_definition: None) -> None:
 def test_health_liveness(client: TestClient) -> None:
     """Tests GET /health/live without requiring external dependencies."""
     response = client.get("/health/live")
+    response_content = response.json()
 
     assert response.status_code == 200
-    assert response.json() == {"status": "UP"}
+    assert response_content["status"] == "UP"
 
 
 @patch("jobsies.api.health.get_redis_handler")

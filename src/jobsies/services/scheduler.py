@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from datetime import datetime, timedelta
 
 from croniter import croniter
@@ -8,26 +7,25 @@ from sqlmodel import select
 
 from jobsies.database import get_db_handler
 from jobsies.schemas.tables import TableJobsiesDefinition
-from jobsies.services import get_redis_handler
 from jobsies.settings import get_settings
 
+settings = get_settings()
 
 class SchedulingService:
     """
-    Handles dynamic task discovery, cron execution calculations,
-    and duplicate prevention using Redis locks.
+    Service for handling all methods related to custom task scheduling.
+
+    Dynamic task discovery, cron execution calculations, and duplicate prevention using Redis locks.
     """
 
-    def __init__(self, lookahead_seconds: int) -> None:
-        """Initiates Redis client and how far into the future scheduler should schedule."""
-        self.redis = get_redis_handler()
-        self.lookahead_seconds = lookahead_seconds
-        self.settings = get_settings()
+    def __init__(self) -> None:
+        """Initiates the Redis and database clients used by the scheduler."""
+        # Tasks are scheduled into the broker database
+        self.db = get_db_handler()
 
     def get_active_task_configs(self) -> list[TableJobsiesDefinition]:
         """Returns a list of active jobsies configurations."""
-        db = get_db_handler()
-        return db.load(
+        return self.db.load(
             TableJobsiesDefinition,
             statement=select(TableJobsiesDefinition).where(TableJobsiesDefinition.enabled.is_(True)),
         )
@@ -46,39 +44,19 @@ class SchedulingService:
 
         return executions
 
-    def process_and_schedule(self, target_task_callable: Callable) -> dict:
-        """
-        Core orchestration loop. Finds upcoming tasks, verifies locks,
-        and triggers the Celery tasks with an ETA.
-        """
-        now = datetime.now(timezone(self.settings.tz_info))
-        window_end = now + timedelta(seconds=self.lookahead_seconds)
+    def define_next_jobsies(self, lookahead_seconds: int) -> dict[int, list[datetime]]:
+        """Return the upcoming execution times for each active jobsie."""
+        now = datetime.now(timezone(settings.tz_info))
+        window_end = now + timedelta(seconds=lookahead_seconds)
 
         configs = self.get_active_task_configs()
-        results = {"enqueued": 0, "skipped": 0}
+        jobsies = {}
 
-        logger.debug(f"Starting schedule scan for window: {now} to {window_end}")
+        logger.debug(f"Defining jobsies for window: {now} to {window_end}")
 
         for config in configs:
-            task_id = config.id
-            cron_expr = config.cron
+            executions = self.calculate_executions_in_window(config.cron, now, window_end)
+            if executions:
+                jobsies[config.id] = executions
 
-            # Find all runs for this task in the next 30 minutes
-            upcoming_runs = self.calculate_executions_in_window(cron_expr, now, window_end)
-
-            # Scheduling task execution with locking mechanism to prevent double executions.
-            for run_time in upcoming_runs:
-                epoch_timestamp = int(run_time.timestamp()) // 60
-                lock_key = f"lock:task_run:{task_id}:{epoch_timestamp}"
-                logger.debug(f"Locking key: {lock_key}")
-
-                # Keys expire after 1.2 multiple of the lookahead_seconds
-                if self.redis.acquire_enqueue_lock(lock_key, int(self.lookahead_seconds * 1.2)):
-                    target_task_callable.apply_async(args=[task_id], eta=run_time)
-                    results["enqueued"] += 1
-                    logger.info(f"Enqueued jobsie ID: '{task_id}', name: '{config.name}' for ETA: {run_time}")
-                else:
-                    results["skipped"] += 1
-                    logger.warning(f"Jobsie with ID {task_id} already scheduled for {run_time}")
-
-        return results
+        return jobsies

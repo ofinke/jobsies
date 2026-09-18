@@ -10,6 +10,10 @@ class ResponseHealthLiveness(BaseModel):
         description="Liveness status of the application",
         examples=["UP"],
     )
+    timestamp: str = Field(
+        description="Timestamp of the request",
+        examples=[datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S%z")],
+    )
 
 
 class ResponseHealthReadiness(BaseModel):

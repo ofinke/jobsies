@@ -10,15 +10,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Environmental variables."""
 
-    model_config = SettingsConfigDict(env_file=find_dotenv(usecwd=True))
+    model_config = SettingsConfigDict(
+        env_file=find_dotenv(usecwd=True),
+        extra="ignore",
+    )
 
     db_url: str = Field(
         default="sqlite:///data/jobsies.sqlite",
         description="URL for database, default points to the data folder",
     )
-    redis_url: str = Field(
+    broker_redis_url: str = Field(
         default="redis://redis:6379/0",
-        description="Redis used by the worker, default points to the redis created by docker compose",
+        description="Redis used by the worker as a broker, default points to the redis created by docker compose",
+    )
+    redbeat_redis_url: str = Field(
+        default="redis://redis:6379/1",
+        description="Redis used by the redbeat scheduler",
     )
     tz_info: str = Field(
         default="UTC",

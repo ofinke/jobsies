@@ -1,10 +1,11 @@
 [project]
 name = "jobsies"
-version = "0.2.5"
+version = "0.2.6"
 description = "Run small jobs automatically on your home server"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "celery-redbeat>=2.4.2",
     "celery[redis]>=5.6.3",
     "click>=8.4.2",
     "croniter>=6.2.4",
@@ -59,6 +60,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "radon>=6.0.1",
     "ruff>=0.16.1",
+    "wrapture>=1.0.0a22",
 ]
 notebooks = [
     "ipykernel>=7.3.0",

@@ -14,16 +14,25 @@ router = APIRouter(prefix="/health", tags=["Health"])
 settings = get_settings()
 
 
-@router.get("/live", status_code=status.HTTP_200_OK)
+@router.get(
+    "/live",
+    status_code=status.HTTP_200_OK,
+)
 def app_liveness() -> ResponseHealthLiveness:
-    """Returns 200 if application is healthy."""
+    """Returns status UP if application is alive."""
     logger.debug("GET /health/live called")
-    return ResponseHealthLiveness(status="UP")
+    return ResponseHealthLiveness(
+        status="UP",
+        timestamp=datetime.now(timezone(settings.tz_info)).strftime("%Y-%m-%dT%H:%M:%S%z"),
+    )
 
 
-@router.get("/ready", status_code=status.HTTP_200_OK)
+@router.get(
+    "/ready",
+    status_code=status.HTTP_200_OK,
+)
 def app_readiness(response: Response) -> ResponseHealthReadiness:
-    """Return the availability status of the application dependencies."""
+    """Return the availability status of the application components."""
     logger.debug("GET /health/ready called")
     components: dict[str, str] = {}
 
@@ -37,7 +46,7 @@ def app_readiness(response: Response) -> ResponseHealthReadiness:
         components["database"] = "UP"
 
     try:
-        get_redis_handler().client.ping()
+        get_redis_handler(settings.broker_redis_url).client.ping()
     except Exception as err:  # noqa: BLE001
         logger.error(f"Redis readiness check failed: {err!s}")
         components["redis"] = "DOWN"

@@ -1,3 +1,4 @@
+import re
 from datetime import UTC, datetime
 
 import pytest
@@ -52,6 +53,56 @@ def test_latest_results_formats_created_at(client: TestClient, monkeypatch: pyte
 
     assert response.status_code == 200
     assert f"a minute ago ({created_at_formatted})" in response.text
+
+
+def test_worker_status_renders_all_components(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Tests the combined worker endpoint renders all page components."""
+    defined_at = datetime(2026, 9, 7, 13, tzinfo=UTC)
+    scheduled_at = datetime(2026, 9, 7, 14, tzinfo=UTC)
+    monkeypatch.setattr(
+        "jobsies.api.web.components.worker.SchedulingService.define_next_jobsies",
+        lambda _service, _lookahead: {1: [defined_at, scheduled_at]},
+    )
+    monkeypatch.setattr(
+        "jobsies.api.web.components.worker.get_redis_handler",
+        lambda _url: type(
+            "RedisHandlerStub",
+            (),
+            {
+                "get_scheduled_tasks": lambda _self, **_kwargs: {1: [scheduled_at]},
+                "client_status": lambda _self: {
+                    "version": "8.0.0",
+                    "alive": True,
+                    "uptime": 60,
+                    "memory_usage": "1M",
+                },
+            },
+        )(),
+    )
+    monkeypatch.setattr(
+        "jobsies.api.web.components.worker.celery_app_status",
+        lambda: {"alive": True, "uptime": 120},
+    )
+    monkeypatch.setattr(
+        "jobsies.api.web.components.worker.OutputService.get_exception_counts",
+        lambda _service: [{"id": 1, "name": "ExampleJobsie", "exceptions": 3}],
+    )
+
+    response = client.get("/worker/status")
+
+    assert response.status_code == 200
+    assert 'id="worker-next-tasks"' in response.text
+    assert 'id="worker-app-status"' in response.text
+    assert 'id="worker-exceptions"' in response.text
+    assert 'id="status-bar"' in response.text
+    assert "Defined" in response.text
+    assert "Acknowledged" in response.text
+    assert response.text.count("Initial Test Config") == 2
+    assert "ExampleJobsie" in response.text
+    assert re.search(r">\s*3\s*<", response.text)
 
 
 def test_definitions_page_full_load(client: TestClient) -> None:

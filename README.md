@@ -1,5 +1,7 @@
 🛠️ Jobsies is a self-hosted tool designed to automatically run simple jobs on the internet; scrape price of a product you are interested in, monitor websites for new events, or anything you are willing to program yourself.
 
+Features:
+
 # Quickstart
 
 To run the project locally, docker installation is assumed. The project can be run fully locally without it, but you need to supply redis instance and include it in `.env` file. Project is mainly controlled via the included `Makefile`, run

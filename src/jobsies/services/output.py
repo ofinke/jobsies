@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import func
 from sqlmodel import select
 
@@ -28,3 +30,22 @@ class OutputService:
             .order_by(TableJobsiesOutputs.jobsie_id)
         )
         return self.db.load(TableJobsiesOutputs, statement=stmt)
+
+    def get_exception_counts(self) -> list[dict[str, int | str]]:
+        """Return the number of failed executions for each jobsie in the last 24 hours."""
+        since = datetime.now(UTC) - timedelta(hours=24)
+        stmt = select(TableJobsiesOutputs).where(
+            TableJobsiesOutputs.success.is_(False),
+            TableJobsiesOutputs.created_at >= since,
+        )
+        outputs = self.db.load(TableJobsiesOutputs, statement=stmt)
+        counts: dict[int, dict[str, int | str]] = {}
+        for output in outputs:
+            if output.jobsie_id not in counts:
+                counts[output.jobsie_id] = {
+                    "id": output.jobsie_id,
+                    "name": output.jobsie_name,
+                    "exceptions": 0,
+                }
+            counts[output.jobsie_id]["exceptions"] = int(counts[output.jobsie_id]["exceptions"]) + 1
+        return sorted(counts.values(), key=lambda row: int(row["id"]))

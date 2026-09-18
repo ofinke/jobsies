@@ -1,4 +1,4 @@
-<div id="worker-next-tasks">
+<div id="worker-next-tasks" hx-swap-oob="outerHTML">
   <div class="table-wrapper">
     <table class="table-def">
       <thead>
@@ -6,6 +6,7 @@
           <th>Jobsie</th>
           <th>Name</th>
           <th>Next execution</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -14,10 +15,15 @@
           <td>{{ task.id }}</td>
           <td>{{ task.name }}</td>
           <td>{{ task.scheduled_at }}</td>
+          <td>
+            <span class="badge {{ 'badge-success' if task.status == 'Acknowledged' else 'badge-neutral' }}">
+              {{ task.status }}
+            </span>
+          </td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="3" class="text-center">No tasks scheduled in the next 24 hours.</td>
+          <td colspan="4" class="text-center">No tasks scheduled in the next 24 hours.</td>
         </tr>
         {% endfor %}
       </tbody>

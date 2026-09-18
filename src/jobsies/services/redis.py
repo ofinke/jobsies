@@ -1,7 +1,14 @@
+import base64
 import functools
+import json
+from datetime import datetime
 from typing import Any
 
 import redis
+
+from jobsies.config import get_config
+
+config = get_config()
 
 
 class RedisHandler:
@@ -20,19 +27,43 @@ class RedisHandler:
         return bool(self.client.set(lock_key, "enqueued", nx=True, ex=lock_timeout))
 
     def client_status(self) -> dict[str, Any]:
-        """Return status containing liveness, memory usage and number of tasks in queue."""
+        """Return Redis liveness and broker diagnostics."""
         try:
             alive = bool(self.client.ping())
         except redis.RedisError:
-            return {"alive": False, "memory_usage": "Unavailable", "tasks_in_queue": 0}
+            return {
+                "alive": False,
+                "memory_usage": "Unavailable",
+                "version": "Unavailable",
+                "uptime": "Unavailable",
+            }
 
-        memory_info = self.client.info("memory")
+        info = self.client.info()
+
         return {
             "alive": alive,
-            "memory_usage": memory_info.get("used_memory_human", "Unavailable"),
-            "tasks_in_queue": self.client.llen("celery"),
+            "memory_usage": info.get("used_memory_human", "Unavailable"),
+            "version": info.get("redis_version", "Unavailable"),
+            "uptime": info.get("uptime_in_seconds", "Unavailable"),
         }
 
+    def get_scheduled_tasks(self, limit: int | None = None) -> dict[int, list[datetime]]:
+        """Return scheduled dynamic jobsies currently held by Celery."""
+        scheduled_tasks: dict[int, list[datetime]] = {}
+
+        for raw_entry in list(self.client.hgetall("unacked").values())[:limit]:
+            try:
+                message, _, _ = json.loads(raw_entry)
+                body = base64.b64decode(message["body"])
+                decoded_body = json.loads(body)
+                jobsie_id = int(decoded_body[0][0])
+                eta = datetime.fromisoformat(message["headers"]["eta"])
+            except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError, base64.binascii.Error):
+                continue
+
+            scheduled_tasks.setdefault(jobsie_id, []).append(eta)
+
+        return scheduled_tasks
 
 @functools.cache
 def get_redis_handler(url: str) -> RedisHandler:

@@ -10,7 +10,7 @@
   - [X] v0.2.3 - Testing for celery worker 
   - [X] v0.2.4 - Testing suite for the fastapi and Jobsie for scraping airpline ticket prices from google flights
   - [X] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
-  - [ ] v0.2.6 - Page for monitoring celery worker and jobsies scheduling (look at /sibson/redbeat as a celery scheduler) and mobile friendly UI
+  - [X] v0.2.6 - Page for monitoring celery worker and jobsies scheduling (look at /sibson/redbeat as a celery scheduler) and mobile friendly UI
 - [ ] v0.3.0 - Reusable services, generic configuration template for credentials, jobsies as a plugin system, monitoring results as charts, and db population on first start as part of entrypoint.sh script
   - [ ] v O.3.1 - cleanup of the project and figuring out what next
 

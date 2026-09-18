@@ -71,7 +71,27 @@
   padding: 0.5rem 0.75rem;
 }
 
-#worker-redis-status .table-def {
+#worker-app-status .table-def {
   width: auto;
   box-shadow: none;
+}
+
+.worker-app-status-tables {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.worker-app-status-tables .table-wrapper {
+  width: fit-content;
+  max-width: 100%;
+}
+
+#worker-app-status .badge {
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  line-height: inherit;
+  background-color: transparent;
+  border-radius: 0;
 }

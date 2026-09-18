@@ -38,6 +38,13 @@
   margin-bottom: 1rem;
 }
 
+.footnote {
+  margin-top: 1rem;
+  color: var(--text-subtle);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
 .text-content ul,
 .text-content ol {
   margin: 0 0 1rem 1.5rem;

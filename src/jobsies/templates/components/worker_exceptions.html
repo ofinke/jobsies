@@ -1,0 +1,30 @@
+<div id="worker-exceptions" hx-swap-oob="outerHTML">
+  <div class="table-wrapper">
+    <table class="table-def">
+      <thead>
+        <tr>
+          <th>Jobsie</th>
+          <th>Name</th>
+          <th>Exceptions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for jobsie in exceptions %}
+        <tr>
+          <td>{{ jobsie.id }}</td>
+          <td>{{ jobsie.name }}</td>
+          <td>
+            <span class="badge badge-danger">
+              {{ jobsie.exceptions }}
+            </span>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" class="text-center">No exceptions in the last 24 hours.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

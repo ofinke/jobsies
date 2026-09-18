@@ -1,3 +1,5 @@
+from typing import Any
+
 from celery import Celery
 from loguru import logger
 
@@ -22,14 +24,32 @@ app.conf.task_time_limit = 360
 app.conf.task_ignore_result = True
 app.conf.worker_concurrency = 2
 app.conf.redbeat_redis_url = settings.redbeat_redis_url
+app.conf.task_default_queue = config.task_queue_name
+app.conf.worker_prefetch_multiplier = 0
 
 # Scheduler for cron jobs
 app.conf.beat_schedule = {
     "schedule-upcoming-jobsies": {
         "task": "task.schedule_upcoming_jobsies",
-        "schedule": config.scheduler_lookahead,
+        "schedule": config.scheduler_interval,
     },
 }
+
+
+def celery_app_status() -> dict[str, Any]:
+    """Return the status and uptime of the Celery worker."""
+    status = {"alive": False, "uptime": "Unavailable"}
+    try:
+        stats = app.control.inspect(timeout=0.1).stats() or {}
+        if not stats:
+            return status
+        worker_key = next(iter(stats))
+        uptime = stats[worker_key].get("uptime", "Unavailable")
+    except Exception:  # noqa: BLE001
+        return status
+
+    status.update(alive=True, uptime=uptime)
+    return status
 
 
 # Celery worker tasks

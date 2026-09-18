@@ -60,6 +60,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "radon>=6.0.1",
     "ruff>=0.16.1",
+    "wrapture>=1.0.0a22",
 ]
 notebooks = [
     "ipykernel>=7.3.0",

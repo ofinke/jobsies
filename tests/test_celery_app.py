@@ -2,7 +2,14 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from jobsies.celery_app import config, schedule_upcoming_jobsies, settings, wrapper_run_dynamic_jobsie
+from jobsies.celery_app import (
+    app,
+    # celery_app_status,
+    config,
+    schedule_upcoming_jobsies,
+    settings,
+    wrapper_run_dynamic_jobsie,
+)
 
 
 @patch("jobsies.celery_app.RunnerService")
@@ -20,6 +27,51 @@ def test_wrapper_run_dynamic_jobsie_delegates_to_runner(
     assert args == (42,)
     assert kwargs["execution_metadata"]["execution_method"] == "celery"
     assert "execution_id" in kwargs["execution_metadata"]
+
+
+def test_celery_uses_configured_task_queue() -> None:
+    """Tests that Celery uses the queue configured for Redis inspection."""
+    assert app.conf.task_default_queue == config.task_queue_name
+
+
+# @patch("jobsies.celery_app.app")
+# def test_celery_status_returns_worker_metrics(mock_app: MagicMock) -> None:
+#     """Test Celery status normalizes worker metrics without task payloads."""
+#     inspector = mock_app.control.inspect.return_value
+#     inspector.stats.return_value = {
+#         "celery@worker": {"pid": 42, "uptime": 600, "pool": {"max-concurrency": 2}},
+#     }
+
+#     status = celery_app_status()
+
+#     assert status == {
+#         "alive": True,
+#         "worker_count": 1,
+#         "workers": [
+#             {
+#                 "hostname": "celery@worker",
+#                 "alive": True,
+#                 "concurrency": 2,
+#                 "active_tasks": "Unavailable",
+#                 "reserved_tasks": "Unavailable",
+#                 "scheduled_tasks": "Unavailable",
+#                 "uptime": 600,
+#                 "pid": 42,
+#             },
+#         ],
+#     }
+#     mock_app.control.inspect.assert_called_once_with(timeout=0.1)
+#     inspector.stats.assert_called_once_with()
+
+
+# @patch("jobsies.celery_app.app")
+# def test_celery_status_reports_unavailable_when_inspection_fails(mock_app: MagicMock) -> None:
+#     """Test failed Celery inspection produces a safe unavailable status."""
+#     mock_app.control.inspect.side_effect = RuntimeError("worker unavailable")
+
+#     status = celery_app_status()
+
+#     assert status == {"alive": False, "worker_count": 0, "workers": []}
 
 
 @patch("jobsies.celery_app.SchedulingService")

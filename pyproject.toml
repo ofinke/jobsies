@@ -1,8 +1,10 @@
 [project]
 name = "jobsies"
 version = "0.2.6"
-description = "Run small jobs automatically on your home server"
+description = "Task automation application"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = [
     "celery-redbeat>=2.4.2",

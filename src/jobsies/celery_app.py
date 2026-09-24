@@ -26,9 +26,9 @@ app.conf.task_default_queue = "celery"
 app.conf.worker_prefetch_multiplier = 0
 app.conf.task_ignore_result = True
 # configurable
-app.conf.task_soft_time_limit = 300
-app.conf.task_time_limit = 360
-app.conf.worker_concurrency = 2
+app.conf.task_soft_time_limit = config.task_soft_time_limit
+app.conf.task_time_limit = config.task_time_limit
+app.conf.worker_concurrency = config.worker_concurrency
 
 # Scheduler for cron jobs
 app.conf.beat_schedule = {
@@ -75,6 +75,7 @@ def wrapper_run_dynamic_jobsie(self, jobsie_id: int) -> None:  # noqa: ANN001
 def schedule_upcoming_jobsies() -> None:
     """Schedules upcoming jobsies based on configuration using SchedulingService."""
     # inti services
+    config = get_config_by_name("app-config")
     scheduler = SchedulingService()
     redis = get_redis_handler(settings.broker_redis_url)
 

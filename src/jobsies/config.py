@@ -20,16 +20,8 @@ class ConfigRegistry:
         for stored_configuration in get_db_handler().load(TableSharedConfigurations):
             configuration = TableSharedConfigurations.model_validate(stored_configuration)
             config_model = next(
-                (
-                    subclass
-                    for subclass in BaseConfig.__subclasses__()
-                    if subclass.__name__ == configuration.config_model
-                ),
-                None,
+                subclass for subclass in BaseConfig.__subclasses__() if subclass.__name__ == configuration.config_model
             )
-            if config_model is None:
-                msg = f"Configuration model must be a BaseConfig subclass: {configuration.config_model}"
-                raise TypeError(msg)
 
             self.registry[configuration.name] = config_model.model_validate(configuration.config)
 

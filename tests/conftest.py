@@ -13,6 +13,8 @@ from sqlmodel import Session, SQLModel, create_engine
 _get_config_by_name = jobsies_config.get_config_by_name
 
 
+# NOTE: celery_app loads "app-config" during test collection, before DB fixtures can run.
+# This is a workaround, fixture made at home.
 def _get_config_by_name_with_app_default(name: str) -> BaseConfig:
     """Return the default app configuration for tests when it is not seeded."""
     if name == "app-config":

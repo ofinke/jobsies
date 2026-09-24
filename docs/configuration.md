@@ -1,18 +1,15 @@
 # Overview
 
-In Jobsies, different configurations are implemented as a database stored entities. In configs, we store credentials, and other parameters which doesn't need to update very often. Each service, jobsie or other components requirung configuration has it defined as pydantic model. Set values are then stored in the `shared_configurations` table. Configurations are stored under unique names.
+In Jobsies, configurations are implemented as entities stored in the database. Configurations store credentials and other parameters that don't need to be updated very often.
 
 ## Architecture
 
-- Each configuration is stored as row in the `TableSharedConfigurations` table under a unique name and ID
-    - values of the configuration are stored as a JSON
-- In the application, all configurations are accessible through singleton instance of `ConfigRegistry`
+- Configs are defined as pydantic models derived from `BaseConfig` class
+- Each configuration is stored as a row in the `TableSharedConfigurations` table under a unique name and ID
+    - Configuration values are stored as JSON in the `config` column.
+- In the application, all configurations are accessible through a singleton instance of `ConfigRegistry` and retrieved by the `get_config_by_name` function
     - Configurations are loaded and cached at the start of the application
-    - Cache is cleared when any update, through application interface, is done to any configurations
-    - Some configuration changes require application restart
-- 
-
-
-
-Mutable / unmutable configuration
-- Idea is, that this is configuration for some app part, celery, fastapi, or something similar. Something which would require application restart to work and has some default values defined in the application. Should be user able to modify this? Or should ve define it with different flag? Is the flag even necessary?
+    - The cache is cleared whenever a configuration is updated through the application interface
+    - Some configuration changes require an application restart
+    - Retrieved configurations are validated by their models and returned as instances of those models
+    - The main application configuration is stored under the name `app-config`

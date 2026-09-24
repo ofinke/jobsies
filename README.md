@@ -61,4 +61,4 @@ Goal is to develop dockerized system consisting of celery worker for processing 
 
 # AI Contribution
 
-This project was co-developed with [opencode](https://opencode.ai/) using various models, mostly GPT-5.6-Luna, DeepSeek v4 Flash, and Gemini-3.7-Flash. Contribution via PRs are welcomed, however fully AI generated and automated PRs will be rejected.
+This project was co-developed with [opencode](https://opencode.ai/) using various models, mostly GPT-5.6-Luna, DeepSeek v4 Flash, and Gemini-3.7-Flash.

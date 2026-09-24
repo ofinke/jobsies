@@ -1,43 +1,45 @@
 import functools
-from importlib.metadata import version
 
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
-
-
-class Config(BaseModel):
-    """Application configuration."""
-
-    app_version: str = Field(
-        default=version("jobsies"),
-        description="Application version extracted from the pyproject",
-    )
-    scheduler_lookahead: int = Field(
-        default=900,
-        description="How often the worker schedules tasks ahead",
-    )
-    scheduler_interval: int = Field(
-            default=450,
-            description="How often the scheduler runs",
-        )
-    task_queue_name: str = Field(
-        default="celery",
-        description="Redis queue used by Celery tasks",
-    )
-    templates_location: str = Field(
-        default="src/jobsies/templates",
-        description="Location of Jinja templates",
-    )
+from jobsies.database import get_db_handler
+from jobsies.schemas.config import BaseConfig
+from jobsies.schemas.tables import TableSharedConfigurations
 
 
-@functools.cache
-def get_config() -> Config:
-    """Retruns cached application configuration."""
-    return Config()
+class ConfigRegistry:
+    """Registry of reusable configurations used accross the application."""
+
+    def __init__(self) -> None:
+        """On initialization, loads all available configurations from database and stores them in internal registry."""
+        self.store_and_validate()
+
+    def store_and_validate(self) -> None:
+        """Loads configuration from database, validates it with appropriate models and stores it in the registry."""
+        # Clear existing registry
+        self.registry: dict[str, BaseConfig] = {}
+
+        for stored_configuration in get_db_handler().load(TableSharedConfigurations):
+            configuration = TableSharedConfigurations.model_validate(stored_configuration)
+            config_model = next(
+                subclass for subclass in BaseConfig.__subclasses__() if subclass.__name__ == configuration.config_model
+            )
+
+            self.registry[configuration.name] = config_model.model_validate(configuration.config)
+
+    def get(self, name: str) -> BaseConfig:
+        """Retrieve configuration by its name."""
+        try:
+            return self.registry[name]
+        except KeyError:
+            msg = f"Configuration not found: {name}"
+            raise KeyError(msg) from None
 
 
 @functools.cache
-def get_templates() -> Jinja2Templates:
-    templates = Jinja2Templates(directory=get_config().templates_location)
-    templates.env.globals["app_version"] = get_config().app_version
-    return templates
+def get_config_registry() -> ConfigRegistry:
+    """Singleton of the configuration registy."""
+    return ConfigRegistry()
+
+
+def get_config_by_name(name: str) -> BaseConfig:
+    """Function for retrieving named configuration."""
+    return get_config_registry().get(name)

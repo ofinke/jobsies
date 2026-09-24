@@ -1,0 +1,13 @@
+[
+    {
+        "name": "app-config",
+        "config_model": "AppConfig",
+        "config": {
+            "scheduler_lookahead": 900,
+            "scheduler_interval": 450,
+            "task_soft_time_limit": 300,
+            "task_time_limit": 360,
+            "worker_concurrency": 2
+        }
+    }
+]

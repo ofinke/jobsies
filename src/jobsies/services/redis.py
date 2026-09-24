@@ -6,10 +6,6 @@ from typing import Any
 
 import redis
 
-from jobsies.config import get_config
-
-config = get_config()
-
 
 class RedisHandler:
     """
@@ -64,6 +60,7 @@ class RedisHandler:
             scheduled_tasks.setdefault(jobsie_id, []).append(eta)
 
         return scheduled_tasks
+
 
 @functools.cache
 def get_redis_handler(url: str) -> RedisHandler:

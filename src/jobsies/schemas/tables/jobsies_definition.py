@@ -9,6 +9,8 @@ from .base import TableDefaultModel
 
 
 class TableJobsiesDefinition(TableDefaultModel, table=True):
+    """Table for defining jobsies."""
+
     __tablename__ = "definitions_jobsies"
 
     name: str = Field(

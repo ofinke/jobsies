@@ -20,6 +20,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Copy the application source and install the project itself
 COPY pyproject.toml uv.lock README.md ./
 COPY docs ./docs
+COPY configs ./configs
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 

@@ -1,3 +1,5 @@
+from importlib.metadata import version
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -9,9 +11,9 @@ from jobsies.api.web import (
     web_pages_router,
     worker_component_router,
 )
-from jobsies.config import get_config
+from jobsies.settings import get_settings
 
-config = get_config()
+settings = get_settings()
 
 tags_metadata = [
     {
@@ -26,12 +28,12 @@ tags_metadata = [
 
 app = FastAPI(
     title="Jobsies",
-    version=config.app_version,
+    version=version("jobsies"),
     docs_url="/docs",
     openapi_tags=tags_metadata,
 )
 
-app.mount("/static", StaticFiles(directory="src/jobsies/static"), name="static")
+app.mount("/static", StaticFiles(directory=settings.static_location), name="static")
 
 app.include_router(health_router)
 

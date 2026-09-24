@@ -8,10 +8,9 @@ from pydantic import ValidationError
 from pytz import timezone
 
 from jobsies.celery_app import wrapper_run_dynamic_jobsie
-from jobsies.config import get_templates
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.services import DefinitionService
-from jobsies.settings import get_settings
+from jobsies.settings import get_settings, get_templates
 
 # Static values
 router = APIRouter(prefix="/definition", tags=["Web Components"])

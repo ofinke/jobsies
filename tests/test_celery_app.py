@@ -29,11 +29,6 @@ def test_wrapper_run_dynamic_jobsie_delegates_to_runner(
     assert "execution_id" in kwargs["execution_metadata"]
 
 
-def test_celery_uses_configured_task_queue() -> None:
-    """Tests that Celery uses the queue configured for Redis inspection."""
-    assert app.conf.task_default_queue == config.task_queue_name
-
-
 # @patch("jobsies.celery_app.app")
 # def test_celery_status_returns_worker_metrics(mock_app: MagicMock) -> None:
 #     """Test Celery status normalizes worker metrics without task payloads."""

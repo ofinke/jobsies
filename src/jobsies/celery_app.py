@@ -3,12 +3,12 @@ from typing import Any
 from celery import Celery
 from loguru import logger
 
-from jobsies.config import get_config
+from jobsies.config import get_config_by_name
 from jobsies.services import RunnerService, SchedulingService, get_redis_handler
 from jobsies.settings import get_settings
 
 settings = get_settings()
-config = get_config()
+config = get_config_by_name("app-config")
 
 # Celery worker definition
 app = Celery(
@@ -18,14 +18,17 @@ app = Celery(
 )
 
 # Celery worker configuration
+# Static from env
 app.conf.timezone = settings.tz_info
+app.conf.redbeat_redis_url = settings.redbeat_redis_url
+# hardcoded
+app.conf.task_default_queue = "celery"
+app.conf.worker_prefetch_multiplier = 0
+app.conf.task_ignore_result = True
+# configurable
 app.conf.task_soft_time_limit = 300
 app.conf.task_time_limit = 360
-app.conf.task_ignore_result = True
 app.conf.worker_concurrency = 2
-app.conf.redbeat_redis_url = settings.redbeat_redis_url
-app.conf.task_default_queue = config.task_queue_name
-app.conf.worker_prefetch_multiplier = 0
 
 # Scheduler for cron jobs
 app.conf.beat_schedule = {

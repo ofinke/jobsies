@@ -9,9 +9,8 @@ from loguru import logger
 from pytz import timezone
 
 from jobsies.celery_app import celery_app_status
-from jobsies.config import get_templates
 from jobsies.services import OutputService, SchedulingService, get_redis_handler
-from jobsies.settings import get_settings
+from jobsies.settings import get_settings, get_templates
 
 router = APIRouter(prefix="/worker", tags=["Web Components"])
 templates = get_templates()

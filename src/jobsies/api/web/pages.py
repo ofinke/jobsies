@@ -8,7 +8,7 @@ from loguru import logger
 from mistune import create_markdown
 from starlette.requests import Request
 
-from jobsies.config import get_templates
+from jobsies.settings import get_templates
 
 router = APIRouter(tags=["Web Pages"])
 templates = get_templates()

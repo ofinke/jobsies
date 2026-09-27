@@ -105,7 +105,7 @@ def test_create_definition_stores_and_retrieves_definition() -> None:
     assert fetched.input_kwargs == {"url": "https://example.com"}
     assert fetched.output_monitoring == {}
     assert fetched.enabled is True
-    assert fetched.output_vars == ExampleJobsie.output_schema.model_json_schema()
+    assert fetched.output_vars == ExampleJobsie.output_schema().model_json_schema()
 
     listed = service.list_definitions()
     assert len(listed) == 1
@@ -138,7 +138,7 @@ def test_update_definition_updates_fields() -> None:
     assert updated.input_kwargs == {"url": "https://zalando.cz"}
     assert updated.output_monitoring == {"price_czk": True}
     assert updated.enabled is True
-    assert updated.output_vars == ZalandoJobsie.output_schema.model_json_schema()
+    assert updated.output_vars == ZalandoJobsie.output_schema().model_json_schema()
     assert updated.created_at == before.created_at
     assert len(service.list_definitions()) == 1
 

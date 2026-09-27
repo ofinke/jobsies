@@ -5,7 +5,7 @@ from loguru import logger
 from sqlalchemy.sql import Select
 
 from jobsies.database import get_db_handler
-from jobsies.jobs import get_jobsie_class
+from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.runner import RunnerExecutionMetadata
 from jobsies.schemas.tables import TableJobsiesDefinition, TableJobsiesOutputs
 
@@ -71,7 +71,7 @@ class RunnerService:
         try:
             # selects correct class to execute
             jobsie_config = self._get_jobsie_configuration(jobsie_id)
-            cls = get_jobsie_class(jobsie_config.subclass_name)
+            cls = get_jobsie_registry().get(jobsie_config.subclass_name)
             instance = cls(**jobsie_config.input_kwargs)
 
             # executes the jobsie

@@ -1,8 +1,10 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class BaseJobsieOutput(BaseModel):
     """Base model class for all Jobsies outputs."""
+
+    model_config = ConfigDict(extra="ignore")
 
     @model_validator(mode="after")
     def validate_json_serializable(self) -> "BaseJobsieOutput":
@@ -12,3 +14,5 @@ class BaseJobsieOutput(BaseModel):
 
 class BaseJobsieInput(BaseModel):
     """Base model for all Jobsies inputs."""
+
+    model_config = ConfigDict(extra="ignore")

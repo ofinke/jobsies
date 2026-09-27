@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 
 from jobsies.database import get_db_handler
-from jobsies.jobs.base import BaseJobsie
+from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.tables import TableJobsiesDefinition
 
 DEFAULT_DATA_PATH = Path(__file__).resolve().parents[3] / "data" / "default_jobsies_configs.json"
@@ -13,9 +13,8 @@ DATA_DIR = DEFAULT_DATA_PATH.parent
 
 def _get_output_schema_for_subclass(subclass_name: str) -> dict:
     """Retrieve output schema from the matching BaseJobsie subclass."""
-    cls = BaseJobsie.__subclasses__()
-    mapping = {c.__name__: c for c in cls}
-    return mapping[subclass_name].output_schema.model_json_schema()
+    cls = get_jobsie_registry().get(subclass_name)
+    return cls.output_schema().model_json_schema()
 
 
 @click.command()

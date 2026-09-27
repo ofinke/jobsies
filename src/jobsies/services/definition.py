@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy.sql import Select
 
 from jobsies.database import DatabaseHandler, get_db_handler
-from jobsies.jobs import BaseJobsie, get_jobsie_class
+from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.tables import TableJobsiesDefinition
 
@@ -47,16 +47,19 @@ class DefinitionService:
 
     def list_jobsie_types(self) -> list[str]:
         """Retrieve names of all BaseJobsie subclasses."""
-        return [cls.__name__ for cls in BaseJobsie.__subclasses__()]
+        return list(get_jobsie_registry().registry)
 
     def get_output_schema(self, subclass_name: str) -> dict:
         """Retrieve output schema from the matching BaseJobsie subclass."""
-        cls = get_jobsie_class(subclass_name)
-        return cls.output_schema.model_json_schema()
+        cls = get_jobsie_registry().get(subclass_name)
+        return cls.output_schema().model_json_schema()
 
     def get_input_examples(self) -> dict[str, dict]:
         """Retrieve example input values for all Jobsie subclasses."""
-        return {cls.__name__: _build_example(cls.input_schema) for cls in BaseJobsie.__subclasses__()}
+        return {
+            name: _build_example(cls.input_schema())
+            for name, cls in get_jobsie_registry().registry.items()
+        }
 
     def list_definitions(self) -> list[TableJobsiesDefinition]:
         """Retrieve all jobsie definitions."""

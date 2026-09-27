@@ -6,21 +6,20 @@ from starlette.responses import HTMLResponse
 
 
 @pytest.mark.parametrize(
-    ("path", "template_name", "active_page"),
+    ("path", "expected"),
     [
-        ("/", "results.html", "results"),
-        ("/definition", "definition.html", "definitions"),
-        ("/worker", "worker.html", "worker"),
-        ("/trends", "trends.html", "trends"),
-        ("/about", "about.html", "about"),
+        ("/", ("results.html", "results", None)),
+        ("/definition", ("definition.html", "definitions", None)),
+        ("/worker", ("worker.html", "worker", None)),
+        ("/trends", ("trends.html", "trends", None)),
+        ("/documentation", ("documentation.html", "documentation", "about")),
     ],
 )
 def test_page_endpoint_renders_expected_template_and_active_page(
     client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
     path: str,
-    template_name: str,
-    active_page: str,
+    expected: tuple[str, str, str | None],
 ) -> None:
     """Test each page route selects its template and active navigation page."""
     rendered: list[tuple[Request, str, dict[str, object]]] = []
@@ -30,18 +29,20 @@ def test_page_endpoint_renders_expected_template_and_active_page(
         return HTMLResponse("rendered page")
 
     monkeypatch.setattr(pages.templates, "TemplateResponse", render_template)
-    monkeypatch.setattr(pages, "_load_about_docs", lambda: "about content")
 
     response = client.get(path)
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
     assert len(rendered) == 1
-    assert rendered[0][1] == template_name
-    assert rendered[0][2]["active_page"] == active_page
+    assert rendered[0][1] == expected[0]
+    assert rendered[0][2]["active_page"] == expected[1]
+
+    if expected[2] is not None:
+        assert rendered[0][2]["selected_documentation_page"] == expected[2]
 
 
-@pytest.mark.parametrize("path", ["/missing"])
+@pytest.mark.parametrize("path", ["/missing", "/documentation?page=missing"])
 def test_page_endpoints_reject_unknown_page_paths(client: TestClient, path: str) -> None:
     """Test page routes do not silently accept unknown or trailing-slash paths."""
     response = client.get(path)

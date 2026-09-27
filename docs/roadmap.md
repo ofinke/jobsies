@@ -1,6 +1,4 @@
-# Roadmap
-
- The development roughly follows this path
+The development roughly follows this path
 
 - [X] v0.1.0 - Celery worker with sqlite storage
 - [X] v0.1.1 - Simple containerization for deployment

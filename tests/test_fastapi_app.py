@@ -41,9 +41,9 @@ def test_all_router_routes_are_included(router: APIRouter) -> None:
 
 def test_docs_url_is_configured(client: TestClient) -> None:
     """Verify that the configured docs URL is available at /docs."""
-    assert app.docs_url == "/docs"
+    assert app.docs_url == "/swagger"
 
-    response = client.get("/docs")
+    response = client.get("/swagger")
 
     assert response.status_code == 200
     assert "Swagger UI" in response.text

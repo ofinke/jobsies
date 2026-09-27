@@ -34,15 +34,19 @@ class Settings(BaseSettings):
         description="Timezone definition",
     )
 
-    # varibles below are not suppose to change. It will break the app
-    # but hey, if you want to, be my guest
-    templates_location: str = Field(
+    # Varibles below are not suppose to change. It will break the app
+    # but hey, if you want to, be my guest. Distinguished by _ after name
+    templates_location_: str = Field(
         default="src/jobsies/templates",
         description="Location of Jinja templates",
     )
-    static_location: str = Field(
+    static_location_: str = Field(
         default="src/jobsies/static",
         description="Location of static files",
+    )
+    docs_location_: str = Field(
+        default="",
+        description="Location of markdown documentation files",
     )
 
     @field_validator("tz_info")
@@ -63,6 +67,6 @@ def get_settings() -> Settings:
 
 @functools.cache
 def get_templates() -> Jinja2Templates:
-    templates = Jinja2Templates(directory=get_settings().templates_location)
+    templates = Jinja2Templates(directory=get_settings().templates_location_)
     templates.env.globals["app_version"] = version("jobsies")
     return templates

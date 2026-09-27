@@ -7,6 +7,7 @@ from jobsies.api.health import router as health_router
 from jobsies.api.v1 import jobsies_definition_router, jobsies_execution_router, jobsies_output_router
 from jobsies.api.web import (
     definition_component_router,
+    documentation_component_router,
     results_component_router,
     web_pages_router,
     worker_component_router,
@@ -29,11 +30,11 @@ tags_metadata = [
 app = FastAPI(
     title="Jobsies",
     version=version("jobsies"),
-    docs_url="/docs",
+    docs_url="/swagger",
     openapi_tags=tags_metadata,
 )
 
-app.mount("/static", StaticFiles(directory=settings.static_location), name="static")
+app.mount("/static", StaticFiles(directory=settings.static_location_), name="static")
 
 app.include_router(health_router)
 
@@ -43,5 +44,6 @@ app.include_router(jobsies_execution_router)
 
 app.include_router(web_pages_router)
 app.include_router(definition_component_router)
+app.include_router(documentation_component_router)
 app.include_router(results_component_router)
 app.include_router(worker_component_router)

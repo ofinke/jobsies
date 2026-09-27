@@ -1,6 +1,6 @@
 /* Shared rich text content */
 .text-content {
-  max-width: 90ch;
+  max-width: 108ch;
   font-size: 1rem;
   line-height: 1.7;
 }
@@ -90,6 +90,45 @@
   padding-left: 1rem;
   border-left: 3px solid var(--content-border-subtle);
   color: var(--text-subtle);
+}
+
+.text-content table {
+  width: 100%;
+  margin: 1.25rem 0;
+  border-collapse: collapse;
+  background-color: var(--content-main-bg);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.text-content th,
+.text-content td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: normal;
+  word-break: normal;
+  border-bottom: 1px solid var(--content-border-subtle);
+}
+
+.text-content th {
+  background-color: var(--content-second-bg);
+  color: var(--text-main);
+  font-size: inherit;
+  font-weight: 600;
+}
+
+.text-content tbody td {
+  border-bottom: none;
+  background-color: var(--row);
+}
+
+.text-content tbody tr:hover td {
+  background-color: var(--row-hover);
+}
+
+.text-content tr:last-child td {
+  border-bottom: none;
 }
 
 /* Shared rich text content: mobile typography */

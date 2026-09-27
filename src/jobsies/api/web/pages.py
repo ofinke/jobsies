@@ -1,26 +1,13 @@
-import functools
-from pathlib import Path
-
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
-from justhtml import JustHTML
 from loguru import logger
-from mistune import create_markdown
 from starlette.requests import Request
 
+from jobsies.api.web.components.documentation import DOCUMENTATION_PAGES
 from jobsies.settings import get_templates
 
 router = APIRouter(tags=["Web Pages"])
 templates = get_templates()
-
-
-@functools.cache
-def _load_about_docs() -> str:
-    """Load the about page documentation and convert it to an HTML fragment."""
-    about_path = Path(__file__).resolve().parents[4] / "docs" / "about.md"
-    about_markdown = about_path.read_text(encoding="utf-8")
-    about_html = create_markdown()(about_markdown)
-    return JustHTML(about_html, fragment=True).to_html()
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -67,15 +54,19 @@ async def page_trends(request: Request) -> HTMLResponse:
     )
 
 
-@router.get("/about", response_class=HTMLResponse)
-async def page_about(request: Request) -> HTMLResponse:
-    """Render the jobsie about full page."""
-    logger.debug("GET about.html")
+@router.get("/documentation", response_class=HTMLResponse)
+async def page_documentation(request: Request, page: str = "about") -> HTMLResponse:
+    """Render the jobsie documentation full page."""
+    if page not in DOCUMENTATION_PAGES:
+        raise HTTPException(status_code=404, detail="Documentation page not found")
+
+    logger.debug("GET documentation.html")
     return templates.TemplateResponse(
         request=request,
-        name="about.html",
+        name="documentation.html",
         context={
-            "active_page": "about",
-            "about_content": _load_about_docs(),
+            "active_page": "documentation",
+            "documentation_pages": DOCUMENTATION_PAGES,
+            "selected_documentation_page": page,
         },
     )

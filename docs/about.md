@@ -24,4 +24,4 @@ The `Results` page shows latest results for each defined jobsie.
 
 ## Building jobsies
 
-Like the whole applications, Jobsies are written in Python and all are derived from a `BaseJobsie` class. 
+Like the whole applications, Jobsies are written in Python and all are derived from a `BaseJobsie` class.

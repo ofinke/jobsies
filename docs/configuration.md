@@ -1,5 +1,3 @@
-# Overview
-
 In Jobsies, configurations are implemented as entities stored in the database. Configurations store credentials and other parameters that don't need to be updated very often.
 
 ## Architecture

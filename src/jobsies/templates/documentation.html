@@ -1,0 +1,42 @@
+{% extends "menu.html" %}
+
+{% block title %}Jobsies - Documentation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Documentation</h1>
+        <p class="subtitle">Description of the application functionality and important how tos.</p>
+    </div>
+    <div class="actions">
+        {% for page_id, page in documentation_pages.items() %}
+        <button class="btn btn-sm btn-ghost btn-action"
+                hx-get="/documentation/content?page={{ page_id }}"
+                hx-target="#documentation-content"
+                hx-swap="outerHTML"
+                hx-push-url="/documentation?page={{ page_id }}"
+                title="{{ page.label }}"
+                aria-label="{{ page.label }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /></svg>
+            {{ page.label }}
+        </button>
+        {% endfor %}
+        <a class="btn btn-sm btn-ghost btn-action"
+           href="/swagger"
+           target="_blank"
+           rel="noopener noreferrer"
+           title="Swagger"
+           aria-label="Swagger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 13h5" /><path d="M12 16v-8h3a2 2 0 0 1 2 2v1a2 2 0 0 1 -2 2h-3" /><path d="M20 8v8" /><path d="M9 16v-5.5a2.5 2.5 0 0 0 -5 0v5.5" /></svg>
+            Swagger
+        </a>
+    </div>
+</div>
+<div id="documentation-content"
+     class="text-content"
+     hx-get="/documentation/content?page={{ selected_documentation_page }}"
+     hx-trigger="load"
+     hx-swap="outerHTML">
+    <p class="text-center">Loading documentation...</p>
+</div>
+{% endblock %}

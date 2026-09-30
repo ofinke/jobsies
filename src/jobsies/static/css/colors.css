@@ -39,8 +39,8 @@
   --negative-dim: #381e13;
   --positive-main: #95CC5E;
   --positive-dim: #23281e;
-  --warning-main: ;
-  --warning-dim: ;
+  --warning-main: #F8BB39;
+  --warning-dim: #382b13;
   --neutral-main: #b9b2a8;
   --neutral-dim: #302d29;
 
@@ -82,8 +82,8 @@
   --negative-dim: #FBE9E9;
   --positive-main: #065f46;
   --positive-dim: #D3EDE9;
-  --warning-main: ;
-  --warning-dim: ;
+  --warning-main: #92400e;
+  --warning-dim: #FEF3C7;
   --neutral-main: #59636e;
   --neutral-dim: #e5e7eb;
 }

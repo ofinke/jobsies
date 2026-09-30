@@ -46,7 +46,7 @@ def test_create_definition_success(client: TestClient) -> None:
         "retention": "30d",
         "input_kwargs": {"url": "https://zalando.cz/item", "size": "M"},
         "output_monitoring": {},
-        "enabled": True,
+        "status": "enabled",
     }
     response = client.post("/api/v1/jobsie/definition", json=payload)
     assert response.status_code == 201

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class JobsieDefinitionStatus(Enum):
+class JobsieDefinitionStatus(StrEnum):
     """
     Options for jobsie definition status.
 

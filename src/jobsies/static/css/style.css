@@ -186,6 +186,11 @@ body {
   color: var(--negative-main);
 }
 
+.badge-warning {
+  background-color: var(--warning-dim);
+  color: var(--warning-main);
+}
+
 .badge-neutral {
   background-color: var(--neutral-dim);
   color: var(--neutral-main);

@@ -84,7 +84,6 @@ async def definition_get_update_form(request: Request, definition_id: int) -> HT
 async def definition_create(request: Request) -> HTMLResponse:
     """Create a new jobsie definition via HTMX form submission."""
     form_data = await _extract_form_data(request)
-    form_data["enabled"] = "enabled" in form_data
     logger.debug(f"Received form data for definition creation: {form_data}")
 
     service = DefinitionService()
@@ -129,7 +128,6 @@ async def definintion_update(request: Request, definition_id: int) -> HTMLRespon
         raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
 
     form_data = await _extract_form_data(request)
-    form_data["enabled"] = "enabled" in form_data
     form_data.pop("subclass_name", None)
     logger.debug(f"Received form data for definition update: {form_data}")
 

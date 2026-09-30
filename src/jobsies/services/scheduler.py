@@ -6,6 +6,7 @@ from pytz import timezone
 from sqlmodel import select
 
 from jobsies.database import get_db_handler
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.settings import get_settings
 
@@ -27,7 +28,9 @@ class SchedulingService:
         """Returns a list of active jobsies configurations."""
         return self.db.load(
             TableJobsiesDefinition,
-            statement=select(TableJobsiesDefinition).where(TableJobsiesDefinition.enabled.is_(True)),
+            statement=select(TableJobsiesDefinition).where(
+                TableJobsiesDefinition.status == JobsieDefinitionStatus.ENABLED,
+            ),
         )
 
     def calculate_executions_in_window(self, cron_string: str, start_time: datetime, end_time: datetime) -> list:

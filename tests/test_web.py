@@ -150,7 +150,9 @@ def test_definitions_create_dialog_get(client: TestClient) -> None:
     assert "input_kwargs" in html
     assert 'name="cron"' in html
     assert 'name="retention"' in html
-    assert 'name="enabled"' in html
+    assert 'name="status"' in html
+    assert 'value="enabled"' in html
+    assert 'value="disabled"' in html
 
 
 def test_definitions_create_post_success(client: TestClient) -> None:
@@ -161,7 +163,7 @@ def test_definitions_create_post_success(client: TestClient) -> None:
         "cron": "*/5 * * * *",
         "retention": "7d",
         "input_kwargs": '{"test_key": "test_val"}',
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.post("/definition/create", data=form_data)
     assert response.status_code == 200
@@ -180,7 +182,7 @@ def test_definitions_create_post_invalid_json(client: TestClient) -> None:
         "cron": "*/5 * * * *",
         "retention": "0",
         "input_kwargs": "{invalid_json",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.post("/definition/create", data=form_data)
     assert response.status_code == 422
@@ -199,7 +201,7 @@ def test_definitions_create_post_invalid_cron(client: TestClient) -> None:
         "cron": "not-a-cron",
         "retention": "0",
         "input_kwargs": "{}",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.post("/definition/create", data=form_data)
     assert response.status_code == 422
@@ -216,7 +218,7 @@ def test_definitions_update_post_invalid_json(client: TestClient) -> None:
         "cron": "0 * * * *",
         "retention": "0",
         "input_kwargs": "{invalid_json_kwargs",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 422
@@ -234,7 +236,7 @@ def test_definitions_update_post_invalid_cron(client: TestClient) -> None:
         "cron": "not-a-valid-cron",
         "retention": "0",
         "input_kwargs": "{}",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 422
@@ -253,17 +255,18 @@ def test_definitions_update_dialog_get(client: TestClient) -> None:
     assert "<dialog" in html
     assert "Update Jobsie Definition" in html
     assert 'value="Initial Test Config"' in html
-    assert 'name="enabled"' in html
+    assert 'name="status"' in html
 
 
 def test_definitions_update_post_disable(client: TestClient) -> None:
-    """Tests PATCH /definition/{id} with unchecked enabled disables the definition."""
+    """Tests PATCH /definition/{id} with disabled status disables the definition."""
     form_data = {
         "name": "Updated Test Config",
         "subclass_name": "ExampleJobsie",
         "cron": "0 * * * *",
         "retention": "0",
         "input_kwargs": "{}",
+        "status": "disabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 200
@@ -273,14 +276,14 @@ def test_definitions_update_post_disable(client: TestClient) -> None:
 
 
 def test_definitions_update_post_enable(client: TestClient) -> None:
-    """Tests PATCH /definition/{id} with checked enabled enables the definition."""
+    """Tests PATCH /definition/{id} with enabled status enables the definition."""
     form_data = {
         "name": "Updated Test Config",
         "subclass_name": "ExampleJobsie",
         "cron": "0 * * * *",
         "retention": "0",
         "input_kwargs": "{}",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 200

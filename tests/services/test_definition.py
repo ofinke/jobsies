@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from jobsies.database import get_db_handler
 from jobsies.jobs import ExampleJobsie, ZalandoJobsie
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.schemas.tables.base import settings as base_settings
 from jobsies.services import DefinitionService
@@ -28,7 +29,7 @@ def definition_request(**overrides: Any) -> RequestJobsieDefinitionCreate:
         "retention": "0",
         "input_kwargs": {},
         "output_monitoring": {},
-        "enabled": True,
+        "status": JobsieDefinitionStatus.ENABLED,
     }
     data.update(overrides)
     return RequestJobsieDefinitionCreate(**data)
@@ -58,7 +59,7 @@ def test_list_definitions_returns_definitions() -> None:
     assert first_definition.name == "Test Jobsie"
     assert first_definition.subclass_name == "ExampleJobsie"
     assert first_definition.cron == "0 0 * * *"
-    assert first_definition.enabled is True
+    assert first_definition.status == JobsieDefinitionStatus.ENABLED
     assert first_definition.created_at is not None
     assert first_definition.updated_at is not None
     assert "content" in first_definition.output_vars["properties"]
@@ -87,6 +88,53 @@ def test_get_definition_returns_none_for_missing_id() -> None:
     assert service.get_definition(999) is None
 
 
+def test_resolve_executability_status_obeys_requested_status() -> None:
+    """Resolve available and missing jobsies, preserving explicit disabled status."""
+    service = DefinitionService()
+
+    assert service._resolve_executability_status("ExampleJobsie", JobsieDefinitionStatus.ENABLED) == (
+        JobsieDefinitionStatus.ENABLED
+    )
+    assert service._resolve_executability_status("MissingJobsie", JobsieDefinitionStatus.ENABLED) == (
+        JobsieDefinitionStatus.UNAVAILABLE
+    )
+    assert service._resolve_executability_status("MissingJobsie", JobsieDefinitionStatus.DISABLED) == (
+        JobsieDefinitionStatus.DISABLED
+    )
+
+
+def test_refresh_executability_statuses_updates_enabled_and_unavailable_definitions() -> None:
+    """Refresh executable statuses while leaving explicitly disabled definitions unchanged."""
+    service = DefinitionService()
+    enabled = service.create_definition(definition_request())
+    disabled = service.create_definition(definition_request(name="Disabled", status=JobsieDefinitionStatus.DISABLED))
+    service.db.update(
+        TableJobsiesDefinition,
+        filters={"id": enabled.id},
+        update_values={"status": JobsieDefinitionStatus.UNAVAILABLE},
+    )
+
+    service.refresh_executability_statuses()
+
+    refreshed_enabled = service.get_definition(enabled.id)
+    unchanged_disabled = service.get_definition(disabled.id)
+    assert refreshed_enabled is not None
+    assert refreshed_enabled.status == JobsieDefinitionStatus.ENABLED
+    assert unchanged_disabled is not None
+    assert unchanged_disabled.status == JobsieDefinitionStatus.DISABLED
+
+    service.db.update(
+        TableJobsiesDefinition,
+        filters={"id": enabled.id},
+        update_values={"subclass_name": "MissingJobsie", "status": JobsieDefinitionStatus.ENABLED},
+    )
+    service.refresh_executability_statuses()
+
+    unavailable = service.get_definition(enabled.id)
+    assert unavailable is not None
+    assert unavailable.status == JobsieDefinitionStatus.UNAVAILABLE
+
+
 def test_create_definition_stores_and_retrieves_definition() -> None:
     """Tests DefinitionService.create_definition persists the definition with service-derived output_vars."""
     service = DefinitionService()
@@ -104,7 +152,7 @@ def test_create_definition_stores_and_retrieves_definition() -> None:
     assert fetched.retention == "7d"
     assert fetched.input_kwargs == {"url": "https://example.com"}
     assert fetched.output_monitoring == {}
-    assert fetched.enabled is True
+    assert fetched.status == JobsieDefinitionStatus.ENABLED
     assert fetched.output_vars == ExampleJobsie.output_schema().model_json_schema()
 
     listed = service.list_definitions()
@@ -137,7 +185,7 @@ def test_update_definition_updates_fields() -> None:
     assert updated.retention == "14d"
     assert updated.input_kwargs == {"url": "https://zalando.cz"}
     assert updated.output_monitoring == {"price_czk": True}
-    assert updated.enabled is True
+    assert updated.status == JobsieDefinitionStatus.ENABLED
     assert updated.output_vars == ZalandoJobsie.output_schema().model_json_schema()
     assert updated.created_at == before.created_at
     assert len(service.list_definitions()) == 1

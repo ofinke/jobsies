@@ -48,10 +48,12 @@
         <td><strong>{{ definition.name }}</strong></td>
         
         <td>
-          {% if definition.enabled %}
-          <span class="badge badge-success">Enabled</span>
-          {% else %}
+          {% if definition.status == "unavailable" %}
+          <span class="badge badge-warning">Unavailable</span>
+          {% elif definition.status == "disabled" %}
           <span class="badge badge-danger">Disabled</span>
+          {% else %}
+          <span class="badge badge-success">Enabled</span>
           {% endif %}
         </td>
         

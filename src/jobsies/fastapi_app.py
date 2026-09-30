@@ -1,3 +1,5 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from importlib.metadata import version
 
 from fastapi import FastAPI
@@ -12,6 +14,7 @@ from jobsies.api.web import (
     web_pages_router,
     worker_component_router,
 )
+from jobsies.services import DefinitionService
 from jobsies.settings import get_settings
 
 settings = get_settings()
@@ -27,11 +30,20 @@ tags_metadata = [
     },
 ]
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+    """Refresh jobsie executability statuses before application starts."""
+    DefinitionService().refresh_executability_statuses()
+    yield
+
+
 app = FastAPI(
     title="Jobsies",
     version=version("jobsies"),
     docs_url="/swagger",
     openapi_tags=tags_metadata,
+    lifespan=lifespan,
 )
 
 app.mount("/static", StaticFiles(directory=settings.static_location_), name="static")

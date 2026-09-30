@@ -5,6 +5,8 @@ from croniter import croniter
 from loguru import logger
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from jobsies.schemas.enums import JobsieDefinitionStatus
+
 
 class JobsieDefinitionBase(BaseModel):
     """
@@ -38,9 +40,9 @@ class JobsieDefinitionBase(BaseModel):
         default_factory=dict,
         description="How we want to monitor results in frontend",
     )
-    enabled: bool = Field(
-        default=True,
-        description="Is the jobsie enabled",
+    status: JobsieDefinitionStatus = Field(
+        default=JobsieDefinitionStatus.ENABLED,
+        description="Requested execution status of the jobsie",
     )
 
     @field_validator("cron")
@@ -75,8 +77,6 @@ class JobsieDefinitionBase(BaseModel):
                 data["input_kwargs"] = parsed
             elif isinstance(raw, str) and not raw.strip():
                 data["input_kwargs"] = {}
-        if "enabled" in data and data["enabled"] is not None:
-            data["enabled"] = data["enabled"] in ("on", "true", "True", True)
         return data
 
 
@@ -93,7 +93,7 @@ class RequestJobsieDefinitionUpdate(JobsieDefinitionBase):
     retention: str | None = None
     input_kwargs: dict[str, Any] | None = None
     output_monitoring: dict[str, Any] | None = None
-    enabled: bool | None = None
+    status: JobsieDefinitionStatus | None = None
 
     @field_validator("cron")
     @classmethod

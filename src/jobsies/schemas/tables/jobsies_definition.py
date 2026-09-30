@@ -5,6 +5,8 @@ from sqlalchemy import Column, Text
 from sqlalchemy.dialects.sqlite import JSON
 from sqlmodel import Field
 
+from jobsies.schemas.enums import JobsieDefinitionStatus
+
 from .base import TableDefaultModel
 
 
@@ -42,11 +44,21 @@ class TableJobsiesDefinition(TableDefaultModel, table=True):
         sa_column=Column(JSON, nullable=False),
         description="How we want to monitor results in frontend",
     )
-    # NOTE: Replace with JobsieDefinitionStatus and status
-    enabled: bool = Field(
-        default=True,
-        description="Is the jobsie enabled",
+    status: str = Field(
+        default=JobsieDefinitionStatus.ENABLED,
+        sa_column=Column(Text, nullable=False),
+        description="Executability status of the jobsie",
     )
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str) -> str:
+        """Ensure status values are members of JobsieDefinitionStatus."""
+        try:
+            return JobsieDefinitionStatus(value).value
+        except ValueError:
+            msg = f"Invalid jobsie definition status: {value}"
+            raise ValueError(msg) from None
 
     @field_validator("cron")
     @classmethod

@@ -49,9 +49,12 @@
         <input type="text" id="retention" name="retention" class="form-control" placeholder="e.g. 30d (default: 0)" value="{{ form_data.get('retention', '') }}">
       </div>
 
-      <div class="form-group form-check">
-        <input type="checkbox" id="enabled" name="enabled" class="form-check-input"{% if form_data.get('enabled', True) %} checked{% endif %}>
-        <label for="enabled" class="form-check-label">Enabled</label>
+      <div class="form-group">
+        <label for="status"><b>Status</b></label>
+        <select id="status" name="status" required class="form-control">
+          <option value="enabled"{% if form_data.get('status', 'enabled') in ('enabled', 'unavailable') %} selected{% endif %}>Enabled</option>
+          <option value="disabled"{% if form_data.get('status') == 'disabled' %} selected{% endif %}>Disabled</option>
+        </select>
       </div>
     </div>
 

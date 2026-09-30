@@ -1,9 +1,9 @@
+from importlib import import_module
+
 from pydantic import field_validator
 from sqlalchemy import Column, Text
 from sqlalchemy.dialects.sqlite import JSON
 from sqlmodel import Field
-
-from jobsies.schemas.config import BaseConfig
 
 from .base import TableDefaultModel
 
@@ -30,13 +30,10 @@ class TableSharedConfigurations(TableDefaultModel, table=True):
     @classmethod
     def validate_config_model(cls, value: str) -> str:
         """Ensure the configured model resolves to a BaseConfig subclass."""
-        config_model = next(
-            (subclass for subclass in BaseConfig.__subclasses__() if subclass.__name__ == value),
-            None,
-        )
-
-        if not isinstance(config_model, type) or not issubclass(config_model, BaseConfig):
+        try:
+            import_module("jobsies.config").get_config_class_registry().get(value)
+        except KeyError:
             msg = f"Configuration model must be a BaseConfig subclass: {value}"
-            raise TypeError(msg)
+            raise TypeError(msg) from None
 
         return value

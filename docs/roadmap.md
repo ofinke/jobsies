@@ -16,6 +16,9 @@ The development roughly follows this path
 
 Here is a list of features which I would like to include. Some will be later included in the roadmap and some will be done randomly when I feel like it. Some will be skipped when I inevitably get bored with this project.
 
+## Things to handle
+- Installed configs and jobsies via plugin, handle situation when the config / definition is in the database, but the plugin is unninstalled. Look at NOTEs)
+
 ## jobsies
 -
 

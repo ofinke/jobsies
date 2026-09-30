@@ -9,6 +9,7 @@ from sqlalchemy.sql import Select
 from jobsies.database import DatabaseHandler, get_db_handler
 from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
 
 
@@ -45,6 +46,12 @@ class DefinitionService:
         """Initialize definition service."""
         self.db = db_handler or get_db_handler()
 
+    # Private methods
+    def _resolve_executability_status() -> JobsieDefinitionStatus:
+        """Validates if jobsie can be executed based on availability of configuration or execution class."""
+        # Uses JobsieRegistry to find if the class for execution is installed
+        # if class exists and jobsie required config, it validates that the config exist too using ConfigClassRegistry
+
     def list_jobsie_types(self) -> list[str]:
         """Retrieve names of all BaseJobsie subclasses."""
         return list(get_jobsie_registry().registry)
@@ -78,6 +85,7 @@ class DefinitionService:
         output_vars = self.get_output_schema(definition_in.subclass_name)
         definition_data = definition_in.model_dump()
         definition_data["output_vars"] = output_vars
+        # NOTE: Include _resolve_executability_status here
 
         db_definition = TableJobsiesDefinition(**definition_data)
         self.db.store([db_definition])
@@ -103,6 +111,8 @@ class DefinitionService:
 
         # datetime values are stored in UTC in the database, therefore we use UTC here
         update_data["updated_at"] = datetime.now(UTC)
+        # NOTE: Include _resolve_executability_status here
+
         self.db.update(
             TableJobsiesDefinition,
             filters={"id": definition_id},

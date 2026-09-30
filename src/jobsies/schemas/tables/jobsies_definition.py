@@ -42,6 +42,7 @@ class TableJobsiesDefinition(TableDefaultModel, table=True):
         sa_column=Column(JSON, nullable=False),
         description="How we want to monitor results in frontend",
     )
+    # NOTE: Replace with JobsieDefinitionStatus and status
     enabled: bool = Field(
         default=True,
         description="Is the jobsie enabled",

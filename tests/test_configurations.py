@@ -1,8 +1,9 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from jobsies.config import ConfigRegistry
-from jobsies.schemas.config import AppConfig
+from jobsies.config import ConfigClassRegistry, ConfigRegistry
+from jobsies.schemas.config import AppConfig, BaseConfig
 from jobsies.schemas.tables import TableSharedConfigurations
 from pydantic import ValidationError
 
@@ -91,3 +92,40 @@ def test_configuration_rejects_unknown_model() -> None:
                 "config": {},
             }
         )
+
+
+def test_config_class_registry_loads_plugin(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Load configuration classes exposed by the plugin entry-point group."""
+
+    class PluginConfig(BaseConfig):
+        """Configuration class supplied by a plugin."""
+
+    entry_point = SimpleNamespace(name="plugin-config", load=lambda: PluginConfig)
+    monkeypatch.setattr("jobsies.config.entry_points", lambda **_: [entry_point])
+
+    registry = ConfigClassRegistry()
+
+    assert registry.get("PluginConfig") is PluginConfig
+
+
+def test_config_class_registry_loads_local_subclasses(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Automatically register local configuration subclasses."""
+
+    class LocalConfig(BaseConfig):
+        """Configuration class defined within the application."""
+
+    monkeypatch.setattr("jobsies.config.entry_points", lambda **_: [])
+
+    registry = ConfigClassRegistry()
+
+    assert registry.get("LocalConfig") is LocalConfig
+
+
+def test_config_class_registry_tracks_invalid_plugin(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep plugin entry-point values that are not BaseConfig subclasses in failed_load."""
+    entry_point = SimpleNamespace(name="invalid-config", load=lambda: object)
+    monkeypatch.setattr("jobsies.config.entry_points", lambda **_: [entry_point])
+
+    registry = ConfigClassRegistry()
+
+    assert registry.failed_load == {"invalid-config": object}

@@ -68,6 +68,7 @@ class RunnerService:
         output = {}
 
         # Whole jobsie execution is done in a single Try / Except block so if anything fails, the attempt is logged
+        # We expect that the jobsie is executable (decision if it is is handled elsewhere)
         try:
             # selects correct class to execute
             jobsie_config = self._get_jobsie_configuration(jobsie_id)

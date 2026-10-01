@@ -9,6 +9,7 @@ from pytz import timezone
 
 from jobsies.celery_app import wrapper_run_dynamic_jobsie
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.services import DefinitionService
 from jobsies.settings import get_settings, get_templates
 
@@ -178,6 +179,16 @@ async def definition_delete(definition_id: int) -> HTMLResponse:
 @router.post("/execute/{definition_id}", response_class=HTMLResponse)
 async def definition_execute(definition_id: int) -> HTMLResponse:
     """Schedules jobsie execution via HTMX and returns status bar."""
+    definition = DefinitionService().get_definition(definition_id)
+    if not definition:
+        msg = f"Jobsie definition with id {definition_id} not found"
+        logger.error(msg)
+        return HTMLResponse(_status_bar_html(msg, status_type="error"))
+    if definition.status == JobsieDefinitionStatus.UNAVAILABLE:
+        msg = f"Jobsie definition with id {definition_id} is unavailable"
+        logger.error(msg)
+        return HTMLResponse(_status_bar_html(msg, status_type="error"))
+
     try:
         task = wrapper_run_dynamic_jobsie.apply_async(args=[definition_id])
         logger.debug(f"Triggered jobsie id {definition_id} with task id {task.id}")

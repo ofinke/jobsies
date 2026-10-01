@@ -4,6 +4,7 @@ from celery import Celery
 from loguru import logger
 
 from jobsies.config import get_config_by_name
+from jobsies.exceptions import UnavailableJobsieError
 from jobsies.services import RunnerService, SchedulingService, get_redis_handler
 from jobsies.settings import get_settings
 
@@ -60,6 +61,7 @@ def celery_app_status() -> dict[str, Any]:
     name="task.run_dynamic_jobsie",
     bind=True,
     autoretry_for=(Exception,),
+    dont_autoretry_for=(UnavailableJobsieError,),
     retry_kwargs={"max_retries": 3},
     retry_backoff=True,
 )

@@ -1,6 +1,21 @@
-🛠️ `Jobsies` is a self-hosted tool designed to automatically run simple jobs on the internet. This about page focuses on description on what jobsies are, how to set them up, and how to implement new ones.
+🛠️ `Jobsies` is a self-hosted application designed to run scheduled tasks (called jobsies) on your home server. These tasks can be anything you are willing to program yourself, scrape price of a product you are interested in, or create reports on data from various sources. Here, you can find documentation of the project which focuses on high-level description of the program, explaining core concepts, and helping you to get started.
 
-# Jobsies
+# Glossary
+- `Jobsie` refers to the whole project
+- Jobsie refers to the task which is executed
+- Definition refers to definition of jobsie, when it is suppose to be executed, with what input parameters, etc...
+
+# Features
+- Cron scheduler and execution layer for your jobsies
+- Local sqlite database for storing definitions, configurations, and jobsies outputs
+- Plugin system so you can create and install only jobsies you will be using
+- Reusable services to help you with jobsies executions
+- API interface to control system programatically 
+- Simple HTMX powered frontend
+
+# How to
+
+## Installing Jobsies
 
 Jobsie is a single job which has a simple output and you want to run it repeatedly, the current implementations contains these jobsies:
 

@@ -5,7 +5,9 @@ from loguru import logger
 from sqlalchemy.sql import Select
 
 from jobsies.database import get_db_handler
+from jobsies.exceptions import UnavailableJobsieError
 from jobsies.jobs import get_jobsie_registry
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.runner import RunnerExecutionMetadata
 from jobsies.schemas.tables import TableJobsiesDefinition, TableJobsiesOutputs
 
@@ -53,7 +55,12 @@ class RunnerService:
             msg = f"No jobsie config found with id {jobsie_id}"
             logger.error(msg)
             raise ValueError(msg)
-        return jobsie_configs[0]
+        jobsie_config = jobsie_configs[0]
+        if jobsie_config.status == JobsieDefinitionStatus.UNAVAILABLE:
+            msg = f"Jobsie with id {jobsie_id} is unavailable"
+            logger.error(msg)
+            raise UnavailableJobsieError(msg)
+        return jobsie_config
 
     def run_dynamic_jobsie(self, jobsie_id: int, *, execution_metadata: dict | None = None) -> None:
         """Executes jobsie based on its configuration ID and stores the output into database."""

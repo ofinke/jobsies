@@ -5,7 +5,7 @@ import pytz
 from dotenv import find_dotenv
 from fastapi.templating import Jinja2Templates
 from loguru import logger
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     tz_info: str = Field(
         default="UTC",
         description="Timezone definition",
+    )
+    encryption_key: SecretStr | None = Field(
+        default=None,
+        description="Optional secret string for configuration encryption.",
     )
 
     # Varibles below are not suppose to change. It will break the app

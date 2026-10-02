@@ -73,6 +73,7 @@ class ConfigRegistry:
 
     def store_and_validate(self) -> None:
         """Loads configuration from database, validates it with appropriate models and stores it in the registry."""
+        # NOTE: We will have to handle config reload both in backend (easy) and (worker) on configuration changes
         # Clear existing registry
         self.registry: dict[str, BaseConfig] = {}
 

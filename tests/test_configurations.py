@@ -5,7 +5,10 @@ import pytest
 from jobsies.config import ConfigClassRegistry, ConfigRegistry
 from jobsies.schemas.config import AppConfig, BaseConfig
 from jobsies.schemas.tables import TableSharedConfigurations
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+from sqlmodel import Session, select
 
 
 @pytest.fixture
@@ -92,6 +95,60 @@ def test_configuration_rejects_unknown_model() -> None:
                 "config": {},
             }
         )
+
+
+def test_configuration_is_stored_as_json_text(
+    monkeypatch: pytest.MonkeyPatch,
+    test_db: Engine,
+) -> None:
+    """Store configuration dictionaries as JSON strings and load them as dictionaries."""
+    monkeypatch.setattr(
+        "jobsies.schemas.tables.config.get_settings",
+        lambda: SimpleNamespace(encryption_key=None),
+    )
+    configuration = {"worker_concurrency": 4}
+
+    with Session(test_db) as session:
+        session.add(TableSharedConfigurations(name="json-config", config_model="AppConfig", config=configuration))
+        session.commit()
+
+        stored_value = session.execute(
+            text("SELECT config FROM shared_configurations WHERE name = :name"),
+            {"name": "json-config"},
+        ).scalar_one()
+        loaded_configuration = session.exec(
+            select(TableSharedConfigurations).where(TableSharedConfigurations.name == "json-config")
+        ).one()
+
+    assert stored_value == '{"worker_concurrency": 4}'
+    assert loaded_configuration.config == configuration
+
+
+def test_configuration_is_encrypted_in_database(
+    monkeypatch: pytest.MonkeyPatch,
+    test_db: Engine,
+) -> None:
+    """Encrypt configuration JSON in storage and decrypt it when loading the row."""
+    monkeypatch.setattr(
+        "jobsies.schemas.tables.config.get_settings",
+        lambda: SimpleNamespace(encryption_key=SecretStr("test-encryption-key")),
+    )
+    configuration = {"secret": "private-value"}
+
+    with Session(test_db) as session:
+        session.add(TableSharedConfigurations(name="encrypted-config", config_model="AppConfig", config=configuration))
+        session.commit()
+
+        stored_value = session.execute(
+            text("SELECT config FROM shared_configurations WHERE name = :name"),
+            {"name": "encrypted-config"},
+        ).scalar_one()
+        loaded_configuration = session.exec(
+            select(TableSharedConfigurations).where(TableSharedConfigurations.name == "encrypted-config")
+        ).one()
+
+    assert "private-value" not in stored_value
+    assert loaded_configuration.config == configuration
 
 
 def test_config_class_registry_loads_plugin(monkeypatch: pytest.MonkeyPatch) -> None:

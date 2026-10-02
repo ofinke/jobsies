@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from pytz import timezone
 
 from jobsies.celery_app import wrapper_run_dynamic_jobsie
+from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.services import DefinitionService
@@ -50,6 +51,24 @@ async def definition_get_table() -> HTMLResponse:
     status_bar = _status_bar_html(f"Definitions refreshed at {now}")
     logger.debug("Endpoint executed: GET /definition/table")
     return HTMLResponse(table_html + "\n" + status_bar)
+
+
+@router.get("/jobsies", response_class=HTMLResponse)
+async def definition_get_jobsies() -> HTMLResponse:
+    """Render the installed jobsie classes HTMX partial."""
+    jobsies = [
+        {
+            "name": name,
+            "docstring": jobsie_class.__doc__,
+            "config_class": (
+                config_schema.__name__ if (config_schema := jobsie_class.config_schema()) is not None else None
+            ),
+        }
+        for name, jobsie_class in get_jobsie_registry().registry.items()
+    ]
+    jobsies_html = templates.get_template("components/definition_jobsies.html").render({"jobsies": jobsies})
+    logger.debug("Endpoint executed: GET /definition/jobsies")
+    return HTMLResponse(jobsies_html)
 
 
 @router.get("/create", response_class=HTMLResponse)

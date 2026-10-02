@@ -16,11 +16,18 @@ The development roughly follows this path
 
 Here is a list of features which I would like to include. Some will be later included in the roadmap and some will be done randomly when I feel like it. Some will be skipped when I inevitably get bored with this project.
 
+## Reusable services
+- Alerting service using email / whatsapp? / discord?
+
 ## Things to handle
-- Installed configs and jobsies via plugin, handle situation when the config / definition is in the database, but the plugin is unninstalled. Look at NOTEs)
+- configuration changes
+
+## Some randoms
+- Add a copy button to the definitions actions
+- Figure out if I want to reuse the json with examples from model schema for configurations or I would rather use json with datatypes as example
 
 ## jobsies
--
+- Deepresearch agent
 
 ## Small
 

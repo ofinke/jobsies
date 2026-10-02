@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from urllib.parse import parse_qs
 
@@ -97,6 +98,34 @@ async def definition_get_update_form(request: Request, definition_id: int) -> HT
         request=request,
         name="components/definition_update_form.html",
         context={"definition": definition},
+    )
+
+
+@router.get("/{definition_id}/copy", response_class=HTMLResponse)
+async def definition_get_copy_form(request: Request, definition_id: int) -> HTMLResponse:
+    """Render a prefilled creation dialog copied from an existing definition."""
+    service = DefinitionService()
+    definition = service.get_definition(definition_id)
+    if not definition:
+        raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
+
+    form_data = {
+        "name": f"{definition.name} (copy)",
+        "subclass_name": definition.subclass_name,
+        "cron": definition.cron,
+        "retention": definition.retention,
+        "status": definition.status,
+        "input_kwargs": json.dumps(definition.input_kwargs, indent=2),
+    }
+    logger.debug(f"Endpoint executed: GET /definition/{definition_id}/copy")
+    return templates.TemplateResponse(
+        request=request,
+        name="components/definition_create_form.html",
+        context={
+            "subclasses": service.list_jobsie_types(),
+            "input_examples": service.get_input_examples(),
+            "form_data": form_data,
+        },
     )
 
 

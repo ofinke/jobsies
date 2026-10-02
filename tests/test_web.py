@@ -135,6 +135,7 @@ def test_definitions_table_component_partial_load(client: TestClient) -> None:
     assert "definitions-table" in html
     assert "Initial Test Config" in html
     assert "ExampleJobsie" in html
+    assert 'hx-get="/definition/1/copy"' in html
 
 
 def test_definitions_create_dialog_get(client: TestClient) -> None:
@@ -256,6 +257,26 @@ def test_definitions_update_dialog_get(client: TestClient) -> None:
     assert "Update Jobsie Definition" in html
     assert 'value="Initial Test Config"' in html
     assert 'name="status"' in html
+
+
+def test_definitions_copy_dialog_get(client: TestClient) -> None:
+    """Tests GET /definition/{id}/copy returns a prefilled create dialog."""
+    response = client.get("/definition/1/copy")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    html = response.text
+    assert "Create Jobsie Definition" in html
+    assert 'value="Initial Test Config (copy)"' in html
+    assert 'value="ExampleJobsie" selected' in html
+    assert 'value="0 * * * *"' in html
+    assert 'name="input_kwargs"' in html
+    assert 'name="status"' in html
+
+
+def test_definitions_copy_dialog_get_missing_definition(client: TestClient) -> None:
+    """Tests GET /definition/{id}/copy returns 404 for an unknown definition."""
+    response = client.get("/definition/999/copy")
+    assert response.status_code == 404
 
 
 def test_definitions_update_post_disable(client: TestClient) -> None:

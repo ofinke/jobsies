@@ -1,13 +1,14 @@
 import re
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 from freezegun import freeze_time
-from jobsies.config import get_config_registry
 from jobsies.database import get_db_handler
 from jobsies.fastapi_app import app
 from jobsies.schemas.tables import TableJobsiesOutputs, TableSharedConfigurations
+from jobsies.services.config_service import get_config_service
 
 
 @pytest.fixture(autouse=True)
@@ -139,6 +140,19 @@ def test_configs_page_and_form_load(client: TestClient) -> None:
     assert form_response.text.index('name="description"') < form_response.text.index("Config (JSON)")
 
 
+def test_configs_table_warns_about_missing_models(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Show configurations whose plugin model is no longer registered."""
+    service = SimpleNamespace(
+        failed_load={"plugin-config": SimpleNamespace(config_model="RemovedPluginConfig")},
+        list_configurations=list,
+    )
+    monkeypatch.setattr("jobsies.api.web.components.config.get_config_service", lambda: service)
+
+    response = client.get("/configs/table")
+
+    assert response.status_code == 200
+
+
 def test_config_create_update_and_delete_reload_registry(client: TestClient) -> None:
     """Keep the in-memory config registry synchronized with config mutations."""
     created = client.post(
@@ -154,8 +168,10 @@ def test_config_create_update_and_delete_reload_registry(client: TestClient) -> 
     assert created.status_code == 200
     assert created.headers.get("HX-Trigger") == "config-created"
     assert created.text.index("<th>Description</th>") > created.text.index("<th>Updated At</th>")
+    assert "<th>Config Model</th>" in created.text
+    assert "<td><code>AppConfig</code></td>" in created.text
     assert "Created description" in created.text
-    assert get_config_registry().get("web-test-config").worker_concurrency == 4
+    assert get_config_service().get("web-test-config").worker_concurrency == 4
 
     configuration = get_db_handler().load(TableSharedConfigurations)[0]
     assert configuration.description == "Created description"
@@ -176,13 +192,13 @@ def test_config_create_update_and_delete_reload_registry(client: TestClient) -> 
     assert updated.headers.get("HX-Trigger") == "config-updated"
     assert "Updated description" in updated.text
     assert get_db_handler().load(TableSharedConfigurations)[0].description == "Updated description"
-    assert get_config_registry().get("web-test-config").worker_concurrency == 5
+    assert get_config_service().get("web-test-config").worker_concurrency == 5
 
     deleted = client.delete(f"/configs/{configuration.id}")
 
     assert deleted.status_code == 200
     with pytest.raises(KeyError):
-        get_config_registry().get("web-test-config")
+        get_config_service().get("web-test-config")
 
 
 def test_config_create_rejects_invalid_json(client: TestClient) -> None:

@@ -6,12 +6,13 @@ from loguru import logger
 from pydantic import BaseModel
 from sqlalchemy.sql import Select
 
-from jobsies.config import get_config_class_registry
 from jobsies.database import DatabaseHandler, get_db_handler
 from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
+
+from .config_classes import get_config_class_registry
 
 
 def _unwrap_optional(annotation: Any) -> Any:
@@ -82,10 +83,7 @@ class DefinitionService:
 
     def get_input_examples(self) -> dict[str, dict]:
         """Retrieve example input values for all Jobsie subclasses."""
-        return {
-            name: _build_example(cls.input_schema())
-            for name, cls in get_jobsie_registry().registry.items()
-        }
+        return {name: _build_example(cls.input_schema()) for name, cls in get_jobsie_registry().registry.items()}
 
     def list_definitions(self) -> list[TableJobsiesDefinition]:
         """Retrieve all jobsie definitions."""

@@ -4,3 +4,7 @@ class DuplicateJobsieError(Exception):
 
 class UnavailableJobsieError(Exception):
     """Raised when execution of unavailable jobsie is triggered."""
+
+
+class UnavailableConfigError(Exception):
+    """Raised when a configuration's model is unavailable."""

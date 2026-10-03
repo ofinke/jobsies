@@ -3,9 +3,8 @@ from typing import Any
 from celery import Celery
 from loguru import logger
 
-from jobsies.config import get_config_by_name
 from jobsies.exceptions import UnavailableJobsieError
-from jobsies.services import RunnerService, SchedulingService, get_redis_handler
+from jobsies.services import RunnerService, SchedulingService, get_config_by_name, get_redis_handler
 from jobsies.settings import get_settings
 
 settings = get_settings()

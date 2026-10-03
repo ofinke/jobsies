@@ -1,4 +1,5 @@
 from .components import (
+    config_component_router,
     definition_component_router,
     documentation_component_router,
     results_component_router,
@@ -7,6 +8,7 @@ from .components import (
 from .pages import router as web_pages_router
 
 __all__ = [
+    "config_component_router",
     "definition_component_router",
     "documentation_component_router",
     "results_component_router",

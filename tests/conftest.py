@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-import jobsies.config as jobsies_config
+import jobsies.services.config_service as jobsies_config
 import pytest
 from jobsies.database import get_db_handler
 from jobsies.jobs import ExampleJobsie

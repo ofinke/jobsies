@@ -1,7 +1,6 @@
 import base64
 import hashlib
 import json
-from importlib import import_module
 
 from cryptography.fernet import Fernet
 from pydantic import field_validator
@@ -58,6 +57,11 @@ class TableSharedConfigurations(TableDefaultModel, table=True):
         sa_column=Column(Text, nullable=False, unique=True),
         description="Unique name of the configuration.",
     )
+    description: str | None = Field(
+        default=None,
+        sa_column=Column(Text, nullable=True),
+        description="Description of the configuration.",
+    )
     config_model: str = Field(
         sa_column=Column(Text, nullable=False),
         description="Fully qualified name of the BaseConfig subclass validating configuration values.",
@@ -71,8 +75,11 @@ class TableSharedConfigurations(TableDefaultModel, table=True):
     @classmethod
     def validate_config_model(cls, value: str) -> str:
         """Ensure the configured model resolves to a BaseConfig subclass."""
+        # Imported locally to avoid a circular import
+        from jobsies.services.config_service import get_config_class_registry  # noqa: PLC0415
+
         try:
-            import_module("jobsies.config").get_config_class_registry().get(value)
+            get_config_class_registry().get(value)
         except KeyError:
             msg = f"Configuration model must be a BaseConfig subclass: {value}"
             raise TypeError(msg) from None

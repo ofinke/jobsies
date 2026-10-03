@@ -32,6 +32,17 @@ async def page_definitions(request: Request) -> HTMLResponse:
     )
 
 
+@router.get("/configs", response_class=HTMLResponse)
+async def page_configs(request: Request) -> HTMLResponse:
+    """Render the reusable configurations page."""
+    logger.debug("GET config.html")
+    return templates.TemplateResponse(
+        request=request,
+        name="config.html",
+        context={"active_page": "configs"},
+    )
+
+
 @router.get("/worker", response_class=HTMLResponse)
 async def page_worker(request: Request) -> HTMLResponse:
     """Render the jobsie worker full page."""

@@ -2,9 +2,11 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from jobsies.config import ConfigClassRegistry, ConfigRegistry
+from jobsies.exceptions import UnavailableConfigError
 from jobsies.schemas.config import AppConfig, BaseConfig
 from jobsies.schemas.tables import TableSharedConfigurations
+from jobsies.services.config_classes import ConfigClassRegistry
+from jobsies.services.config_service import ConfigService
 from pydantic import SecretStr, ValidationError
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -15,29 +17,29 @@ from sqlmodel import Session, select
 def mock_db_handler(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     """Provide a mocked database handler for registry tests."""
     handler = MagicMock()
-    monkeypatch.setattr("jobsies.config.get_db_handler", lambda: handler)
+    monkeypatch.setattr("jobsies.services.config_service.get_db_handler", lambda: handler)
     return handler
 
 
-def test_registry_loads_and_validates_config(mock_db_handler: MagicMock) -> None:
-    """Load stored values as an instance of the configuration model."""
-    mock_db_handler.load.return_value = [
-        TableSharedConfigurations(
-            name="app-config",
-            config_model="AppConfig",
-            config={"worker_concurrency": 4},
-        )
-    ]
+def test_get_loads_and_validates_config_each_time(mock_db_handler: MagicMock) -> None:
+    """Load a stored configuration from the database and validate it on each lookup."""
+    configuration = TableSharedConfigurations(
+        name="app-config",
+        config_model="AppConfig",
+        config={"worker_concurrency": 4},
+    )
+    mock_db_handler.load.return_value = [configuration]
+    service = ConfigService()
 
-    registry = ConfigRegistry()
-
-    config = registry.get("app-config")
+    config = service.get("app-config")
+    service.get("app-config")
 
     assert isinstance(config, AppConfig)
     assert config.worker_concurrency == 4
+    assert mock_db_handler.load.call_count == 3
 
 
-def test_registry_rejects_invalid_config_values(mock_db_handler: MagicMock) -> None:
+def test_get_rejects_invalid_config_values(mock_db_handler: MagicMock) -> None:
     """Reject stored values that do not validate against their configuration model."""
     mock_db_handler.load.return_value = [
         TableSharedConfigurations(
@@ -47,42 +49,52 @@ def test_registry_rejects_invalid_config_values(mock_db_handler: MagicMock) -> N
         )
     ]
 
+    service = ConfigService()
+
     with pytest.raises(ValidationError):
-        ConfigRegistry()
+        service.get("app-config")
 
 
-def test_registry_reports_missing_configuration(mock_db_handler: MagicMock) -> None:
+def test_get_reports_missing_configuration(mock_db_handler: MagicMock) -> None:
     """Raise a clear lookup error when a configuration name is not registered."""
     mock_db_handler.load.return_value = []
-    registry = ConfigRegistry()
+    service = ConfigService()
 
     with pytest.raises(KeyError, match="Configuration not found: missing"):
-        registry.get("missing")
+        service.get("missing")
 
 
-def test_registry_reload_replaces_stored_configurations(mock_db_handler: MagicMock) -> None:
-    """Replace cached entries when configurations are loaded again."""
-    mock_db_handler.load.return_value = [
-        TableSharedConfigurations(
-            name="old-config",
-            config_model="AppConfig",
-            config={},
-        )
-    ]
-    registry = ConfigRegistry()
+def test_registry_tracks_configurations_with_missing_models(
+    mock_db_handler: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Keep configurations whose plugin model is no longer registered in failed_load."""
+    configuration = TableSharedConfigurations(
+        name="plugin-config",
+        config_model="AppConfig",
+        config={"setting": "value"},
+    )
+    configuration.config_model = "RemovedPluginConfig"
+    mock_db_handler.load.return_value = [configuration]
 
-    mock_db_handler.load.return_value = [
-        TableSharedConfigurations(
-            name="new-config",
-            config_model="AppConfig",
-            config={"worker_concurrency": 3},
-        )
-    ]
-    registry.store_and_validate()
+    class MissingConfigRegistry:
+        """Simulate a config class registry without the removed plugin model."""
 
-    with pytest.raises(KeyError, match="Configuration not found: old-config"):
-        registry.get("old-config")
-    assert registry.get("new-config").worker_concurrency == 3
+        def get(self, _name: str) -> type[BaseConfig]:
+            """Raise when the removed model is requested."""
+            msg = "Configuration class not found: RemovedPluginConfig"
+            raise KeyError(msg)
+
+    monkeypatch.setattr(
+        "jobsies.services.config_service.get_config_class_registry",
+        MissingConfigRegistry,
+    )
+
+    service = ConfigService()
+
+    assert service.failed_load == {"plugin-config": configuration}
+    with pytest.raises(UnavailableConfigError, match=r"plugin-config.*RemovedPluginConfig"):
+        service.get("plugin-config")
 
 
 def test_configuration_rejects_unknown_model() -> None:
@@ -158,7 +170,7 @@ def test_config_class_registry_loads_plugin(monkeypatch: pytest.MonkeyPatch) -> 
         """Configuration class supplied by a plugin."""
 
     entry_point = SimpleNamespace(name="plugin-config", load=lambda: PluginConfig)
-    monkeypatch.setattr("jobsies.config.entry_points", lambda **_: [entry_point])
+    monkeypatch.setattr("jobsies.services.config_classes.entry_points", lambda **_: [entry_point])
 
     registry = ConfigClassRegistry()
 
@@ -171,7 +183,7 @@ def test_config_class_registry_loads_local_subclasses(monkeypatch: pytest.Monkey
     class LocalConfig(BaseConfig):
         """Configuration class defined within the application."""
 
-    monkeypatch.setattr("jobsies.config.entry_points", lambda **_: [])
+    monkeypatch.setattr("jobsies.services.config_classes.entry_points", lambda **_: [])
 
     registry = ConfigClassRegistry()
 
@@ -181,7 +193,7 @@ def test_config_class_registry_loads_local_subclasses(monkeypatch: pytest.Monkey
 def test_config_class_registry_tracks_invalid_plugin(monkeypatch: pytest.MonkeyPatch) -> None:
     """Keep plugin entry-point values that are not BaseConfig subclasses in failed_load."""
     entry_point = SimpleNamespace(name="invalid-config", load=lambda: object)
-    monkeypatch.setattr("jobsies.config.entry_points", lambda **_: [entry_point])
+    monkeypatch.setattr("jobsies.services.config_classes.entry_points", lambda **_: [entry_point])
 
     registry = ConfigClassRegistry()
 

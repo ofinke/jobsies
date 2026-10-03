@@ -20,7 +20,8 @@ Here is a list of features which I would like to include. Some will be later inc
 - Alerting service using email / whatsapp? / discord?
 
 ## Things to handle
-- configuration changes
+- configuration changes using redis backed versioning? Where on config change, value in redis increases and app checks this value of every config load if it is not matching, it reloads the config. Maybe move config to be a Service (not it makes more sense as a service to me)
+- add description into config database. Add mandatory flag? (to handle when it shouldnt be deleted, or some automatic reload of app-config when it gets deleted)
 
 ## Some randoms
 - Add a copy button to the definitions actions

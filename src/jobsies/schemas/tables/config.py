@@ -58,6 +58,11 @@ class TableSharedConfigurations(TableDefaultModel, table=True):
         sa_column=Column(Text, nullable=False, unique=True),
         description="Unique name of the configuration.",
     )
+    description: str | None = Field(
+        default=None,
+        sa_column=Column(Text, nullable=True),
+        description="Description of the configuration.",
+    )
     config_model: str = Field(
         sa_column=Column(Text, nullable=False),
         description="Fully qualified name of the BaseConfig subclass validating configuration values.",

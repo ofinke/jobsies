@@ -2,6 +2,7 @@
     {
         "name": "app-config",
         "config_model": "AppConfig",
+        "description": "core application configuration; changes require app restart to take effect",
         "config": {
             "scheduler_lookahead": 900,
             "scheduler_interval": 450,

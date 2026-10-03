@@ -1,0 +1,55 @@
+<div id="configs-table">
+  <div class="table-wrapper">
+    <table class="table-def">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Actions</th>
+          <th>Name</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for configuration in configurations %}
+        <tr>
+          <td>{{ configuration.id }}</td>
+          <td>
+            <button class="btn btn-sm btn-ghost"
+                    hx-delete="/configs/{{ configuration.id }}"
+                    hx-target="#configs-table"
+                    hx-confirm="Are you sure you want to delete '{{ configuration.name }}'?"
+                    title="Delete"
+                    aria-label="Delete">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+            </button>
+            <button class="btn btn-sm btn-ghost"
+                    hx-get="/configs/{{ configuration.id }}/update"
+                    hx-target="#dialog-container"
+                    hx-swap="innerHTML"
+                    title="Edit"
+                    aria-label="Edit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"/><path d="M16 5l3 3"/></svg>
+            </button>
+            <button class="btn btn-sm btn-ghost"
+                    hx-get="/configs/{{ configuration.id }}/copy"
+                    hx-target="#dialog-container"
+                    hx-swap="innerHTML"
+                    title="Copy"
+                    aria-label="Copy">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg>
+            </button>
+          </td>
+          <td><strong>{{ configuration.name }}</strong></td>
+          <td>{{ configuration.created_at.strftime('%Y-%m-%d %H:%M:%S') if configuration.created_at else '-' }}</td>
+          <td>{{ configuration.updated_at.strftime('%Y-%m-%d %H:%M:%S') if configuration.updated_at else '-' }}</td>
+          <td>{{ configuration.description or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center">No configurations found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

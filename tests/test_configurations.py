@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from jobsies.exceptions import UnavailableConfigError
 from jobsies.schemas.config import AppConfig, BaseConfig
 from jobsies.schemas.tables import TableSharedConfigurations
 from jobsies.services.config_classes import ConfigClassRegistry
@@ -20,25 +21,25 @@ def mock_db_handler(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     return handler
 
 
-def test_registry_loads_and_validates_config(mock_db_handler: MagicMock) -> None:
-    """Load stored values as an instance of the configuration model."""
-    mock_db_handler.load.return_value = [
-        TableSharedConfigurations(
-            name="app-config",
-            config_model="AppConfig",
-            config={"worker_concurrency": 4},
-        )
-    ]
+def test_get_loads_and_validates_config_each_time(mock_db_handler: MagicMock) -> None:
+    """Load a stored configuration from the database and validate it on each lookup."""
+    configuration = TableSharedConfigurations(
+        name="app-config",
+        config_model="AppConfig",
+        config={"worker_concurrency": 4},
+    )
+    mock_db_handler.load.return_value = [configuration]
+    service = ConfigService()
 
-    registry = ConfigService()
-
-    config = registry.get("app-config")
+    config = service.get("app-config")
+    service.get("app-config")
 
     assert isinstance(config, AppConfig)
     assert config.worker_concurrency == 4
+    assert mock_db_handler.load.call_count == 3
 
 
-def test_registry_rejects_invalid_config_values(mock_db_handler: MagicMock) -> None:
+def test_get_rejects_invalid_config_values(mock_db_handler: MagicMock) -> None:
     """Reject stored values that do not validate against their configuration model."""
     mock_db_handler.load.return_value = [
         TableSharedConfigurations(
@@ -48,42 +49,19 @@ def test_registry_rejects_invalid_config_values(mock_db_handler: MagicMock) -> N
         )
     ]
 
+    service = ConfigService()
+
     with pytest.raises(ValidationError):
-        ConfigService()
+        service.get("app-config")
 
 
-def test_registry_reports_missing_configuration(mock_db_handler: MagicMock) -> None:
+def test_get_reports_missing_configuration(mock_db_handler: MagicMock) -> None:
     """Raise a clear lookup error when a configuration name is not registered."""
     mock_db_handler.load.return_value = []
-    registry = ConfigService()
+    service = ConfigService()
 
     with pytest.raises(KeyError, match="Configuration not found: missing"):
-        registry.get("missing")
-
-
-def test_registry_reload_replaces_stored_configurations(mock_db_handler: MagicMock) -> None:
-    """Replace cached entries when configurations are loaded again."""
-    mock_db_handler.load.return_value = [
-        TableSharedConfigurations(
-            name="old-config",
-            config_model="AppConfig",
-            config={},
-        )
-    ]
-    registry = ConfigService()
-
-    mock_db_handler.load.return_value = [
-        TableSharedConfigurations(
-            name="new-config",
-            config_model="AppConfig",
-            config={"worker_concurrency": 3},
-        )
-    ]
-    registry.store_and_validate()
-
-    with pytest.raises(KeyError, match="Configuration not found: old-config"):
-        registry.get("old-config")
-    assert registry.get("new-config").worker_concurrency == 3
+        service.get("missing")
 
 
 def test_registry_tracks_configurations_with_missing_models(
@@ -112,10 +90,11 @@ def test_registry_tracks_configurations_with_missing_models(
         MissingConfigRegistry,
     )
 
-    registry = ConfigService()
+    service = ConfigService()
 
-    assert registry.registry == {}
-    assert registry.failed_load == {"plugin-config": configuration}
+    assert service.failed_load == {"plugin-config": configuration}
+    with pytest.raises(UnavailableConfigError, match=r"plugin-config.*RemovedPluginConfig"):
+        service.get("plugin-config")
 
 
 def test_configuration_rejects_unknown_model() -> None:

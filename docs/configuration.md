@@ -4,9 +4,11 @@ In current version, configurations are stored in database without any encryption
 
 # Architecture
 
-Configurations are defined as pydantic models derived from the `BaseConfig` class and multiple configurations from the same model can be stored in the `TableSharedConfigurations` table under unique name and ID. Name is then used in the application to retrieve the configuration using the `get_config_by_name` function, which returns configuration as instance of its pydantic model. Application loads and caches all configurations on startup and it only reloads them when configuration is updated through the application interface. However, some updates require application restart to take full efect (configurations changing application worker behavior for example)
+Configurations are defined as pydantic models derived from the `BaseConfig` class and multiple configurations from the same model can be stored in the `TableSharedConfigurations` table under unique name and ID. Name is then used in the application to retrieve the configuration using the `get_config_by_name` function, which returns configuration as instance of its pydantic model. Some updates require application restart to take full efect (configurations changing application worker behavior for example)
 
 Reserved name for application configuration is `app-config`.
+
+Originally the configurations were cached in memory and this cache was reloaded only on changes. However we would have needed to track the changes through redis (so worker and app stays synchronized), so this feature was removed as we don't access the database that often anyway and it is just simpler.
 
 # In jobsies
 

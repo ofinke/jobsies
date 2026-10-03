@@ -33,8 +33,10 @@ def test_wrapper_run_dynamic_jobsie_delegates_to_runner(
 @patch("jobsies.celery_app.SchedulingService")
 def test_schedule_upcoming_jobsies_delegates_to_scheduler(
     mock_scheduler_service: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Tests that upcoming jobsies are passed to SchedulingService."""
+    monkeypatch.setattr("jobsies.celery_app.get_config_by_name", lambda _name: config)
     scheduler = mock_scheduler_service.return_value
     scheduler.define_next_jobsies.return_value = {}
 
@@ -51,8 +53,10 @@ def test_schedule_upcoming_jobsies_enqueues_defined_runs(
     mock_scheduler_service: MagicMock,
     mock_get_redis_handler: MagicMock,
     mock_task: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Tests that defined runs are locked and passed to Celery with their ETA."""
+    monkeypatch.setattr("jobsies.celery_app.get_config_by_name", lambda _name: config)
     run_time = datetime(2026, 9, 14, 13, 0, tzinfo=UTC)
     scheduler = mock_scheduler_service.return_value
     scheduler.define_next_jobsies.return_value = {42: [run_time]}

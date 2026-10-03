@@ -5,6 +5,7 @@ from loguru import logger
 from sqlalchemy.sql import Select
 
 from jobsies.database import DatabaseHandler, get_db_handler
+from jobsies.exceptions import UnavailableConfigError
 from jobsies.schemas.config import BaseConfig
 from jobsies.schemas.tables import TableSharedConfigurations
 
@@ -15,23 +16,23 @@ class ConfigService:
     """
     Service for retrieving and managing configurations.
 
-    It is accessed as a singleton entity through get_config_service function
+    It is accessed as a singleton entity through get_config_service function. Named configurations are then
+    retrieved by get_config_by_name function.
     """
 
     def __init__(self, db_handler: DatabaseHandler | None = None) -> None:
-        """On initialization, loads all available configurations from database and stores them in internal registry."""
+        """Initialize the service and record configurations with unavailable models."""
         self.db = db_handler or get_db_handler()
 
-        self.store_and_validate()
+        self._detect_failed_loads()
 
-    def store_and_validate(self) -> None:
-        """Loads configuration from database, validates it with appropriate models and stores it in the registry."""
-        registry: dict[str, BaseConfig] = {}
+    def _detect_failed_loads(self) -> None:
+        """Record configurations whose model is no longer registered."""
         failed_load: dict[str, TableSharedConfigurations] = {}
 
         for configuration in self.db.load(TableSharedConfigurations):
             try:
-                config_model = get_config_class_registry().get(configuration.config_model)
+                get_config_class_registry().get(configuration.config_model)
             except KeyError:
                 failed_load[configuration.name] = configuration
                 logger.warning(
@@ -40,9 +41,6 @@ class ConfigService:
                 )
                 continue
 
-            registry[configuration.name] = config_model.model_validate(configuration.config)
-
-        self.registry = registry
         self.failed_load = failed_load
 
     def list_configurations(self) -> list[TableSharedConfigurations]:
@@ -64,7 +62,7 @@ class ConfigService:
         config: dict,
         description: str | None = None,
     ) -> TableSharedConfigurations:
-        """Validate and persist a configuration, then refresh the cached registry."""
+        """Validate and persist a configuration."""
         name = name.strip()
         if not name:
             msg = "Configuration name cannot be empty"
@@ -77,7 +75,6 @@ class ConfigService:
             config=self._validate_config(config_model, config),
         )
         self.db.store([configuration])
-        self.store_and_validate()
         logger.info(f"Created configuration with ID {configuration.id} and name '{configuration.name}'")
         return configuration
 
@@ -90,7 +87,7 @@ class ConfigService:
         config: dict,
         description: str | None = None,
     ) -> TableSharedConfigurations | None:
-        """Validate and update a stored configuration, then refresh the cached registry."""
+        """Validate and update a stored configuration, then refresh failed-load detection."""
         existing = self.get_configuration(config_id)
         if existing is None:
             return None
@@ -111,18 +108,18 @@ class ConfigService:
                 "updated_at": datetime.now(UTC),
             },
         )
-        self.store_and_validate()
+        self._detect_failed_loads()
         logger.info(f"Updated configuration with ID {config_id}")
         return self.get_configuration(config_id)
 
     def delete_configuration(self, config_id: int) -> bool:
-        """Delete a stored configuration and refresh the cached registry."""
+        """Delete a stored configuration and refresh failed-load detection."""
         existing = self.get_configuration(config_id)
         if existing is None:
             return False
 
         self.db.delete(TableSharedConfigurations, filters={"id": config_id})
-        self.store_and_validate()
+        self._detect_failed_loads()
         logger.info(f"Deleted configuration with ID {config_id} and name '{existing.name}'")
         return True
 
@@ -134,12 +131,24 @@ class ConfigService:
 
     def get(self, name: str) -> BaseConfig:
         """Retrieve configuration by its name."""
-        try:
-            return self.registry[name]
-        except KeyError:
+        configurations = self.db.load(
+            TableSharedConfigurations,
+            statement=Select(TableSharedConfigurations).where(TableSharedConfigurations.name == name),
+        )
+        if not configurations:
             msg = f"Configuration not found: {name}"
             logger.error(msg)
             raise KeyError(msg) from None
+
+        configuration = configurations[0]
+        try:
+            config_class = get_config_class_registry().get(configuration.config_model)
+        except KeyError:
+            msg = f"Configuration '{name}' uses unavailable model: {configuration.config_model}"
+            logger.error(msg)
+            raise UnavailableConfigError(msg) from None
+
+        return config_class.model_validate(configuration.config)
 
 
 @functools.cache

@@ -1,10 +1,11 @@
 from collections.abc import Generator
 
-import jobsies.config as jobsies_config
+import jobsies.services.config_service as jobsies_config
 import pytest
 from jobsies.database import get_db_handler
 from jobsies.jobs import ExampleJobsie
 from jobsies.schemas.config import AppConfig, BaseConfig
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import StaticPool
@@ -55,9 +56,9 @@ def create_initial_definition(engine: Engine) -> None:
                 cron="0 * * * *",
                 retention="0",
                 input_kwargs={},
-                output_vars=ExampleJobsie.output_schema.model_json_schema(),
+                output_vars=ExampleJobsie.output_schema().model_json_schema(),
                 output_monitoring={},
-                enabled=True,
+                status=JobsieDefinitionStatus.ENABLED,
             )
         )
         session.commit()

@@ -31,7 +31,9 @@
   color: var(--text-subtle);
 }
 
-#definitions-table .table-def tbody td {
+#definitions-table .table-def tbody td,
+#configs-table .table-def tbody td,
+#config-schema .table-def tbody td {
   border-bottom: none;
   background-color: var(--row);
 }
@@ -40,7 +42,9 @@
   border-bottom: none;
 }
 
-#definitions-table .table-def tbody tr:hover td {
+#definitions-table .table-def tbody tr:hover td,
+#configs-table .table-def tbody tr:hover td,
+#config-schema .table-def tbody tr:hover td {
   background-color: var(--row-hover);
 }
 

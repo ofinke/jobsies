@@ -1,11 +1,14 @@
 import re
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 from freezegun import freeze_time
+from jobsies.database import get_db_handler
 from jobsies.fastapi_app import app
-from jobsies.schemas.tables import TableJobsiesOutputs
+from jobsies.schemas.tables import TableJobsiesOutputs, TableSharedConfigurations
+from jobsies.services.config_service import get_config_service
 
 
 @pytest.fixture(autouse=True)
@@ -124,6 +127,107 @@ def test_definitions_page_full_load(client: TestClient) -> None:
     assert "dialog-container" in html
 
 
+def test_configs_page_and_form_load(client: TestClient) -> None:
+    """Render the configs page and its create form successfully."""
+    page_response = client.get("/configs")
+    form_response = client.get("/configs/create")
+
+    assert page_response.status_code == 200
+    assert "text/html" in page_response.headers["content-type"]
+    assert form_response.status_code == 200
+    assert "text/html" in form_response.headers["content-type"]
+    assert 'name="description"' in form_response.text
+    assert form_response.text.index('name="description"') < form_response.text.index("Config (JSON)")
+
+
+def test_configs_table_warns_about_missing_models(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Show configurations whose plugin model is no longer registered."""
+    service = SimpleNamespace(
+        failed_load={"plugin-config": SimpleNamespace(config_model="RemovedPluginConfig")},
+        list_configurations=list,
+    )
+    monkeypatch.setattr("jobsies.api.web.components.config.get_config_service", lambda: service)
+
+    response = client.get("/configs/table")
+
+    assert response.status_code == 200
+
+
+def test_config_create_update_and_delete_reload_registry(client: TestClient) -> None:
+    """Keep the in-memory config registry synchronized with config mutations."""
+    created = client.post(
+        "/configs/create",
+        data={
+            "name": "web-test-config",
+            "config_model": "AppConfig",
+            "description": "Created description",
+            "config": '{"worker_concurrency": 4}',
+        },
+    )
+
+    assert created.status_code == 200
+    assert created.headers.get("HX-Trigger") == "config-created"
+    assert created.text.index("<th>Description</th>") > created.text.index("<th>Updated At</th>")
+    assert "<th>Config Model</th>" in created.text
+    assert "<td><code>AppConfig</code></td>" in created.text
+    assert "Created description" in created.text
+    assert get_config_service().get("web-test-config").worker_concurrency == 4
+
+    configuration = get_db_handler().load(TableSharedConfigurations)[0]
+    assert configuration.description == "Created description"
+    update_form = client.get(f"/configs/{configuration.id}/update")
+    assert 'name="description"' in update_form.text
+    assert "Created description" in update_form.text
+    updated = client.patch(
+        f"/configs/{configuration.id}",
+        data={
+            "name": "web-test-config",
+            "config_model": "AppConfig",
+            "description": "Updated description",
+            "config": '{"worker_concurrency": 5}',
+        },
+    )
+
+    assert updated.status_code == 200
+    assert updated.headers.get("HX-Trigger") == "config-updated"
+    assert "Updated description" in updated.text
+    assert get_db_handler().load(TableSharedConfigurations)[0].description == "Updated description"
+    assert get_config_service().get("web-test-config").worker_concurrency == 5
+
+    deleted = client.delete(f"/configs/{configuration.id}")
+
+    assert deleted.status_code == 200
+    with pytest.raises(KeyError):
+        get_config_service().get("web-test-config")
+
+
+def test_config_create_rejects_invalid_json(client: TestClient) -> None:
+    """Return an unprocessable response when config values are invalid JSON."""
+    response = client.post(
+        "/configs/create",
+        data={"name": "invalid-config", "config_model": "AppConfig", "config": "{invalid"},
+    )
+
+    assert response.status_code == 422
+
+
+def test_config_copy_form_loads(client: TestClient) -> None:
+    """Render a copied configuration form and report missing configurations."""
+    configuration = TableSharedConfigurations(
+        name="copy-source",
+        config_model="AppConfig",
+        config={"worker_concurrency": 2},
+    )
+    get_db_handler().store([configuration])
+
+    response = client.get(f"/configs/{configuration.id}/copy")
+    missing_response = client.get("/configs/999/copy")
+
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert missing_response.status_code == 404
+
+
 def test_definitions_table_component_partial_load(client: TestClient) -> None:
     """Tests GET /definition/table returns only partial table HTML."""
     response = client.get("/definition/table")
@@ -135,6 +239,7 @@ def test_definitions_table_component_partial_load(client: TestClient) -> None:
     assert "definitions-table" in html
     assert "Initial Test Config" in html
     assert "ExampleJobsie" in html
+    assert 'hx-get="/definition/1/copy"' in html
 
 
 def test_definitions_create_dialog_get(client: TestClient) -> None:
@@ -150,7 +255,9 @@ def test_definitions_create_dialog_get(client: TestClient) -> None:
     assert "input_kwargs" in html
     assert 'name="cron"' in html
     assert 'name="retention"' in html
-    assert 'name="enabled"' in html
+    assert 'name="status"' in html
+    assert 'value="enabled"' in html
+    assert 'value="disabled"' in html
 
 
 def test_definitions_create_post_success(client: TestClient) -> None:
@@ -161,7 +268,7 @@ def test_definitions_create_post_success(client: TestClient) -> None:
         "cron": "*/5 * * * *",
         "retention": "7d",
         "input_kwargs": '{"test_key": "test_val"}',
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.post("/definition/create", data=form_data)
     assert response.status_code == 200
@@ -180,7 +287,7 @@ def test_definitions_create_post_invalid_json(client: TestClient) -> None:
         "cron": "*/5 * * * *",
         "retention": "0",
         "input_kwargs": "{invalid_json",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.post("/definition/create", data=form_data)
     assert response.status_code == 422
@@ -199,7 +306,7 @@ def test_definitions_create_post_invalid_cron(client: TestClient) -> None:
         "cron": "not-a-cron",
         "retention": "0",
         "input_kwargs": "{}",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.post("/definition/create", data=form_data)
     assert response.status_code == 422
@@ -216,7 +323,7 @@ def test_definitions_update_post_invalid_json(client: TestClient) -> None:
         "cron": "0 * * * *",
         "retention": "0",
         "input_kwargs": "{invalid_json_kwargs",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 422
@@ -234,7 +341,7 @@ def test_definitions_update_post_invalid_cron(client: TestClient) -> None:
         "cron": "not-a-valid-cron",
         "retention": "0",
         "input_kwargs": "{}",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 422
@@ -253,17 +360,38 @@ def test_definitions_update_dialog_get(client: TestClient) -> None:
     assert "<dialog" in html
     assert "Update Jobsie Definition" in html
     assert 'value="Initial Test Config"' in html
-    assert 'name="enabled"' in html
+    assert 'name="status"' in html
+
+
+def test_definitions_copy_dialog_get(client: TestClient) -> None:
+    """Tests GET /definition/{id}/copy returns a prefilled create dialog."""
+    response = client.get("/definition/1/copy")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    html = response.text
+    assert "Create Jobsie Definition" in html
+    assert 'value="Initial Test Config (copy)"' in html
+    assert 'value="ExampleJobsie" selected' in html
+    assert 'value="0 * * * *"' in html
+    assert 'name="input_kwargs"' in html
+    assert 'name="status"' in html
+
+
+def test_definitions_copy_dialog_get_missing_definition(client: TestClient) -> None:
+    """Tests GET /definition/{id}/copy returns 404 for an unknown definition."""
+    response = client.get("/definition/999/copy")
+    assert response.status_code == 404
 
 
 def test_definitions_update_post_disable(client: TestClient) -> None:
-    """Tests PATCH /definition/{id} with unchecked enabled disables the definition."""
+    """Tests PATCH /definition/{id} with disabled status disables the definition."""
     form_data = {
         "name": "Updated Test Config",
         "subclass_name": "ExampleJobsie",
         "cron": "0 * * * *",
         "retention": "0",
         "input_kwargs": "{}",
+        "status": "disabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 200
@@ -273,14 +401,14 @@ def test_definitions_update_post_disable(client: TestClient) -> None:
 
 
 def test_definitions_update_post_enable(client: TestClient) -> None:
-    """Tests PATCH /definition/{id} with checked enabled enables the definition."""
+    """Tests PATCH /definition/{id} with enabled status enables the definition."""
     form_data = {
         "name": "Updated Test Config",
         "subclass_name": "ExampleJobsie",
         "cron": "0 * * * *",
         "retention": "0",
         "input_kwargs": "{}",
-        "enabled": "on",
+        "status": "enabled",
     }
     response = client.patch("/definition/1", data=form_data)
     assert response.status_code == 200

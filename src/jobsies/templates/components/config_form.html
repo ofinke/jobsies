@@ -1,0 +1,55 @@
+{% extends "components/dialog.html" %}
+
+{% block dialog_class %}config-dialog{% endblock %}
+
+{% block dialog_title %}{% if config_id %}Update{% else %}Create{% endif %} Config{% endblock %}
+
+{% block dialog_body %}
+<form
+  id="config-form"
+  {% if config_id %}hx-patch="{{ form_action }}"{% else %}hx-post="{{ form_action }}"{% endif %}
+  hx-target="#dialog-container"
+  hx-swap="innerHTML"
+  hx-on::before-swap="if(event.detail.xhr.status === 422) event.detail.shouldSwap = true"
+  hx-on::after-request="if(event.detail.successful) document.getElementById('dialog').remove()"
+>
+  {% set form_data = form_data | default({}) %}
+  {% set errors = errors | default([]) %}
+
+  {% if errors %}
+  <div class="form-errors">
+    {% for error in errors %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="form-group">
+    <label for="config-name"><b>Name</b></label>
+    <input type="text" id="config-name" name="name" required class="form-control" value="{{ form_data.get('name', '') }}">
+  </div>
+
+  <div class="form-group">
+    <label for="config-model"><b>Configuration Type</b></label>
+    <select id="config-model" name="config_model" required class="form-control">
+      {% for model_name in config_models %}
+      <option value="{{ model_name }}"{% if form_data.get('config_model', loop.first and model_name) == model_name %} selected{% endif %}>{{ model_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="config-description"><b>Description</b></label>
+    <textarea id="config-description" name="description" class="form-control" rows="3">{{ form_data.get('description', '') }}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="config-values"><b>Config (JSON)</b></label>
+    <textarea id="config-values" name="config" class="form-control" rows="16">{% if 'config' in form_data %}{{ form_data['config'] }}{% else %}{{ config_datatypes | tojson(indent=2) }}{% endif %}</textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-ghost btn-action">{% if config_id %}Update{% else %}Create{% endif %} Config</button>
+  </div>
+</form>
+{% endblock %}

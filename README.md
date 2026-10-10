@@ -4,6 +4,29 @@ Features:
 
 # Quickstart
 
+The application is designed to run in docker with several components: application, worker, and redis. This definition is declared in the `docker-compose.yml` file. To start the application, please first pull the repository
+
+```bash
+git clone
+```
+
+open `docker-compose.yml` and replace the `TZ_INFO` with your local timezone and map location of the `data` folder (change value of volumes) for database persistant storage. Then run
+
+```bash
+make up
+# or 
+docker compose up --build -d
+```
+
+Application will start and will be available by defaulf on port 8777: [http://127.0.0.1:8777](http://127.0.0.1:8777). Stop the whole stack by running
+
+```bash
+make down
+# or
+docker compose down
+```
+## Run the project locally
+
 To run the project locally, docker installation is assumed. The project can be run fully locally without it, but you need to supply redis instance and include it in `.env` file. Project is mainly controlled via the included `Makefile`, run
 
 ```bash
@@ -36,21 +59,7 @@ make run-app
 
 These commands creates redis instance using docker and starts both the worker and app. Application is then available at [localhost:8000](http://127.0.0.1:8000). Swagger documentation is available at [/docs](http://127.0.0.1:8000/docs). 
 
-## Containerized 
 
-Build and start the whole stack in docker (redis + worker + app) using
-
-```bash
-make up
-```
-
-The worker container mounts the local `./data` folder, so the database persists on the host. By default, the docker exposes app at the port 8777 - [http://127.0.0.1:8777](http://127.0.0.1:8777).
-
-Stop the whole stack by running
-
-```bash
-make down
-```
 # How to
 
 TBD (general introduction, how to create new jobsie).
@@ -61,4 +70,4 @@ Goal is to develop dockerized system consisting of celery worker for processing 
 
 # AI Contribution
 
-This project was co-developed with [opencode](https://opencode.ai/) using various models, mostly GPT-5.6-Luna, DeepSeek v4 Flash, and Gemini-3.7-Flash.
+This project was co-developed with [opencode](https://opencode.ai/) using various models, mostly GPT-6-Luna, GPT-5.6-Luna, DeepSeek v4 Flash, and Gemini-3.7-Flash.

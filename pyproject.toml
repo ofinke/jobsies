@@ -11,6 +11,7 @@ dependencies = [
     "celery[redis]>=5.6.3",
     "click>=8.4.2",
     "croniter>=6.2.4",
+    "cryptography>=50.0.1",
     "fast-flights>=3.1.0",
     "fastapi>=0.141.1",
     "httpx2>=2.10.0",
@@ -57,16 +58,13 @@ docstring-code-format = true
 
 [dependency-groups]
 dev = [
+    "deptry>=0.25.1",
     "freezegun>=1.5.5",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "radon>=6.0.1",
     "ruff>=0.16.1",
-    "wrapture>=1.0.0a22",
-]
-notebooks = [
-    "ipykernel>=7.3.0",
-    "jupyter>=1.1.1",
+    "vulture>=2.16",
 ]
 
 [tool.ruff.lint]

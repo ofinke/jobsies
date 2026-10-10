@@ -1,15 +1,15 @@
-# Overview
+In `Jobsies`, configurations are implemented as entities stored in the database. Configurations store credentials and other parameters that don't need to be updated very often, like credentials for services.
 
-In Jobsies, configurations are implemented as entities stored in the database. Configurations store credentials and other parameters that don't need to be updated very often.
+In current version, configurations are stored in database without any encryption.
 
-## Architecture
+# Architecture
 
-- Configs are defined as pydantic models derived from `BaseConfig` class
-- Each configuration is stored as a row in the `TableSharedConfigurations` table under a unique name and ID
-    - Configuration values are stored as JSON in the `config` column.
-- In the application, all configurations are accessible through a singleton instance of `ConfigRegistry` and retrieved by the `get_config_by_name` function
-    - Configurations are loaded and cached at the start of the application
-    - The cache is cleared whenever a configuration is updated through the application interface
-    - Some configuration changes require an application restart
-    - Retrieved configurations are validated by their models and returned as instances of those models
-    - The main application configuration is stored under the name `app-config`
+Configurations are defined as pydantic models derived from the `BaseConfig` class and multiple configurations from the same model can be stored in the `TableSharedConfigurations` table under unique name and ID. Name is then used in the application to retrieve the configuration using the `get_config_by_name` function, which returns configuration as instance of its pydantic model. Some updates require application restart to take full efect (configurations changing application worker behavior for example)
+
+Reserved name for application configuration is `app-config`.
+
+Originally the configurations were cached in memory and this cache was reloaded only on changes. However we would have needed to track the changes through redis (so worker and app stays synchronized), so this feature was removed as we don't access the database that often anyway and it is just simpler.
+
+# In jobsies
+
+Jobsies can have configurations and the schema of the configuration is retrievable using the `config_schema` classmethod. On startup, application checks if any configuration of that schema exist in the database, if not, jobsie is considered unavailable. However, it is up to the user to specify which named configuration to use and also specify when and how it is loaded during jobsie execution.

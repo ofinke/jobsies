@@ -1,3 +1,4 @@
+import time
 import traceback
 from uuid import uuid4
 
@@ -5,7 +6,9 @@ from loguru import logger
 from sqlalchemy.sql import Select
 
 from jobsies.database import get_db_handler
-from jobsies.jobs import get_jobsie_class
+from jobsies.exceptions import UnavailableJobsieError
+from jobsies.jobs import get_jobsie_registry
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.runner import RunnerExecutionMetadata
 from jobsies.schemas.tables import TableJobsiesDefinition, TableJobsiesOutputs
 
@@ -18,7 +21,7 @@ class RunnerService:
     """
 
     @property
-    def _default_execution_metadata() -> dict:
+    def _default_execution_metadata(self) -> RunnerExecutionMetadata:
         """Generates default execution metadata."""
         return RunnerExecutionMetadata(execution_id=str(uuid4()), execution_method="direct_call")
 
@@ -53,25 +56,32 @@ class RunnerService:
             msg = f"No jobsie config found with id {jobsie_id}"
             logger.error(msg)
             raise ValueError(msg)
-        return jobsie_configs[0]
+        jobsie_config = jobsie_configs[0]
+        if jobsie_config.status == JobsieDefinitionStatus.UNAVAILABLE:
+            msg = f"Jobsie with id {jobsie_id} is unavailable"
+            logger.error(msg)
+            raise UnavailableJobsieError(msg)
+        return jobsie_config
 
     def run_dynamic_jobsie(self, jobsie_id: int, *, execution_metadata: dict | None = None) -> None:
         """Executes jobsie based on its configuration ID and stores the output into database."""
         # If the execution layer doesn't provide execution_metadata, generate default ones or validate the input.
         if not execution_metadata:
-            execution_metadata = self._default_execution_metadata()
+            execution_metadata = self._default_execution_metadata
         else:
             execution_metadata = RunnerExecutionMetadata(**execution_metadata)
 
         # First we define empty config and output to handle cases where it fails somewhere
         jobsie_config = {}
         output = {}
+        execution_started_at = time.perf_counter()
 
         # Whole jobsie execution is done in a single Try / Except block so if anything fails, the attempt is logged
+        # We expect that the jobsie is executable (decision if it is is handled elsewhere)
         try:
             # selects correct class to execute
             jobsie_config = self._get_jobsie_configuration(jobsie_id)
-            cls = get_jobsie_class(jobsie_config.subclass_name)
+            cls = get_jobsie_registry().get(jobsie_config.subclass_name)
             instance = cls(**jobsie_config.input_kwargs)
 
             # executes the jobsie
@@ -85,6 +95,7 @@ class RunnerService:
             raise
 
         finally:
+            execution_metadata.duration = time.perf_counter() - execution_started_at
             # Convert model to dict for DB storage
             output_data = output.model_dump() if not isinstance(output, dict) else output
             # Store result in database

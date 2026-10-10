@@ -1,0 +1,15 @@
+<section id="installed-jobsies" class="text-content">
+  <h2>Installed Jobsies</h2>
+  <ul>
+    {% for jobsie in jobsies %}
+    <li>
+      <code>{{ jobsie.name }}</code> - {{ jobsie.docstring or "No class docstring available." }}
+      {% if jobsie.config_class %}
+      <p><strong>Requires configuration:</strong> <code>{{ jobsie.config_class }}</code></p>
+      {% endif %}
+    </li>
+    {% else %}
+    <li>No jobsie classes are installed.</li>
+    {% endfor %}
+  </ul>
+</section>

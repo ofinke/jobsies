@@ -1,3 +1,4 @@
+import time
 import traceback
 from uuid import uuid4
 
@@ -20,7 +21,7 @@ class RunnerService:
     """
 
     @property
-    def _default_execution_metadata() -> dict:
+    def _default_execution_metadata(self) -> RunnerExecutionMetadata:
         """Generates default execution metadata."""
         return RunnerExecutionMetadata(execution_id=str(uuid4()), execution_method="direct_call")
 
@@ -66,13 +67,14 @@ class RunnerService:
         """Executes jobsie based on its configuration ID and stores the output into database."""
         # If the execution layer doesn't provide execution_metadata, generate default ones or validate the input.
         if not execution_metadata:
-            execution_metadata = self._default_execution_metadata()
+            execution_metadata = self._default_execution_metadata
         else:
             execution_metadata = RunnerExecutionMetadata(**execution_metadata)
 
         # First we define empty config and output to handle cases where it fails somewhere
         jobsie_config = {}
         output = {}
+        execution_started_at = time.perf_counter()
 
         # Whole jobsie execution is done in a single Try / Except block so if anything fails, the attempt is logged
         # We expect that the jobsie is executable (decision if it is is handled elsewhere)
@@ -93,6 +95,7 @@ class RunnerService:
             raise
 
         finally:
+            execution_metadata.duration = time.perf_counter() - execution_started_at
             # Convert model to dict for DB storage
             output_data = output.model_dump() if not isinstance(output, dict) else output
             # Store result in database

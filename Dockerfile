@@ -1,6 +1,11 @@
 # syntax=docker/dockerfile:1
 FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim
 
+# Installs git (needed for plugin system)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -11,7 +16,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 RUN groupadd -g 1000 appuser && \
     useradd -u 1000 -g appuser -s /bin/sh -d /app appuser
 
-# Install third-party dependencies first to leverage Docker layer caching
+# Install third-party dependencies first
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
@@ -21,8 +26,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY docs ./docs
 COPY configs ./configs
-COPY entrypoint.sh ./
-RUN chmod +x entrypoint.sh
+COPY startup.sh ./
+RUN chmod +x startup.sh
 
 COPY src ./src
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -33,5 +38,5 @@ RUN mkdir -p /app/data && chown -R appuser:appuser /app
 
 USER appuser
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/startup.sh"]
 CMD ["worker"]

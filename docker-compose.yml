@@ -1,4 +1,5 @@
 services:
+  # Redis for message queue and scheduling
   redis:
     container_name: jobsies-redis
     image: redis:alpine
@@ -13,23 +14,38 @@ services:
       start_period: 10s
       retries: 3
 
+  # Creates and validates the database before the app and worker start
+  setup:
+    container_name: jobsies-setup
+    build: .
+    command: ["setup"]
+    restart: "no"
+    env_file:
+      - ./.env.container
+    volumes:
+      - ./data:/app/data
+
+  # Worker is responsible for durable execution
   worker:
     container_name: jobsies-worker
     build: .
     command: ["worker"]
     restart: unless-stopped
-    environment:
-      TZ_INFO: Europe/Prague
+    env_file:
+      - ./.env.container
     volumes:
       - ./data:/app/data
     depends_on:
       redis:
         condition: service_healthy
+      setup:
+        condition: service_completed_successfully
     deploy:
       resources:
         limits:
           memory: 1GB
 
+  # App handles user interface
   app:
     container_name: jobsies-app
     build: .
@@ -37,13 +53,15 @@ services:
     restart: unless-stopped
     ports:
       - "8777:8000"
-    environment:
-      TZ_INFO: Europe/Prague
+    env_file:
+      - ./.env.container
     volumes:
       - ./data:/app/data
     depends_on:
       redis:
         condition: service_healthy
+      setup:
+        condition: service_completed_successfully
     deploy:
       resources:
         limits:

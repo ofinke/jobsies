@@ -9,7 +9,7 @@ The development roughly follows this path
   - [X] v0.2.4 - Testing suite for the fastapi and Jobsie for scraping airpline ticket prices from google flights
   - [X] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
   - [X] v0.2.6 - Page for monitoring celery worker and jobsies scheduling (look at /sibson/redbeat as a celery scheduler) and mobile friendly UI
-- [ ] v0.3.0 - Reusable services, ~~generic configuration template for credentials~~, jobsies as a plugin system, monitoring results as charts, and db population on first start as part of entrypoint.sh script
+- [ ] v0.3.0 - Reusable services, ~~generic configuration template for credentials~~, jobsies as a plugin system, monitoring results as charts, and ~~db population on first start as part of entrypoint.sh script~~
   - [ ] v O.3.1 - cleanup of the project and figuring out what next
 
 # Features
@@ -26,9 +26,11 @@ Here is a list of features which I would like to include. Some will be later inc
 ## Some randoms
 - Add a copy button to the definitions actions
 - Figure out if I want to reuse the json with examples from model schema for configurations or I would rather use json with datatypes as example
+- Logs page which would show execution logs (focus on worker). Sinking logs to redis? Extracting directly from docker?
+- API fo configurations
 
 ## jobsies
-- Deepresearch agent
+- Deepresearch agent using the langgraph deepresearch?
 
 ## Small
 
@@ -38,6 +40,7 @@ Here is a list of features which I would like to include. Some will be later inc
 - Include copy and export as json buttons to the definition page
 - Figure out how to operate with jobsies and their runs after they are deleted (do I keep the run, what about the database id, does it get reused, do I show the results)
   - ID doesn't get reused from the database, don't know when I'm migrating the database for example.
+- When Iḿ not connected to the internet, the app doesn´t start, is it some fastapi stuff? Worker starts normally
 
 ## Large
 

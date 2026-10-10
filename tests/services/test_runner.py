@@ -2,7 +2,7 @@ import pytest
 from jobsies.database import get_db_handler
 from jobsies.exceptions import UnavailableJobsieError
 from jobsies.schemas.enums import JobsieDefinitionStatus
-from jobsies.schemas.tables import TableJobsiesDefinition
+from jobsies.schemas.tables import TableJobsiesDefinition, TableJobsiesOutputs
 from jobsies.services.runner import RunnerService
 
 
@@ -21,3 +21,15 @@ def test_get_jobsie_configuration_raises_for_unavailable_jobsie() -> None:
 
     with pytest.raises(UnavailableJobsieError, match="is unavailable"):
         RunnerService()._get_jobsie_configuration(jobsie_config.id)
+
+
+@pytest.mark.usefixtures("seeded_definition")
+def test_run_dynamic_jobsie_stores_execution_duration(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Store the measured jobsie execution duration in output metadata."""
+    timestamps = iter((10.0, 12.5))
+    monkeypatch.setattr("jobsies.services.runner.time.perf_counter", lambda: next(timestamps))
+
+    RunnerService().run_dynamic_jobsie(1)
+
+    output = get_db_handler().load(TableJobsiesOutputs)[0]
+    assert output.execution_metadata["duration"] == 2.5

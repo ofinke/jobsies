@@ -13,7 +13,7 @@ from .base import TableDefaultModel
 class TableJobsiesDefinition(TableDefaultModel, table=True):
     """Table for defining jobsies."""
 
-    __tablename__ = "definitions_jobsies"
+    __tablename__ = "jobsies_definitions"
 
     name: str = Field(
         sa_column=Column(Text, nullable=False),

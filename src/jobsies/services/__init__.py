@@ -5,6 +5,7 @@ from .output import OutputService
 from .redis import RedisHandler, get_redis_handler
 from .runner import RunnerService
 from .scheduler import SchedulingService
+from .trends import TrendsService
 
 __all__ = [
     "ConfigService",
@@ -13,6 +14,7 @@ __all__ = [
     "RedisHandler",
     "RunnerService",
     "SchedulingService",
+    "TrendsService",
     "get_config_by_name",
     "get_config_class_registry",
     "get_config_service",

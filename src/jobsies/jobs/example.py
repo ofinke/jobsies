@@ -1,3 +1,5 @@
+from random import randint
+
 from loguru import logger
 
 from jobsies.schemas.jobs import BaseJobsieInput, ExampleJobsieOutput
@@ -6,7 +8,7 @@ from .base import BaseJobsie
 
 
 class ExampleJobsie(BaseJobsie):
-    """An example jobsie returns string 'Hello World!'."""
+    """An example jobsie returns 'Hello World!' and a random integer."""
 
     @classmethod
     def config_schema(cls) -> None:
@@ -25,4 +27,4 @@ class ExampleJobsie(BaseJobsie):
     def execute(self) -> ExampleJobsieOutput:
         """Retrieves status and content of example.com."""
         logger.debug("Example jobsie executed!")
-        return self.output_schema()(content="Hello World!")
+        return self.output_schema()(content="Hello World!", number=randint(0, 9))  # noqa: S311

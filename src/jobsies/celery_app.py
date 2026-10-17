@@ -1,5 +1,3 @@
-from typing import Any
-
 from celery import Celery
 from loguru import logger
 
@@ -39,7 +37,7 @@ app.conf.beat_schedule = {
 }
 
 
-def celery_app_status() -> dict[str, Any]:
+def celery_app_status() -> dict[str, object]:
     """Return the status and uptime of the Celery worker."""
     status = {"alive": False, "uptime": "Unavailable"}
     try:

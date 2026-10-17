@@ -6,6 +6,7 @@ from jobsies.api.v1 import jobsies_definition_router, jobsies_execution_router, 
 from jobsies.api.web import (
     definition_component_router,
     results_component_router,
+    trends_component_router,
     web_pages_router,
     worker_component_router,
 )
@@ -30,6 +31,7 @@ def client() -> TestClient:
         web_pages_router,
         definition_component_router,
         results_component_router,
+        trends_component_router,
         worker_component_router,
     ],
 )
@@ -57,6 +59,8 @@ def test_static_files_are_mounted(client: TestClient) -> None:
     assert len(static_mounts) == 1
     assert static_mounts[0].path == "/static"
     assert client.get("/static/css/style.css").status_code == 200
+    assert client.get("/static/js/vendor/chart.umd.min.js").status_code == 200
+    assert client.get("/static/js/trends.js").status_code == 200
 
 
 def test_lifespan_refreshes_executability_statuses(monkeypatch: pytest.MonkeyPatch) -> None:

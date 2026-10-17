@@ -116,6 +116,7 @@ async def definition_get_copy_form(request: Request, definition_id: int) -> HTML
         "retention": definition.retention,
         "status": definition.status,
         "input_kwargs": json.dumps(definition.input_kwargs, indent=2),
+        "output_monitoring": json.dumps(definition.output_monitoring, indent=2),
     }
     logger.debug(f"Endpoint executed: GET /definition/{definition_id}/copy")
     return templates.TemplateResponse(

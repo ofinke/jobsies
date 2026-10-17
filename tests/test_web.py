@@ -1,6 +1,8 @@
+import json
 import re
 from datetime import UTC, datetime
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,6 +10,7 @@ from freezegun import freeze_time
 from jobsies.database import get_db_handler
 from jobsies.fastapi_app import app
 from jobsies.schemas.tables import TableJobsiesOutputs, TableSharedConfigurations
+from jobsies.services import DefinitionService, TrendsService
 from jobsies.services.config_service import get_config_service
 
 
@@ -20,6 +23,43 @@ def seed_database(seeded_definition: None) -> None:
 def client() -> TestClient:
     """Returns a TestClient instance for the FastAPI application."""
     return TestClient(app)
+
+
+@pytest.fixture
+def example_jobsie_monitoring() -> dict[str, Any]:
+    """Provide a valid monitor configuration for ExampleJobsie's numeric output."""
+    return {
+        "version": 1,
+        "monitors": [
+            {
+                "title": "Number history",
+                "field": "/number",
+                "visualization": "line",
+                "window": {"type": "last_executions", "count": 10},
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def monitored_example_jobsie(example_jobsie_monitoring: dict[str, Any]) -> SimpleNamespace:
+    """Provide a monitored ExampleJobsie definition for trends page tests."""
+    return SimpleNamespace(id=2, name="ExampleJobsie numbers", output_monitoring=example_jobsie_monitoring)
+
+
+@pytest.fixture
+def example_jobsie_trend(example_jobsie_monitoring: dict[str, Any]) -> dict[str, Any]:
+    """Provide mocked trend data matching the ExampleJobsie monitor configuration."""
+    monitor = example_jobsie_monitoring["monitors"][0]
+    return {
+        "version": 1,
+        "monitors": [
+            {
+                **monitor,
+                "data": {"timestamp": ["2026-10-17T12:00:00+00:00"], "value": [4]},
+            },
+        ],
+    }
 
 
 def test_index_page(client: TestClient) -> None:
@@ -56,6 +96,50 @@ def test_latest_results_formats_created_at(client: TestClient, monkeypatch: pyte
 
     assert response.status_code == 200
     assert f"a minute ago ({created_at_formatted})" in response.text
+
+
+def test_trends_endpoint_renders_monitored_jobsies_as_single_column_widgets(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    monitored_example_jobsie: SimpleNamespace,
+    example_jobsie_trend: dict[str, Any],
+) -> None:
+    """Render a name and raw trend JSON for each definition with monitors configured."""
+    unmonitored = SimpleNamespace(id=3, name="Unmonitored jobsie", output_monitoring={})
+    monkeypatch.setattr(
+        DefinitionService,
+        "list_definitions",
+        lambda _service: [monitored_example_jobsie, unmonitored],
+    )
+    monkeypatch.setattr(
+        TrendsService,
+        "get_output_trend",
+        lambda _service, jobsie_id: example_jobsie_trend if jobsie_id == monitored_example_jobsie.id else None,
+    )
+
+    response = client.get("/trends/latest")
+
+    assert response.status_code == 200
+    assert "#2" in response.text
+    assert "ExampleJobsie numbers" in response.text
+    assert "Unmonitored jobsie" not in response.text
+    assert 'class="trend-card"' in response.text
+    assert "data-trend-chart" in response.text
+    assert "data-points=" in response.text
+    assert "View raw data" not in response.text
+    assert "Number history" in response.text
+
+
+def test_trends_page_loads_widgets_via_htmx(client: TestClient) -> None:
+    """Load trends widgets asynchronously and provide a refresh control."""
+    response = client.get("/trends")
+
+    assert response.status_code == 200
+    assert 'hx-get="/trends/latest"' in response.text
+    assert 'hx-trigger="load"' in response.text
+    assert 'hx-target="#trends-list"' in response.text
+    assert 'src="/static/js/vendor/chart.umd.min.js"' in response.text
+    assert 'src="/static/js/trends.js"' in response.text
 
 
 def test_worker_status_renders_all_components(
@@ -253,6 +337,7 @@ def test_definitions_create_dialog_get(client: TestClient) -> None:
     assert "subclass_name" in html
     assert "ExampleJobsie" in html
     assert "input_kwargs" in html
+    assert 'name="output_monitoring"' in html
     assert 'name="cron"' in html
     assert 'name="retention"' in html
     assert 'name="status"' in html
@@ -260,7 +345,10 @@ def test_definitions_create_dialog_get(client: TestClient) -> None:
     assert 'value="disabled"' in html
 
 
-def test_definitions_create_post_success(client: TestClient) -> None:
+def test_definitions_create_post_success(
+    client: TestClient,
+    example_jobsie_monitoring: dict[str, Any],
+) -> None:
     """Tests POST /definition/create creates a new definition and returns updated table."""
     form_data = {
         "name": "New Test Jobsie",
@@ -268,6 +356,7 @@ def test_definitions_create_post_success(client: TestClient) -> None:
         "cron": "*/5 * * * *",
         "retention": "7d",
         "input_kwargs": '{"test_key": "test_val"}',
+        "output_monitoring": json.dumps(example_jobsie_monitoring),
         "status": "enabled",
     }
     response = client.post("/definition/create", data=form_data)
@@ -361,6 +450,7 @@ def test_definitions_update_dialog_get(client: TestClient) -> None:
     assert "Update Jobsie Definition" in html
     assert 'value="Initial Test Config"' in html
     assert 'name="status"' in html
+    assert 'name="output_monitoring"' in html
 
 
 def test_definitions_copy_dialog_get(client: TestClient) -> None:
@@ -374,6 +464,7 @@ def test_definitions_copy_dialog_get(client: TestClient) -> None:
     assert 'value="ExampleJobsie" selected' in html
     assert 'value="0 * * * *"' in html
     assert 'name="input_kwargs"' in html
+    assert 'name="output_monitoring"' in html
     assert 'name="status"' in html
 
 

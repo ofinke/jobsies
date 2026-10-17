@@ -4,6 +4,19 @@
         "subclass_name": "ExampleJobsie",
         "cron": "0 * * * *",
         "input_kwargs": {},
-        "output_monitoring": {}
+        "output_monitoring": {
+            "version": 1,
+            "monitors": [
+                {
+                    "title": "Number",
+                    "field": "/number",
+                    "visualization": "line",
+                    "window": {
+                        "type": "last_executions",
+                        "count": 30
+                    }
+                }
+            ]
+        }
     }
 ]

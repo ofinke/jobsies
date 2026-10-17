@@ -1,6 +1,5 @@
 from datetime import UTC, datetime
 from math import isfinite
-from typing import Any
 
 import pytz
 from sqlmodel import select
@@ -57,7 +56,7 @@ class TrendsService:
             return None
         return value
 
-    def get_output_trend(self, jobsie_id: int) -> dict[str, Any] | None:
+    def get_output_trend(self, jobsie_id: int) -> dict[str, object] | None:
         """Build chart data for a Jobsie definition from its configured output monitors."""
         definitions = self.db.load(
             TableJobsiesDefinition,
@@ -68,7 +67,7 @@ class TrendsService:
 
         raw_monitoring = definitions[0].output_monitoring
         monitoring = OutputMonitoringDefinition.model_validate(raw_monitoring or {"version": 1, "monitors": []})
-        result: dict[str, Any] = {"version": monitoring.version, "monitors": []}
+        result: dict[str, object] = {"version": monitoring.version, "monitors": []}
         if not monitoring.monitors:
             return result
 

@@ -32,11 +32,11 @@ class JobsieDefinitionBase(BaseModel):
         description="Retention configuration in format 30d, etc.",
         examples=["0"],
     )
-    input_kwargs: dict[str, Any] = Field(
+    input_kwargs: dict[str, object] = Field(
         default_factory=dict,
         description="Dictionary of input variables for the jobsie",
     )
-    output_monitoring: dict[str, Any] = Field(
+    output_monitoring: dict[str, object] = Field(
         default_factory=dict,
         description="How we want to monitor results in frontend",
     )

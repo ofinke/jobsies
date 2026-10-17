@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 import redis
 from fastapi import APIRouter
@@ -31,7 +30,7 @@ def _humanize_uptime(uptime: float | str) -> str:
     return precisedelta(uptime, minimum_unit="seconds")
 
 
-def _get_next_tasks() -> list[dict[str, Any]]:
+def _get_next_tasks() -> list[dict[str, object]]:
     """Return the next scheduled jobsies for the following 24 hours."""
     task_limit = 15
     service = SchedulingService()
@@ -83,7 +82,7 @@ def _get_exceptions() -> list[dict[str, int | str]]:
     return OutputService().get_exception_counts()
 
 
-def _get_app_status() -> tuple[dict[str, Any], dict[str, Any]]:
+def _get_app_status() -> tuple[dict[str, object], dict[str, object]]:
     """Return Redis and Celery worker status data."""
     # First retrieve status of redis client
     redis_handler = get_redis_handler(settings.broker_redis_url)

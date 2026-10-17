@@ -22,10 +22,6 @@ class OutputMonitor(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    # id: str = Field(
-    #     min_length=1,
-    #     description="Stable identifier for this monitor within its definition.",
-    # )
     title: str = Field(
         min_length=1,
         description="Human-readable chart title.",
@@ -34,7 +30,7 @@ class OutputMonitor(BaseModel):
         min_length=1,
         pattern=r"^(?:/(?:[^~/]|~[01])*)+$",
         description="JSON Pointer to the output field being monitored.",
-        examples=["/price_czk"],
+        examples=["/number"],
     )
     visualization: Literal["line"] = Field(
         description="Chart visualization to use for the selected output field.",

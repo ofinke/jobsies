@@ -2,7 +2,6 @@ import base64
 import functools
 import json
 from datetime import datetime
-from typing import Any
 
 import redis
 
@@ -22,7 +21,7 @@ class RedisHandler:
         """Attempt to acquire an enqueue lock for the specified timeout."""
         return bool(self.client.set(lock_key, "enqueued", nx=True, ex=lock_timeout))
 
-    def client_status(self) -> dict[str, Any]:
+    def client_status(self) -> dict[str, object]:
         """Return Redis liveness and broker diagnostics."""
         try:
             alive = bool(self.client.ping())

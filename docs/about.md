@@ -1,4 +1,4 @@
-🛠️ `Jobsies` is a self-hosted application designed to run scheduled tasks (called jobsies) on your home server. These tasks can be anything you are willing to program yourself, scrape price of a product you are interested in, or create reports on data from various sources. Here, you can find documentation of the project which focuses on high-level description of the program, explaining core concepts, and helping you to get started.
+🛠️ `Jobsies` is a self-hosted application designed to run scheduled tasks (called jobsies) on your server. These tasks can be anything you are willing to program yourself, scrape price of a product you are interested in, or create reports on data from various sources. Here, you can find documentation of the project which focuses on high-level description of the functionality, explaining core concepts, and helping you to get started.
 
 # Glossary
 - `Jobsie` refers to the whole project

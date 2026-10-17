@@ -16,6 +16,7 @@ DOCUMENTATION_PAGES = {
     "about": {"label": "About", "filename": "about.md"},
     "plugins": {"label": "Plugins", "filename": "plugins.md"},
     "configuration": {"label": "Configuration", "filename": "configuration.md"},
+    "trends": {"label": "Trends", "filename": "trends.md"},
     "services": {"label": "Services", "filename": "services.md"},
 }
 

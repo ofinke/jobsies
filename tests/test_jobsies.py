@@ -1,9 +1,17 @@
 from types import SimpleNamespace
 
 import pytest
-from jobsies.jobs import BaseJobsie, JobsieRegistry
+from jobsies.jobs import BaseJobsie, ExampleJobsie, JobsieRegistry
 from jobsies.schemas.config import BaseConfig
 from jobsies.schemas.jobs import BaseJobsieInput, BaseJobsieOutput
+
+
+def test_example_jobsie_returns_random_number() -> None:
+    """Return the example content and a number within the configured range."""
+    output = ExampleJobsie().execute()
+
+    assert output.content == "Hello World!"
+    assert 0 <= output.number <= 9
 
 
 def test_jobsie_registry_loads_valid_plugin(monkeypatch: pytest.MonkeyPatch) -> None:

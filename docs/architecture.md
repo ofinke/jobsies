@@ -1,9 +1,4 @@
----
-
----
-
 Bellow you can find important architecture diagrams and high level ideas on how `jobsies` are implemented. 
-
 
 ## Manifest
 
@@ -41,7 +36,52 @@ where trigger can be: scheduled execution, API call, or user pressing the run bu
 
 ## Database
 
-Tables schemas:
+```mermaid
+erDiagram
+    direction LR
+
+    jobsies_definitions ||--o{ jobsies_outputs : "jobsie_id (logical reference; not enforced)"
+
+    jobsies_definitions {
+        int id PK
+        datetime created_at "nullable"
+        datetime updated_at "nullable"
+        text name
+        text subclass_name
+        text cron
+        text retention
+        json input_kwargs
+        json output_vars
+        json output_monitoring
+        text status
+    }
+
+    jobsies_outputs {
+        int id PK
+        datetime created_at "nullable"
+        datetime updated_at "nullable"
+        text jobsie_name
+        int jobsie_id
+        text execution_id
+        datetime retention "nullable"
+        boolean success
+        json output_data
+        json execution_metadata
+    }
+```
+
+```mermaid
+erDiagram
+    shared_configurations {
+        int id PK
+        datetime created_at "nullable"
+        datetime updated_at "nullable"
+        text name UK
+        text description "nullable"
+        text config_model
+        text config "encrypted JSON when configured"
+    }
+```
 
 
 ## Plugin system

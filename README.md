@@ -1,6 +1,9 @@
-🛠️ Jobsies is a self-hosted tool designed to automatically run simple jobs on the internet; scrape price of a product you are interested in, monitor websites for new events, or anything you are willing to program yourself.
+🛠️ `Jobsies` is a self-hosted application designed to run scheduled tasks (called jobsies) on your server. These tasks can be anything you are willing to develop yourself, scrape price of a product you are interested in, or create reports on data from various sources. Here, you can find documentation of the project which focuses on high-level description of the functionality, explaining core concepts, and helping you to get started.
 
-Features:
+**Features:**
+  - Simple HTMX based fronted to monitor results and plan your jobsies execution via cron based scheduler
+  - Plugin system for jobsies. Develop and install only jobsies you want to have
+    - You want to implement your own jobsie? look at the [jobsies-template](https://github.com/ofinke/jobsies-template) repository for guide how to do that
 
 # Quickstart
 

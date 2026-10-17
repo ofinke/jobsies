@@ -1,6 +1,6 @@
 {% extends "menu.html" %}
 
-{% block title %}Jobsies - Results{% endblock %}
+{% block title %}Jobsies - Trends{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -8,8 +8,24 @@
         <h1>Jobsies Trends</h1>
         <p class="subtitle">Monitor trends in the Jobsies results.</p>
     </div>
+    <div class="actions">
+        {% include "components/status_bar.html" %}
+        <button class="btn btn-sm btn-ghost btn-action"
+                hx-get="/trends/latest"
+                hx-target="#trends-list"
+                hx-swap="outerHTML"
+                title="Refresh"
+                aria-label="Refresh">
+            Refresh
+        </button>
+    </div>
 </div>
-<p>
-    To be implemented
-</p>
+<div id="trends-list" class="trends-list" hx-get="/trends/latest" hx-trigger="load" hx-swap="outerHTML">
+    <p class="text-center">Loading...</p>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/static/js/vendor/chart.umd.min.js" defer></script>
+<script src="/static/js/trends.js" defer></script>
 {% endblock %}

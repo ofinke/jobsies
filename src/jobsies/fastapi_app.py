@@ -12,6 +12,7 @@ from jobsies.api.web import (
     definition_component_router,
     documentation_component_router,
     results_component_router,
+    trends_component_router,
     web_pages_router,
     worker_component_router,
 )
@@ -60,4 +61,5 @@ app.include_router(definition_component_router)
 app.include_router(config_component_router)
 app.include_router(documentation_component_router)
 app.include_router(results_component_router)
+app.include_router(trends_component_router)
 app.include_router(worker_component_router)

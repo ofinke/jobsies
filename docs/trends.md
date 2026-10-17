@@ -1,0 +1,1 @@
+Trends page serves for monitoring trends in your jobsies outputs. 

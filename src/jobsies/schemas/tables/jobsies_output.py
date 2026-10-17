@@ -13,7 +13,7 @@ from .base import TableDefaultModel
 class TableJobsiesOutputs(TableDefaultModel, table=True):
     """Table for storing results from Jobsies executions."""
 
-    __tablename__ = "data_outputs"
+    __tablename__ = "jobsies_outputs"
 
     # Information about jobsie executed
     jobsie_name: str = Field(

@@ -21,12 +21,14 @@
 
 .definition-form-inputs {
   display: flex;
+  flex-direction: column;
 }
 
 .definition-form-inputs .form-group {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
 }
 
 .definition-form-inputs textarea.form-control {

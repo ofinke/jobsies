@@ -1,6 +1,7 @@
 import pytest
 from jobsies.database import get_db_handler
 from jobsies.exceptions import UnavailableJobsieError
+from jobsies.jobs import ExampleJobsie, get_jobsie_registry
 from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition, TableJobsiesOutputs
 from jobsies.services.runner import RunnerService
@@ -33,3 +34,21 @@ def test_run_dynamic_jobsie_stores_execution_duration(monkeypatch: pytest.Monkey
 
     output = get_db_handler().load(TableJobsiesOutputs)[0]
     assert output.execution_metadata["duration"] == 2.5
+
+
+@pytest.mark.usefixtures("seeded_definition")
+def test_run_dynamic_jobsie_skips_storage_when_result_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Skip storing output when the jobsie opts out of result persistence."""
+
+    class IgnoreResultJobsie(ExampleJobsie):
+        def __init__(self) -> None:
+            """Initialize the jobsie with result persistence disabled."""
+            super().__init__()
+            self.ignore_result = True
+
+    registry = get_jobsie_registry()
+    monkeypatch.setitem(registry.registry, "ExampleJobsie", IgnoreResultJobsie)
+
+    RunnerService().run_dynamic_jobsie(1)
+
+    assert get_db_handler().load(TableJobsiesOutputs) == []

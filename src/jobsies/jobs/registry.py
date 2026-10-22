@@ -71,19 +71,16 @@ class JobsieRegistry:
             return f"expected a BaseJobsie subclass, got {loaded!r}"
 
         schema_types = (
-            ("input_schema", BaseJobsieInput, False),
-            ("output_schema", BaseJobsieOutput, False),
-            ("config_schema", BaseConfig, True),
+            ("input_model", BaseJobsieInput, False),
+            ("output_model", BaseJobsieOutput, False),
+            ("config_model", BaseConfig, True),
         )
-        for method_name, schema_base, optional in schema_types:
-            try:
-                schema = getattr(loaded, method_name)()
-            except Exception as error:  # noqa: BLE001
-                return f"{method_name}() raised {error!r}"
+        for attribute_name, schema_base, optional in schema_types:
+            schema = getattr(loaded, attribute_name, None)
             if optional and schema is None:
                 continue
             if not isinstance(schema, type) or not issubclass(schema, schema_base):
-                return f"{method_name}() must return a {schema_base.__name__} subclass"
+                return f"{attribute_name} must be a {schema_base.__name__} subclass"
 
         return None
 

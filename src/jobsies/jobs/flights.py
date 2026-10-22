@@ -23,23 +23,12 @@ MIN_CONSENT_FORMS = 2
 class FlightPriceJobsie(BaseJobsie):
     """Jobsie for retrieving flight prices using the fast_flight google flights scraper."""
 
-    @classmethod
-    def config_schema(cls) -> None:
-        """Returns None as this jobsie doesn't have any configuration."""
-
-    @classmethod
-    def output_schema(cls) -> type[FlightPriceJobsieOutput]:
-        """Return this jobsie's output model class."""
-        return FlightPriceJobsieOutput
-
-    @classmethod
-    def input_schema(cls) -> type[FlightPriceJobsieInput]:
-        """Return this jobsie's input model class."""
-        return FlightPriceJobsieInput
+    input_model = FlightPriceJobsieInput
+    output_model = FlightPriceJobsieOutput
 
     def __init__(self, **kwargs: object) -> None:
         """Validate and store the complete fast-flights query configuration."""
-        self.input = self.input_schema()(**kwargs)
+        self.input = self.input_model(**kwargs)
 
     @staticmethod
     def _get_flights_after_consent(query: Query) -> ResultList:
@@ -109,7 +98,7 @@ class FlightPriceJobsie(BaseJobsie):
         result = self._get_flights(query)
 
         found_flights = [FlightsOutput(**asdict(flight)) for flight in result]
-        return self.output_schema()(
+        return self.output_model(
             **self._calculate_cheapest(found_flights),
             flights=found_flights,
         )

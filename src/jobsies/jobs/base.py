@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 from jobsies.schemas.config.base import BaseConfig
 from jobsies.schemas.jobs.base import BaseJobsieInput, BaseJobsieOutput
@@ -7,24 +8,19 @@ from jobsies.schemas.jobs.base import BaseJobsieInput, BaseJobsieOutput
 class BaseJobsie(ABC):
     """Base abstract class for Jobsies, all jobsies are children of this class."""
 
+    # Required model attributes are validated when external Jobsies are registered.
+    input_model: ClassVar[type[BaseJobsieInput]]
+    output_model: ClassVar[type[BaseJobsieOutput]]
+    config_model: ClassVar[type[BaseConfig] | None] = None
+
     def __init__(self) -> None:
-        """Does something."""
-        super().__init__()
+        """
+        Initializes jobsie with default behaviour.
 
-    @classmethod
-    @abstractmethod
-    def config_schema(cls) -> type[BaseConfig] | None:
-        """Return schema of jobsie configuration if it exists, or None if it doesnt."""
-
-    @classmethod
-    @abstractmethod
-    def output_schema(cls) -> type[BaseJobsieOutput]:
-        """Return the output model class for this Jobsie."""
-
-    @classmethod
-    @abstractmethod
-    def input_schema(cls) -> type[BaseJobsieInput]:
-        """Return the input model class for this Jobsie."""
+        By default behaviour, jobsie result is stored in the database.
+        """
+        # False = store result in database, True = skip result
+        self.ignore_result: bool = False
 
     @abstractmethod
     def execute(self) -> BaseJobsieOutput:

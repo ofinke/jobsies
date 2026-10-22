@@ -74,6 +74,7 @@ class RunnerService:
         # First we define empty config and output to handle cases where it fails somewhere
         jobsie_config = {}
         output = {}
+        ignore_result = False
         execution_started_at = time.perf_counter()
 
         # Whole jobsie execution is done in a single Try / Except block so if anything fails, the attempt is logged
@@ -83,6 +84,7 @@ class RunnerService:
             jobsie_config = self._get_jobsie_configuration(jobsie_id)
             cls = get_jobsie_registry().get(jobsie_config.subclass_name)
             instance = cls(**jobsie_config.input_kwargs)
+            ignore_result = instance.ignore_result
 
             # executes the jobsie
             output = instance.execute()
@@ -96,7 +98,8 @@ class RunnerService:
 
         finally:
             execution_metadata.duration = time.perf_counter() - execution_started_at
-            # Convert model to dict for DB storage
-            output_data = output.model_dump() if not isinstance(output, dict) else output
-            # Store result in database
-            self._upload_result_to_db(jobsie_config, output_data, execution_metadata)
+            if not ignore_result:
+                # Convert model to dict for DB storage
+                output_data = output.model_dump() if not isinstance(output, dict) else output
+                # Store result in database
+                self._upload_result_to_db(jobsie_config, output_data, execution_metadata)

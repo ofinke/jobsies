@@ -21,7 +21,7 @@ The application consists of a FastAPI server, Celery worker, Redis, and SQLite d
 
 - Jobsies - `src/jobsies/jobs` folder - repeatable tasks derived from the `BaseJobsie` class. On startup, the application registers all instances of the base class in the `JobsieRegistry`. Jobsies have defined input and output data models derived from the `BaseJobsieInput` and `BaseJobsieOutput` models.
 - Settings - `src/jobsies/settings.py` - contains a unified interface for environment variables. These are used only for the server and worker runtime
-- Schemas - `src/jobsies/schemas` folder - contains all Pydantic models and SQLModel definitions
+- Schemas - `src/jobsies/schemas` folder - contains most Pydantic models and SQLModel definitions
 - Services - `src/jobsies/services` folder - various reusable services that are either required by the application itself or can be used in jobsies
 - Configurations - `src/jobsies/services/config_service.py` - special service for handling various configurations for the application or for jobsies. Configurations can contain secrets and are the preferred method for storing them for jobsies. Configurations are stored as named entities in the database and are validated by their specific Pydantic models derived from the `BaseConfig` class. `BaseConfig` is exposed to the plugin system.
 - Lightweight documentation for some components can be found in `/docs` folder.

@@ -24,4 +24,8 @@ class BaseJobsie(ABC):
 
     @abstractmethod
     def execute(self) -> BaseJobsieOutput:
-        """Actually does something."""
+        """
+        Contains jobsie execution logic.
+
+        Returns instance of data validated by corresponding output_model
+        """

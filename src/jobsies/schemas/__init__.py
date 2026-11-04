@@ -4,10 +4,13 @@ from .api.definition import (
     RequestJobsieDefinitionUpdate,
     ResponseJobsieExecute,
 )
+from .mail import ReceivedMail, SendMail
 
 __all__ = [
     "JobsieDefinitionBase",
+    "ReceivedMail",
     "RequestJobsieDefinitionCreate",
     "RequestJobsieDefinitionUpdate",
     "ResponseJobsieExecute",
+    "SendMail",
 ]

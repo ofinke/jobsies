@@ -122,7 +122,7 @@ def _seed_default_jobsies(engine: Engine) -> None:
                 continue
 
             jobsie_class = jobsie_registry.get(definition["subclass_name"])
-            definition["output_vars"] = jobsie_class.output_schema().model_json_schema()
+            definition["output_vars"] = jobsie_class.output_model.model_json_schema()
             session.add(TableJobsiesDefinition(**definition))
             seeded_names.append(definition["name"])
 

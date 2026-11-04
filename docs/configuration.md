@@ -12,4 +12,4 @@ Originally the configurations were cached in memory and this cache was reloaded 
 
 # In jobsies
 
-Jobsies can have configurations and the schema of the configuration is retrievable using the `config_schema` classmethod. On startup, application checks if any configuration of that schema exist in the database, if not, jobsie is considered unavailable. However, it is up to the user to specify which named configuration to use and also specify when and how it is loaded during jobsie execution.
+Jobsies can have configurations by setting the `config_model` class attribute to a `BaseConfig` subclass. If omitted, the Jobsie has no configuration model. On startup, the application checks whether any configuration of that model exists in the database; if not, the Jobsie is considered unavailable. However, it is up to the user to specify which named configuration to use and also specify when and how it is loaded during Jobsie execution.

@@ -222,6 +222,10 @@ def test_configs_page_and_form_load(client: TestClient) -> None:
     assert "text/html" in form_response.headers["content-type"]
     assert 'name="description"' in form_response.text
     assert form_response.text.index('name="description"') < form_response.text.index("Config (JSON)")
+    assert 'const configExamples = {"AppConfig":' in form_response.text
+    assert '"MailConfig":' in form_response.text
+    assert 'modelSelect.addEventListener("change"' in form_response.text
+    assert "Replace the current config with the selected model example?" in form_response.text
 
 
 def test_configs_table_warns_about_missing_models(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:

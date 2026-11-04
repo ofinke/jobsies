@@ -19,19 +19,8 @@ JSON_SCRIPT_TYPES = {
 class ZalandoJobsie(BaseJobsie):
     """Jobsie for retrieving current price and stock of an item from Zalando."""
 
-    @classmethod
-    def config_schema(cls) -> None:
-        """Returns None as this jobsie doesn't have any configuration."""
-
-    @classmethod
-    def output_schema(cls) -> type[ZalandoJobsieOutput]:
-        """Return this jobsie's output model class."""
-        return ZalandoJobsieOutput
-
-    @classmethod
-    def input_schema(cls) -> type[ZalandoJobsieInput]:
-        """Return this jobsie's input model class."""
-        return ZalandoJobsieInput
+    input_model = ZalandoJobsieInput
+    output_model = ZalandoJobsieOutput
 
     def __init__(self, url: str, size: str) -> None:
         """
@@ -42,7 +31,7 @@ class ZalandoJobsie(BaseJobsie):
             size: exact size name as mentioned on the Zalando page
 
         """
-        self.input_schema()(url=url, size=size)
+        self.input_model(url=url, size=size)
         self.url = str(url)
         self.size = str(size)
 
@@ -265,4 +254,4 @@ class ZalandoJobsie(BaseJobsie):
         }
         logger.debug(f"Extracted price and stock: price_czk={output['price_czk']}, stock={output['stock']}")
 
-        return self.output_schema()(**output)
+        return self.output_model(**output)

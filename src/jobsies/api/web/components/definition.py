@@ -61,9 +61,7 @@ async def definition_get_jobsies() -> HTMLResponse:
         {
             "name": name,
             "docstring": jobsie_class.__doc__,
-            "config_class": (
-                config_schema.__name__ if (config_schema := jobsie_class.config_schema()) is not None else None
-            ),
+            "config_class": jobsie_class.config_model.__name__ if jobsie_class.config_model is not None else None,
         }
         for name, jobsie_class in get_jobsie_registry().registry.items()
     ]

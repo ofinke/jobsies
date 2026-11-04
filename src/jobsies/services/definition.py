@@ -63,10 +63,10 @@ class DefinitionService:
         except KeyError:
             return JobsieDefinitionStatus.UNAVAILABLE
 
-        config_schema = jobsie_class.config_schema()
-        if config_schema is not None:
+        config_model = jobsie_class.config_model
+        if config_model is not None:
             try:
-                get_config_class_registry().get(config_schema.__name__)
+                get_config_class_registry().get(config_model.__name__)
             except KeyError:
                 return JobsieDefinitionStatus.UNAVAILABLE
 
@@ -79,11 +79,11 @@ class DefinitionService:
     def get_output_schema(self, subclass_name: str) -> dict:
         """Retrieve output schema from the matching BaseJobsie subclass."""
         cls = get_jobsie_registry().get(subclass_name)
-        return cls.output_schema().model_json_schema()
+        return cls.output_model.model_json_schema()
 
     def get_input_examples(self) -> dict[str, dict]:
         """Retrieve example input values for all Jobsie subclasses."""
-        return {name: _build_example(cls.input_schema()) for name, cls in get_jobsie_registry().registry.items()}
+        return {name: _build_example(cls.input_model) for name, cls in get_jobsie_registry().registry.items()}
 
     def list_definitions(self) -> list[TableJobsiesDefinition]:
         """Retrieve all jobsie definitions."""

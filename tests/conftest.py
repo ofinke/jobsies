@@ -56,7 +56,7 @@ def create_initial_definition(engine: Engine) -> None:
                 cron="0 * * * *",
                 retention="0",
                 input_kwargs={},
-                output_vars=ExampleJobsie.output_schema().model_json_schema(),
+                output_vars=ExampleJobsie.output_model.model_json_schema(),
                 output_monitoring={},
                 status=JobsieDefinitionStatus.ENABLED,
             )

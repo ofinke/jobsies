@@ -75,6 +75,7 @@ def _form_context(form_data: dict | None = None, errors: list[str] | None = None
     config_models = {
         name: config_class.model_json_schema() for name, config_class in get_config_class_registry().registry.items()
     }
+    config_examples = {name: _get_config_datatypes(schema) for name, schema in config_models.items()}
 
     selected_model = form_data.get("config_model")
     if selected_model not in config_models:
@@ -82,7 +83,8 @@ def _form_context(form_data: dict | None = None, errors: list[str] | None = None
 
     return {
         "config_models": config_models,
-        "config_datatypes": _get_config_datatypes(config_models.get(selected_model, {})),
+        "config_datatypes": config_examples.get(selected_model, {}),
+        "config_examples": config_examples,
         "form_data": form_data,
         "errors": errors or [],
     }

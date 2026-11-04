@@ -6,8 +6,14 @@ from .base import BaseConfig
 
 
 class MailConfig(BaseConfig):
-    """IMAP connection and message filtering configuration."""
+    """IMAP and SMTP connection and message filtering configuration."""
 
+    username: str = Field(
+        description="Username used to authenticate with the IMAP server.",
+    )
+    password: str = Field(
+        description="Password used to authenticate with the IMAP server.",
+    )
     imap_host: str = Field(
         description="Hostname of the IMAP server.",
     )
@@ -17,11 +23,14 @@ class MailConfig(BaseConfig):
         le=65535,
         description="Port of the IMAP server using implicit TLS.",
     )
-    username: str = Field(
-        description="Username used to authenticate with the IMAP server.",
+    smtp_host: str = Field(
+        description="Hostname of the SMTP server.",
     )
-    password: str = Field(
-        description="Password used to authenticate with the IMAP server.",
+    smtp_port: int = Field(
+        default=465,
+        gt=0,
+        le=65535,
+        description="Port of the SMTP server using implicit TLS.",
     )
     mailbox: str = Field(
         default="INBOX",
@@ -30,7 +39,8 @@ class MailConfig(BaseConfig):
     lookup_period: timedelta = Field(
         gt=timedelta(0),
         description=(
-            "How far back to search for messages. JSON values use ISO 8601 durations, for example 'PT6H' for six hours."
+            "How far back to search for unread messages. JSON values use ISO 8601 durations, "
+            "for example 'PT6H' for six hours."
         ),
     )
     senders: list[str] = Field(

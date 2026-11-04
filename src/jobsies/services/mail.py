@@ -2,30 +2,32 @@ from __future__ import annotations
 
 import imaplib
 import re
+import smtplib
 from datetime import UTC, datetime, timedelta, tzinfo
 from email import policy
+from email.message import EmailMessage
 from email.parser import BytesParser
 from email.utils import getaddresses, parsedate_to_datetime
-from typing import TYPE_CHECKING
 
 from loguru import logger
 from pytz import timezone
 
-if TYPE_CHECKING:
-    from email.message import EmailMessage
-
 from jobsies.schemas.config import MailConfig
-from jobsies.schemas.mail import ReceivedMail
+from jobsies.schemas.mail import ReceivedMail, SendMail
 from jobsies.settings import get_settings
 
 from .config_service import get_config_by_name
 
 
 class MailService:
-    """Service for loading and sending emails using a named configuration."""
+    """
+    Send email and load recent unread messages using a named configuration.
+
+    Accepted incoming messages are marked as read so subsequent loads skip them.
+    """
 
     def __init__(self, configuration_name: str) -> None:
-        """Load and retain the configuration used by this mail service."""
+        """Load the named configuration used for IMAP retrieval and SMTP sending."""
         config = get_config_by_name(configuration_name)
         if not isinstance(config, MailConfig):
             msg = f"Configuration '{configuration_name}' must use the MailConfig model"
@@ -34,7 +36,12 @@ class MailService:
         self.config = config
 
     def load(self) -> list[ReceivedMail]:
-        """Load recent emails from IMAP and filter them by configured sender addresses."""
+        """
+        Load recent unread emails matching the sender filter and mark them as read.
+
+        Read messages are excluded from subsequent loads, even while they remain within
+        the configured lookup period.
+        """
         # Calculate the cutoff in the configured timezone and normalize sender addresses for matching.
         local_timezone = timezone(get_settings().tz_info)
         now = datetime.now(local_timezone)
@@ -46,14 +53,14 @@ class MailService:
             # Search a day early because IMAP search has date-only precision; the cutoff is checked below.
             with imaplib.IMAP4_SSL(self.config.imap_host, self.config.imap_port) as client:
                 client.login(self.config.username, self.config.password)
-                status, _ = client.select(self.config.mailbox, readonly=True)
+                status, _ = client.select(self.config.mailbox, readonly=False)
                 if status != "OK":
                     msg = f"Could not select IMAP mailbox '{self.config.mailbox}'"
                     logger.error(msg)
                     raise RuntimeError(msg)
 
                 search_date = (cutoff - timedelta(days=1)).strftime("%d-%b-%Y")
-                status, search_result = client.uid("search", None, "SINCE", search_date)
+                status, search_result = client.uid("search", None, "SINCE", search_date, "UNSEEN")
                 if status != "OK":
                     msg = f"Could not search IMAP mailbox '{self.config.mailbox}'"
                     logger.error(msg)
@@ -67,7 +74,7 @@ class MailService:
                     if status != "OK" or not fetch_result:
                         logger.warning(f"Could not fetch IMAP message UID {uid!r}")
                         continue
-
+                    logger.debug(f"Cleaning message {uid=}")
                     message = self._clean_message_data(
                         uid=uid,
                         fetch_result=fetch_result,
@@ -77,6 +84,9 @@ class MailService:
                     )
                     if message is not None:
                         received_emails.append(message)
+                        status, _ = client.uid("store", uid, "+FLAGS.SILENT", r"(\Seen)")
+                        if status != "OK":
+                            logger.warning(f"Could not mark IMAP message UID {uid!r} as seen")
 
         except (imaplib.IMAP4.error, OSError):
             logger.exception("Failed to load emails from the configured IMAP mailbox")
@@ -92,11 +102,12 @@ class MailService:
         senders: set[str],
         local_timezone: tzinfo,
     ) -> ReceivedMail | None:
-        """Parse a fetched IMAP message and return it if it passes the configured filters."""
+        """Parse a fetched message and return it only if it passes time and sender filters."""
         # Extract the message bytes and IMAP receive timestamp from the FETCH response.
-        fetch_data = next(
-            (item[0] for item in fetch_result if isinstance(item, tuple) and isinstance(item[0], bytes)),
-            b"",
+        fetch_data = b" ".join(
+            item[0] if isinstance(item, tuple) else item
+            for item in fetch_result
+            if (isinstance(item, tuple) and isinstance(item[0], bytes)) or isinstance(item, bytes)
         )
         raw_message = next(
             (item[1] for item in fetch_result if isinstance(item, tuple) and isinstance(item[1], bytes)),
@@ -143,6 +154,14 @@ class MailService:
             message_id=str(message["Message-ID"]) if message["Message-ID"] is not None else None,
         )
 
-    def send(self, message: EmailMessage) -> None:
-        """Send an email using the configured mail transport."""
-        raise NotImplementedError
+    def send(self, message: SendMail) -> None:
+        """Send one email through the configured SMTP server using implicit TLS."""
+        email_message = EmailMessage()
+        email_message["From"] = message.sender
+        email_message["To"] = ", ".join(message.recipients)
+        email_message["Subject"] = message.subject
+        email_message.set_content(message.body)
+
+        with smtplib.SMTP_SSL(self.config.smtp_host, self.config.smtp_port) as client:
+            client.login(self.config.username, self.config.password)
+            client.send_message(email_message)

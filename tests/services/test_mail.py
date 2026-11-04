@@ -1,11 +1,11 @@
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 from freezegun import freeze_time
 from jobsies.schemas.config import MailConfig
-from jobsies.schemas.mail import ReceivedMail
+from jobsies.schemas.mail import ReceivedMail, SendMail
 from jobsies.services.mail import MailService
 
 
@@ -50,6 +50,7 @@ def test_load_receives_converts_and_filters_emails(monkeypatch: pytest.MonkeyPat
     """Retrieve IMAP messages, convert matching recent messages, and filter the rest."""
     config = MailConfig(
         imap_host="imap.example.com",
+        smtp_host="smtp.example.com",
         username="mail-user",
         password="mail-password",  # noqa: S106
         lookup_period=timedelta(hours=24),
@@ -79,6 +80,7 @@ def test_load_receives_converts_and_filters_emails(monkeypatch: pytest.MonkeyPat
         [
             ("OK", [b"11 12 13"]),
             ("OK", [_make_imap_response(11, "10-Mar-2026 11:00:00 +0000", recent_email)]),
+            ("OK", [b"11 (\\Seen)"]),
             ("OK", [_make_imap_response(12, "10-Mar-2026 10:00:00 +0000", other_sender_email)]),
             ("OK", [_make_imap_response(13, "09-Mar-2026 10:00:00 +0000", old_email)]),
         ],
@@ -97,8 +99,10 @@ def test_load_receives_converts_and_filters_emails(monkeypatch: pytest.MonkeyPat
         )
     ]
     client.login.assert_called_once_with("mail-user", "mail-password")
-    client.select.assert_called_once_with("INBOX", readonly=True)
-    assert client.uid.call_count == 4
+    client.select.assert_called_once_with("INBOX", readonly=False)
+    assert client.uid.call_args_list[0] == call("search", None, "SINCE", "08-Mar-2026", "UNSEEN")
+    assert client.uid.call_count == 5
+    assert client.uid.call_args_list[2] == call("store", b"11", "+FLAGS.SILENT", r"(\Seen)")
 
 
 @freeze_time("2026-03-10 12:00:00")
@@ -106,18 +110,29 @@ def test_load_wildcard_accepts_emails_from_any_sender(monkeypatch: pytest.Monkey
     """Accept messages from any address when the configured sender list contains '*'."""
     config = MailConfig(
         imap_host="imap.example.com",
+        smtp_host="smtp.example.com",
         username="mail-user",
         password="mail-password",  # noqa: S106
         lookup_period=timedelta(hours=6),
         senders=["*"],
     )
     raw_message = _raw_email("Unknown <unknown@example.com>", "Hello", "Wildcard accepted.", "<wildcard@example.com>")
-    service, _ = _make_service(
+    service, client = _make_service(
         monkeypatch,
         config,
         [
             ("OK", [b"21"]),
-            ("OK", [_make_imap_response(21, "10-Mar-2026 11:30:00 +0000", raw_message)]),
+            (
+                "OK",
+                [
+                    (
+                        f"21 (RFC822 {{{len(raw_message)}}}".encode(),
+                        raw_message,
+                    ),
+                    b' INTERNALDATE "10-Mar-2026 11:30:00 +0000")',
+                ],
+            ),
+            ("OK", [b"21 (\\Seen)"]),
         ],
         timezone_name="Asia/Tokyo",
     )
@@ -128,3 +143,40 @@ def test_load_wildcard_accepts_emails_from_any_sender(monkeypatch: pytest.Monkey
     assert received[0].sender == "unknown@example.com"
     assert received[0].subject == "Hello"
     assert received[0].received_at.isoformat() == "2026-03-10T20:30:00+09:00"
+    assert client.uid.call_args_list[2] == call("store", b"21", "+FLAGS.SILENT", r"(\Seen)")
+
+
+def test_send_uses_ssl_smtp_to_send_single_message(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Authenticate over SMTP SSL and send the provided message once."""
+    config = MailConfig(
+        imap_host="imap.example.com",
+        smtp_host="smtp.example.com",
+        username="mail-user",
+        password="mail-password",  # noqa: S106
+        lookup_period=timedelta(hours=24),
+        senders=["alerts@example.com"],
+    )
+    client = MagicMock()
+    client.__enter__.return_value = client
+    monkeypatch.setattr("jobsies.services.mail.get_config_by_name", lambda _name: config)
+    smtp_ssl = MagicMock(return_value=client)
+    monkeypatch.setattr("jobsies.services.mail.smtplib.SMTP_SSL", smtp_ssl)
+    service = MailService("mail-config")
+
+    service.send(
+        SendMail(
+            sender="jobsies@example.com",
+            recipients=["user@example.com", "admin@example.com"],
+            subject="Daily report",
+            body="The report is ready.",
+        )
+    )
+
+    smtp_ssl.assert_called_once_with("smtp.example.com", 465)
+    client.login.assert_called_once_with("mail-user", "mail-password")
+    client.send_message.assert_called_once()
+    sent_message = client.send_message.call_args.args[0]
+    assert sent_message["From"] == "jobsies@example.com"
+    assert sent_message["To"] == "user@example.com, admin@example.com"
+    assert sent_message["Subject"] == "Daily report"
+    assert sent_message.get_content() == "The report is ready.\n"

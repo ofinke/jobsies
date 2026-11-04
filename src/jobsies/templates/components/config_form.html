@@ -52,4 +52,25 @@
     <button type="submit" class="btn btn-ghost btn-action">{% if config_id %}Update{% else %}Create{% endif %} Config</button>
   </div>
 </form>
+
+<script>
+  (() => {
+    const modelSelect = document.getElementById("config-model");
+    const configValues = document.getElementById("config-values");
+    const configExamples = {{ config_examples | default({}) | tojson }};
+    let lastLoadedValue = configValues.value;
+
+    modelSelect.addEventListener("change", () => {
+      const example = JSON.stringify(configExamples[modelSelect.value] || {}, null, 2);
+      const hasUserChanges = configValues.value !== lastLoadedValue;
+
+      if (hasUserChanges && configValues.value.trim() && !window.confirm("Replace the current config with the selected model example?")) {
+        return;
+      }
+
+      configValues.value = example;
+      lastLoadedValue = example;
+    });
+  })();
+</script>
 {% endblock %}

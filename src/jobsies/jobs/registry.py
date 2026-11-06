@@ -9,8 +9,6 @@ from jobsies.schemas.jobs import BaseJobsieInput, BaseJobsieOutput
 
 from .base import BaseJobsie
 from .example import ExampleJobsie
-from .flights import FlightPriceJobsie
-from .zalando import ZalandoJobsie
 
 
 class JobsieRegistry:
@@ -30,7 +28,7 @@ class JobsieRegistry:
 
     def _local_load(self) -> None:
         """Loads all local jobsie classes."""
-        jobsie_classes = (ExampleJobsie, FlightPriceJobsie, ZalandoJobsie)
+        jobsie_classes = (ExampleJobsie, )
         for jobsie_class in jobsie_classes:
             name = jobsie_class.__name__
             if name in self.registry:

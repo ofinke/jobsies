@@ -9,12 +9,11 @@ The development roughly follows this path
   - [X] v0.2.4 - Testing suite for the fastapi and Jobsie for scraping airpline ticket prices from google flights
   - [X] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
   - [X] v0.2.6 - Page for monitoring celery worker and jobsies scheduling (look at /sibson/redbeat as a celery scheduler) and mobile friendly UI
-- [ ] v0.3.0 - Reusable services, ~~generic configuration template for credentials, jobsies as a plugin system, monitoring results as charts, and db population on first start as part of entrypoint.sh script~~
+- [ ] v0.3.0 - ~~Reusable services, generic configuration template for credentials, jobsies as a plugin system, monitoring results as charts, and db population on first start as part of entrypoint.sh script~~
   - [ ] v O.3.1 - cleanup of the project, image deployment to docker registry and figuring out what next
 - [] v?.?.? - Frontend rebuild into modern framework but still server via fastapi server
 
 # Finish before 0.3.0
-- email service
 - deployment to pypi
 - Moving jobsies into separate plugins
   - maybe update so that the plugins are not in the env file but a newline separated PLUGINS file? how to ensure that it is safely passed into the container?

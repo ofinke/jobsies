@@ -36,7 +36,7 @@ def create_output_rows() -> None:
         )
         session.add(
             TableJobsiesOutputs(
-                jobsie_name="ZalandoJobsie",
+                jobsie_name="ExampleJobsie",
                 jobsie_id=2,
                 execution_id="exec-3",
                 output_data={"price": 99},
@@ -87,7 +87,7 @@ def test_get_exception_counts_only_returns_recent_failed_outputs() -> None:
                     success=False,
                 ),
                 TableJobsiesOutputs(
-                    jobsie_name="OtherJobsie",
+                    jobsie_name="ExampleJobsie",
                     jobsie_id=2,
                     execution_id="success-1",
                     created_at=now,
@@ -96,7 +96,7 @@ def test_get_exception_counts_only_returns_recent_failed_outputs() -> None:
                     success=True,
                 ),
                 TableJobsiesOutputs(
-                    jobsie_name="OtherJobsie",
+                    jobsie_name="ExampleJobsie",
                     jobsie_id=2,
                     execution_id="failed-old",
                     created_at=now - timedelta(hours=25),

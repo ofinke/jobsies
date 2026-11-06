@@ -5,7 +5,7 @@ import pytest
 import pytz
 from freezegun import freeze_time
 from jobsies.database import get_db_handler
-from jobsies.jobs import ExampleJobsie, ZalandoJobsie
+from jobsies.jobs import ExampleJobsie, get_jobsie_registry
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
 from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
@@ -69,7 +69,7 @@ def test_get_definition_returns_correct_definition() -> None:
     """Tests DefinitionService.get_definition returns the definition matching the given ID."""
     service = DefinitionService()
     first = service.create_definition(definition_request(name="First Jobsie"))
-    second = service.create_definition(definition_request(name="Second Jobsie", subclass_name="ZalandoJobsie"))
+    second = service.create_definition(definition_request(name="Second Jobsie"))
 
     fetched_first = service.get_definition(first.id)
     assert fetched_first is not None
@@ -79,7 +79,7 @@ def test_get_definition_returns_correct_definition() -> None:
     fetched_second = service.get_definition(second.id)
     assert fetched_second is not None
     assert fetched_second.name == "Second Jobsie"
-    assert fetched_second.subclass_name == "ZalandoJobsie"
+    assert fetched_second.subclass_name == "ExampleJobsie"
 
 
 def test_get_definition_returns_none_for_missing_id() -> None:
@@ -160,8 +160,9 @@ def test_create_definition_stores_and_retrieves_definition() -> None:
     assert listed[0].id == created.id
 
 
-def test_update_definition_updates_fields() -> None:
+def test_update_definition_updates_fields(monkeypatch: pytest.MonkeyPatch) -> None:
     """Tests DefinitionService.update_definition changes provided fields and refreshes output_vars."""
+    monkeypatch.setitem(get_jobsie_registry().registry, "TestJobsie", ExampleJobsie)
     service = DefinitionService()
     created = service.create_definition(definition_request())
     before = service.get_definition(created.id)
@@ -169,10 +170,10 @@ def test_update_definition_updates_fields() -> None:
 
     update_in = RequestJobsieDefinitionUpdate(
         name="Updated Jobsie",
-        subclass_name="ZalandoJobsie",
+        subclass_name="TestJobsie",
         cron="*/10 * * * *",
         retention="14d",
-        input_kwargs={"url": "https://zalando.cz"},
+        input_kwargs={"message": "updated"},
         output_monitoring={"price_czk": True},
     )
     updated = service.update_definition(created.id, update_in)
@@ -180,13 +181,13 @@ def test_update_definition_updates_fields() -> None:
     assert updated is not None
     assert updated.id == created.id
     assert updated.name == "Updated Jobsie"
-    assert updated.subclass_name == "ZalandoJobsie"
+    assert updated.subclass_name == "TestJobsie"
     assert updated.cron == "*/10 * * * *"
     assert updated.retention == "14d"
-    assert updated.input_kwargs == {"url": "https://zalando.cz"}
+    assert updated.input_kwargs == {"message": "updated"}
     assert updated.output_monitoring == {"price_czk": True}
     assert updated.status == JobsieDefinitionStatus.ENABLED
-    assert updated.output_vars == ZalandoJobsie.output_model.model_json_schema()
+    assert updated.output_vars == ExampleJobsie.output_model.model_json_schema()
     assert updated.created_at == before.created_at
     assert len(service.list_definitions()) == 1
 

@@ -28,7 +28,7 @@ def seed_outputs() -> None:
         )
         session.add(
             TableJobsiesOutputs(
-                jobsie_name="ZalandoJobsie",
+                jobsie_name="ExampleJobsie",
                 jobsie_id=2,
                 execution_id="exec-3",
                 output_data={"price": 99},
@@ -66,7 +66,7 @@ def test_get_latest_outputs(client: TestClient) -> None:
         },
         {
             "id": 3,
-            "jobsie_name": "ZalandoJobsie",
+            "jobsie_name": "ExampleJobsie",
             "jobsie_id": 2,
             "execution_id": "exec-3",
             "retention": None,

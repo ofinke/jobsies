@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from jobsies.jobs import ZalandoJobsie
+from jobsies.jobs import ExampleJobsie, get_jobsie_registry
 from jobsies.services import DefinitionService
 
 
@@ -40,11 +40,11 @@ def test_get_definition_by_id_not_found(client: TestClient) -> None:
 def test_create_definition_success(client: TestClient) -> None:
     """Tests POST /api/v1/jobsie/definition creates new definition and derives output_vars from subclass."""
     payload = {
-        "name": "New Zalando Watcher",
-        "subclass_name": "ZalandoJobsie",
+        "name": "New Example Jobsie",
+        "subclass_name": "ExampleJobsie",
         "cron": "*/10 * * * *",
         "retention": "30d",
-        "input_kwargs": {"url": "https://zalando.cz/item", "size": "M"},
+        "input_kwargs": {},
         "output_monitoring": {},
         "status": "enabled",
     }
@@ -52,10 +52,10 @@ def test_create_definition_success(client: TestClient) -> None:
     assert response.status_code == 201
     data = response.json()
     assert data["id"] is not None
-    assert data["name"] == "New Zalando Watcher"
-    assert data["subclass_name"] == "ZalandoJobsie"
-    assert data["output_vars"] == ZalandoJobsie.output_model.model_json_schema()
-    assert "price_czk" in data["output_vars"]["properties"]
+    assert data["name"] == "New Example Jobsie"
+    assert data["subclass_name"] == "ExampleJobsie"
+    assert data["output_vars"] == ExampleJobsie.output_model.model_json_schema()
+    assert "content" in data["output_vars"]["properties"]
 
 
 def test_create_definition_invalid_subclass(client: TestClient) -> None:
@@ -101,11 +101,12 @@ def test_create_definition_value_error_returns_400(
     assert response.json()["detail"] == "Definition conflict occurred"
 
 
-def test_update_definition_success(client: TestClient) -> None:
+def test_update_definition_success(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
     """Tests PUT /api/v1/jobsie/definition/{id} updates definition and output_vars when subclass changes."""
+    monkeypatch.setitem(get_jobsie_registry().registry, "TestJobsie", ExampleJobsie)
     payload = {
         "name": "Updated Name",
-        "subclass_name": "ZalandoJobsie",
+        "subclass_name": "TestJobsie",
         "cron": "*/15 * * * *",
     }
     response = client.put("/api/v1/jobsie/definition/1", json=payload)
@@ -113,8 +114,8 @@ def test_update_definition_success(client: TestClient) -> None:
     data = response.json()
     assert data["id"] == 1
     assert data["name"] == "Updated Name"
-    assert data["subclass_name"] == "ZalandoJobsie"
-    assert data["output_vars"] == ZalandoJobsie.output_model.model_json_schema()
+    assert data["subclass_name"] == "TestJobsie"
+    assert data["output_vars"] == ExampleJobsie.output_model.model_json_schema()
 
 
 def test_update_definition_not_found(client: TestClient) -> None:

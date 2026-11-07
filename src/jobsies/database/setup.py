@@ -1,17 +1,17 @@
 import json
-from pathlib import Path
 
 from loguru import logger
 from sqlalchemy import UniqueConstraint, inspect, select
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel
 
+from jobsies.asset_paths import get_asset_path
 from jobsies.database.handler import get_db_handler
 from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.config import AppConfig
 from jobsies.schemas.tables import TableJobsiesDefinition, TableSharedConfigurations
 
-DEFAULT_JOBSIES_CONFIG_PATH = Path(__file__).resolve().parents[3] / "configs" / "default_jobsies_configs.json"
+DEFAULT_JOBSIES_CONFIG_PATH = get_asset_path("configs") / "default_jobsies_configs.json"
 
 
 def setup_database() -> None:

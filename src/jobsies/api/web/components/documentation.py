@@ -1,5 +1,4 @@
 import functools
-from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
@@ -7,6 +6,7 @@ from justhtml import JustHTML
 from loguru import logger
 from mistune import create_markdown
 
+from jobsies.asset_paths import get_asset_path
 from jobsies.settings import get_templates
 
 router = APIRouter(prefix="/documentation", tags=["Web Components"])
@@ -24,7 +24,7 @@ DOCUMENTATION_PAGES = {
 @functools.cache
 def _load_documentation(page: str = "about") -> str:
     """Load a documentation page and convert it to an HTML fragment."""
-    documentation_path = Path(__file__).resolve().parents[5] / "docs" / DOCUMENTATION_PAGES[page]["filename"]
+    documentation_path = get_asset_path("docs") / DOCUMENTATION_PAGES[page]["filename"]
     documentation_markdown = documentation_path.read_text(encoding="utf-8")
     documentation_html = create_markdown(plugins=["table"])(documentation_markdown)
     return JustHTML(documentation_html, fragment=True).to_html()

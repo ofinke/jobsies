@@ -17,26 +17,22 @@
 
 ## Installing Jobsies
 
-Jobsie is a single job which has a simple output and you want to run it repeatedly, the current implementations contains these jobsies:
+Jobsies includes the built-in `ExampleJobsie`. Other jobsies are installed as Python plugin packages. For the Docker Compose setup, add each package's install spec to the `PLUGINS` variable in `.env.container` (you can use `.env.example` as a template). For example:
 
-- `ExampleJobsie` for showing functionality, it only returns "Hello World!" string.
-- `ZalandoJobsie` for scraping product prices from the website zalando.cz. Input for this task is URL to scrape and the size of the product exactly as it is listed on the page.
-- `FlightPriceJobsie` for scraping flight prices from google flights. It supports only looking up flights in specific dates between specific airports.
+```dotenv
+PLUGINS="my-jobsie-plugin another-jobsie-plugin"
+```
+
+The value is a whitespace-separated list of package specs, such as package names available from a package index or Git URLs accepted by `uv pip install`. See Plugins for plugin package requirements.
+
+After changing `PLUGINS`, run `docker compose up -d` to recreate the containers. The startup script installs the listed packages in the app, worker, and setup containers, and the app and worker load the jobsies when they start.
 
 ## Defining jobsies
 
 In the `Definitions` page, select "Create" and fill out the form:
 
 - Named your jobsie, this can be anything as it is for your orientation.
-- Select type of the jobsie (see implemented jobsies above).
-- Select schedule when this jobsie is suppose to run by [Cron Expression](https://en.wikipedia.org/wiki/Cron).
-- Select retention, for how long the results from runs should be stored in application database. Defaults to 0, meaning, that the results are stored indefinetely.
+- Select type of the jobsie from installed plugins.
+- Define schedule when this jobsie is suppose to run by [Cron Expression](https://en.wikipedia.org/wiki/Cron).
+- Select retention, for how long the results from runs should be stored in application database. Defaults to 0, meaning, that the results are stored indefinetely (currently placeholder).
 - Define input variables as a JSON. Input variables depends on the selected Jobsie type and can vary wildly.
-
-## Monitoring jobsies
-
-The `Results` page shows latest results for each defined jobsie.
-
-## Building jobsies
-
-Like the whole applications, Jobsies are written in Python and all are derived from a `BaseJobsie` class.

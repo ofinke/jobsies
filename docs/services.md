@@ -6,7 +6,7 @@ These services are primarly designed to be used with jobsies,
 
 | Service  | Purpose | Usage   |
 | -------- | ------- | ------- |
-|          |         |         |
+| `MailService` | Send email and load recent unread messages from a mailbox | Instantiate with the name of a configured `MailConfig`; the configuration is required for the service to work |
 
 ## Application Services
 

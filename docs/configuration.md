@@ -1,6 +1,6 @@
 In `Jobsies`, configurations are implemented as entities stored in the database. Configurations store credentials and other parameters that don't need to be updated very often, like credentials for services.
 
-In current version, configurations are stored in database without any encryption.
+Configurations are by default stored in database in plaintext. Define `ENCRYPTION_KEY` environmental variable as url safe base64 string.
 
 # Architecture
 

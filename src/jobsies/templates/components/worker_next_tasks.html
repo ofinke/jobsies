@@ -6,6 +6,7 @@
           <th>Jobsie</th>
           <th>Name</th>
           <th>Next execution</th>
+          <th>Executions (24h)</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -15,6 +16,7 @@
           <td>{{ task.id }}</td>
           <td>{{ task.name }}</td>
           <td>{{ task.scheduled_at }}</td>
+          <td>{{ task.executions }}</td>
           <td>
             <span class="badge {{ 'badge-success' if task.status == 'Acknowledged' else 'badge-neutral' }}">
               {{ task.status }}
@@ -23,7 +25,7 @@
         </tr>
         {% else %}
         <tr>
-          <td colspan="4" class="text-center">No tasks scheduled in the next 24 hours.</td>
+          <td colspan="5" class="text-center">No tasks scheduled in the next 24 hours.</td>
         </tr>
         {% endfor %}
       </tbody>

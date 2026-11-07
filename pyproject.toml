@@ -1,6 +1,6 @@
 [project]
 name = "jobsies"
-version = "0.2.6"
+version = "0.3.0"
 description = "Task automation application"
 readme = "README.md"
 license = "MIT"

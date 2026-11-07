@@ -9,21 +9,15 @@ The development roughly follows this path
   - [X] v0.2.4 - Testing suite for the fastapi and Jobsie for scraping airpline ticket prices from google flights
   - [X] v0.2.5 - Update Jobsies definition UI with better input_kwargs validation
   - [X] v0.2.6 - Page for monitoring celery worker and jobsies scheduling (look at /sibson/redbeat as a celery scheduler) and mobile friendly UI
-- [ ] v0.3.0 - ~~Reusable services, generic configuration template for credentials, jobsies as a plugin system, monitoring results as charts, and db population on first start as part of entrypoint.sh script~~
-  - [ ] v O.3.1 - cleanup of the project, image deployment to docker registry and figuring out what next
+- [X] v0.3.0 - ~~Reusable services, generic configuration template for credentials, jobsies as a plugin system, monitoring results as charts, and db population on first start as part of entrypoint.sh script~~
+  - [ ] v O.3.1 - cleanup of the project, image deployment to docker registrynad pypi and figuring out what next
 - [] v?.?.? - Frontend rebuild into modern framework but still server via fastapi server
-
-# Finish before 0.3.0
-- deployment to pypi
-- Update readme and documentation
-- figure how I want to show jobsies defined outputs in the installed jobsies under jobsies definition
 
 # Features
 
 Here is a list of features which I would like to include. Some will be later included in the roadmap and some will be done randomly when I feel like it. Some will be skipped when I inevitably get bored with this project.
 
 ## Reusable services
-- Alerting service using email
 
 ## Things to handle
 - precommit hooks?
@@ -46,6 +40,5 @@ Here is a list of features which I would like to include. Some will be later inc
 
 ## Large
 
-- Advanced UI for showing results from jobsies, allowing show output variables as charts, or something else.
-- Alerting system using whatsapp / email or maybe something else.
+- Advanced UI for showing results from jobsies, allowing show output variables as charts, or something else. (will keep for FE rebuild)
 - Plugins v2: could the plugin installation be done through interface? Probably still requires app restart.

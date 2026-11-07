@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from typing import Any
 
@@ -147,8 +147,8 @@ def test_worker_status_renders_all_components(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Tests the combined worker endpoint renders all page components."""
-    defined_at = datetime(2026, 9, 7, 13, tzinfo=UTC)
-    scheduled_at = datetime(2026, 9, 7, 14, tzinfo=UTC)
+    defined_at = datetime.now(UTC) + timedelta(hours=1)
+    scheduled_at = datetime.now(UTC) + timedelta(hours=2)
     monkeypatch.setattr(
         "jobsies.api.web.components.worker.SchedulingService.define_next_jobsies",
         lambda _service, _lookahead: {1: [defined_at, scheduled_at]},

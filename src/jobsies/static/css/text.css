@@ -77,12 +77,14 @@
   overflow-x: auto;
   background-color: var(--content-widget-bg);
   border-radius: 0.5rem;
+  line-height: 1.2;
 }
 
 .text-content pre code {
   padding: 0;
   background: transparent;
   font-size: 0.875rem;
+  line-height: 1.2;
 }
 
 .text-content blockquote {

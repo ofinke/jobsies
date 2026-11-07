@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import redis
 from fastapi import APIRouter
@@ -32,45 +32,52 @@ def _humanize_uptime(uptime: float | str) -> str:
 
 def _get_next_tasks() -> list[dict[str, object]]:
     """Return the next scheduled jobsies for the following 24 hours."""
-    task_limit = 15
     service = SchedulingService()
     definitions = {definition.id: definition for definition in service.get_active_task_configs()}
     defined_jobsies = service.define_next_jobsies(24 * 60 * 60)
     try:
         redis_handler = get_redis_handler(settings.broker_redis_url)
-        scheduled_jobsies = redis_handler.get_scheduled_tasks(limit=task_limit)
+        scheduled_jobsies = redis_handler.get_scheduled_tasks()
     except redis.exceptions.ConnectionError:
         logger.warning("Redis is unavailable! Cannot retrieve scheduled tasks.")
         scheduled_jobsies = {}
 
-    task_rows = {
-        (definition_id, scheduled_at): {
-            "id": definition_id,
-            "name": definitions[definition_id].name,
-            "scheduled_at": scheduled_at,
-            "status": "Defined",
-        }
+    now = datetime.now(timezone(settings.tz_info))
+    window_end = now + timedelta(hours=24)
+    acknowledged_executions = {
+        (definition_id, scheduled_at): "Acknowledged"
+        for definition_id, executions in scheduled_jobsies.items()
+        if definition_id in definitions
+        for scheduled_at in executions
+        if now <= scheduled_at < window_end
+    }
+    defined_executions = {
+        (definition_id, scheduled_at): "Defined"
         for definition_id, executions in defined_jobsies.items()
         if definition_id in definitions
         for scheduled_at in executions
+        if now <= scheduled_at < window_end
+        and (definition_id, scheduled_at) not in acknowledged_executions
     }
-    for definition_id, executions in scheduled_jobsies.items():
-        if definition_id not in definitions:
-            continue
-        for scheduled_at in executions:
-            task_rows[(definition_id, scheduled_at)] = {
-                "id": definition_id,
-                "name": definitions[definition_id].name,
-                "scheduled_at": scheduled_at,
-                "status": "Acknowledged",
-            }
+    task_executions: dict[tuple[int, str], set[datetime]] = {}
+    for (definition_id, scheduled_at), status in (defined_executions | acknowledged_executions).items():
+        task_executions.setdefault((definition_id, status), set()).add(scheduled_at)
 
+    task_rows = [
+        {
+            "id": definition_id,
+            "name": definitions[definition_id].name,
+            "scheduled_at": min(executions),
+            "executions": len(executions),
+            "status": status,
+        }
+        for (definition_id, status), executions in task_executions.items()
+    ]
     tasks = sorted(
-        task_rows.values(),
+        task_rows,
         key=lambda task: task["scheduled_at"],
-    )[:task_limit]
+    )
 
-    now = datetime.now(timezone(settings.tz_info))
     for task in tasks:
         task["scheduled_at"] = naturaltime(task["scheduled_at"], when=now)
 

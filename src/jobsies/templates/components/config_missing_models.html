@@ -1,0 +1,17 @@
+{% if failed_load %}
+<section class="text-content">
+  <h2>Missing Configuration Models!</h2>
+  <p>
+    The following configuration{% if failed_load|length != 1 %}s{% endif %}
+    {{ "is" if failed_load|length == 1 else "are" }} unavailable because
+    {{ "its model is" if failed_load|length == 1 else "their models are" }} unavailable.
+    Did you uninstall the plugin that declares
+    {{ "this model" if failed_load|length == 1 else "these models" }}?
+  </p>
+  <ul>
+    {% for name, configuration in failed_load.items() %}
+    <li><code>{{ name }}</code> (model <code>{{ configuration.config_model }}</code>)</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}

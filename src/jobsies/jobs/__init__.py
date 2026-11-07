@@ -1,12 +1,10 @@
-from .base import BaseJobsie, get_jobsie_class
+from .base import BaseJobsie
 from .example import ExampleJobsie
-from .flights import FlightPriceJobsie
-from .zalando import ZalandoJobsie
+from .registry import JobsieRegistry, get_jobsie_registry
 
 __all__ = [
     "BaseJobsie",
     "ExampleJobsie",
-    "FlightPriceJobsie",
-    "ZalandoJobsie",
-    "get_jobsie_class",
+    "JobsieRegistry",
+    "get_jobsie_registry",
 ]

@@ -1,12 +1,29 @@
 from collections.abc import Generator
 
+import jobsies.services.config_service as jobsies_config
 import pytest
 from jobsies.database import get_db_handler
 from jobsies.jobs import ExampleJobsie
+from jobsies.schemas.config import AppConfig, BaseConfig
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine
+
+_get_config_by_name = jobsies_config.get_config_by_name
+
+
+# NOTE: celery_app loads "app-config" during test collection, before DB fixtures can run.
+# This is a workaround, fixture made at home.
+def _get_config_by_name_with_app_default(name: str) -> BaseConfig:
+    """Return the default app configuration for tests when it is not seeded."""
+    if name == "app-config":
+        return AppConfig()
+    return _get_config_by_name(name)
+
+
+jobsies_config.get_config_by_name = _get_config_by_name_with_app_default
 
 
 @pytest.fixture(autouse=True)
@@ -39,9 +56,9 @@ def create_initial_definition(engine: Engine) -> None:
                 cron="0 * * * *",
                 retention="0",
                 input_kwargs={},
-                output_vars=ExampleJobsie.output_schema.model_json_schema(),
+                output_vars=ExampleJobsie.output_model.model_json_schema(),
                 output_monitoring={},
-                enabled=True,
+                status=JobsieDefinitionStatus.ENABLED,
             )
         )
         session.commit()

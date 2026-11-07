@@ -1,5 +1,4 @@
-from datetime import datetime
-from typing import Any
+from datetime import datetime, timedelta
 
 import redis
 from fastapi import APIRouter
@@ -9,9 +8,8 @@ from loguru import logger
 from pytz import timezone
 
 from jobsies.celery_app import celery_app_status
-from jobsies.config import get_templates
 from jobsies.services import OutputService, SchedulingService, get_redis_handler
-from jobsies.settings import get_settings
+from jobsies.settings import get_settings, get_templates
 
 router = APIRouter(prefix="/worker", tags=["Web Components"])
 templates = get_templates()
@@ -32,47 +30,54 @@ def _humanize_uptime(uptime: float | str) -> str:
     return precisedelta(uptime, minimum_unit="seconds")
 
 
-def _get_next_tasks() -> list[dict[str, Any]]:
+def _get_next_tasks() -> list[dict[str, object]]:
     """Return the next scheduled jobsies for the following 24 hours."""
-    task_limit = 15
     service = SchedulingService()
     definitions = {definition.id: definition for definition in service.get_active_task_configs()}
     defined_jobsies = service.define_next_jobsies(24 * 60 * 60)
     try:
         redis_handler = get_redis_handler(settings.broker_redis_url)
-        scheduled_jobsies = redis_handler.get_scheduled_tasks(limit=task_limit)
+        scheduled_jobsies = redis_handler.get_scheduled_tasks()
     except redis.exceptions.ConnectionError:
         logger.warning("Redis is unavailable! Cannot retrieve scheduled tasks.")
         scheduled_jobsies = {}
 
-    task_rows = {
-        (definition_id, scheduled_at): {
-            "id": definition_id,
-            "name": definitions[definition_id].name,
-            "scheduled_at": scheduled_at,
-            "status": "Defined",
-        }
+    now = datetime.now(timezone(settings.tz_info))
+    window_end = now + timedelta(hours=24)
+    acknowledged_executions = {
+        (definition_id, scheduled_at): "Acknowledged"
+        for definition_id, executions in scheduled_jobsies.items()
+        if definition_id in definitions
+        for scheduled_at in executions
+        if now <= scheduled_at < window_end
+    }
+    defined_executions = {
+        (definition_id, scheduled_at): "Defined"
         for definition_id, executions in defined_jobsies.items()
         if definition_id in definitions
         for scheduled_at in executions
+        if now <= scheduled_at < window_end
+        and (definition_id, scheduled_at) not in acknowledged_executions
     }
-    for definition_id, executions in scheduled_jobsies.items():
-        if definition_id not in definitions:
-            continue
-        for scheduled_at in executions:
-            task_rows[(definition_id, scheduled_at)] = {
-                "id": definition_id,
-                "name": definitions[definition_id].name,
-                "scheduled_at": scheduled_at,
-                "status": "Acknowledged",
-            }
+    task_executions: dict[tuple[int, str], set[datetime]] = {}
+    for (definition_id, scheduled_at), status in (defined_executions | acknowledged_executions).items():
+        task_executions.setdefault((definition_id, status), set()).add(scheduled_at)
 
+    task_rows = [
+        {
+            "id": definition_id,
+            "name": definitions[definition_id].name,
+            "scheduled_at": min(executions),
+            "executions": len(executions),
+            "status": status,
+        }
+        for (definition_id, status), executions in task_executions.items()
+    ]
     tasks = sorted(
-        task_rows.values(),
+        task_rows,
         key=lambda task: task["scheduled_at"],
-    )[:task_limit]
+    )
 
-    now = datetime.now(timezone(settings.tz_info))
     for task in tasks:
         task["scheduled_at"] = naturaltime(task["scheduled_at"], when=now)
 
@@ -84,7 +89,7 @@ def _get_exceptions() -> list[dict[str, int | str]]:
     return OutputService().get_exception_counts()
 
 
-def _get_app_status() -> tuple[dict[str, Any], dict[str, Any]]:
+def _get_app_status() -> tuple[dict[str, object], dict[str, object]]:
     """Return Redis and Celery worker status data."""
     # First retrieve status of redis client
     redis_handler = get_redis_handler(settings.broker_redis_url)

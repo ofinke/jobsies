@@ -6,10 +6,12 @@ from jobsies.api.v1 import jobsies_definition_router, jobsies_execution_router, 
 from jobsies.api.web import (
     definition_component_router,
     results_component_router,
+    trends_component_router,
     web_pages_router,
     worker_component_router,
 )
 from jobsies.fastapi_app import app
+from jobsies.services import DefinitionService
 from starlette.routing import Mount
 
 
@@ -29,6 +31,7 @@ def client() -> TestClient:
         web_pages_router,
         definition_component_router,
         results_component_router,
+        trends_component_router,
         worker_component_router,
     ],
 )
@@ -41,9 +44,9 @@ def test_all_router_routes_are_included(router: APIRouter) -> None:
 
 def test_docs_url_is_configured(client: TestClient) -> None:
     """Verify that the configured docs URL is available at /docs."""
-    assert app.docs_url == "/docs"
+    assert app.docs_url == "/swagger"
 
-    response = client.get("/docs")
+    response = client.get("/swagger")
 
     assert response.status_code == 200
     assert "Swagger UI" in response.text
@@ -56,6 +59,22 @@ def test_static_files_are_mounted(client: TestClient) -> None:
     assert len(static_mounts) == 1
     assert static_mounts[0].path == "/static"
     assert client.get("/static/css/style.css").status_code == 200
+    assert client.get("/static/js/vendor/chart.umd.min.js").status_code == 200
+    assert client.get("/static/js/trends.js").status_code == 200
+
+
+def test_lifespan_refreshes_executability_statuses(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify the application refreshes jobsie statuses when its lifespan starts."""
+    called = False
+
+    def refresh(_self: DefinitionService) -> None:
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(DefinitionService, "refresh_executability_statuses", refresh)
+
+    with TestClient(app):
+        assert called
 
 
 def test_static_mount_does_not_expose_files_outside_directory(client: TestClient) -> None:

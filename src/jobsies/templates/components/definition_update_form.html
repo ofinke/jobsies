@@ -46,9 +46,12 @@
         <input type="text" id="retention" name="retention" class="form-control" placeholder="e.g. 30d (default: 0)" value="{{ form_data.get('retention', definition.retention) }}">
       </div>
 
-      <div class="form-group form-check">
-        <input type="checkbox" id="enabled" name="enabled" class="form-check-input"{% if form_data.get('enabled', definition.enabled) %} checked{% endif %}>
-        <label for="enabled" class="form-check-label">Enabled</label>
+      <div class="form-group">
+        <label for="status"><b>Status</b></label>
+        <select id="status" name="status" required class="form-control">
+          <option value="enabled"{% if form_data.get('status', definition.status) in ('enabled', 'unavailable') %} selected{% endif %}>Enabled</option>
+          <option value="disabled"{% if form_data.get('status', definition.status) == 'disabled' %} selected{% endif %}>Disabled</option>
+        </select>
       </div>
     </div>
 
@@ -56,6 +59,10 @@
       <div class="form-group">
         <label for="input_kwargs"><b>Input Kwargs (JSON)</b></label>
         <textarea id="input_kwargs" name="input_kwargs" class="form-control" rows="3" placeholder='{"url": "https://www.example.com/"}'>{% if 'input_kwargs' in form_data %}{{ form_data['input_kwargs'] }}{% else %}{{ definition.input_kwargs | tojson(indent=2) }}{% endif %}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="output_monitoring"><b>Output Monitoring (JSON)</b></label>
+        <textarea id="output_monitoring" name="output_monitoring" class="form-control" rows="3" placeholder='{"price_czk": true}'>{% if 'output_monitoring' in form_data %}{{ form_data['output_monitoring'] }}{% else %}{{ definition.output_monitoring | tojson(indent=2) }}{% endif %}</textarea>
       </div>
     </div>
   </div>

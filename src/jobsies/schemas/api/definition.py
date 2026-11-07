@@ -5,6 +5,8 @@ from croniter import croniter
 from loguru import logger
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from jobsies.schemas.enums import JobsieDefinitionStatus
+
 
 class JobsieDefinitionBase(BaseModel):
     """
@@ -30,17 +32,17 @@ class JobsieDefinitionBase(BaseModel):
         description="Retention configuration in format 30d, etc.",
         examples=["0"],
     )
-    input_kwargs: dict[str, Any] = Field(
+    input_kwargs: dict[str, object] = Field(
         default_factory=dict,
         description="Dictionary of input variables for the jobsie",
     )
-    output_monitoring: dict[str, Any] = Field(
+    output_monitoring: dict[str, object] = Field(
         default_factory=dict,
         description="How we want to monitor results in frontend",
     )
-    enabled: bool = Field(
-        default=True,
-        description="Is the jobsie enabled",
+    status: JobsieDefinitionStatus = Field(
+        default=JobsieDefinitionStatus.ENABLED,
+        description="Requested execution status of the jobsie",
     )
 
     @field_validator("cron")
@@ -58,25 +60,25 @@ class JobsieDefinitionBase(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def coerce_form_data(cls, data: Any) -> Any:
-        """Coerce raw form data (str values, JSON-encoded input_kwargs) into proper types."""
+        """Coerce raw form data (including JSON-encoded fields) into proper types."""
         if not isinstance(data, dict):
             return data
-        if "input_kwargs" in data:
-            raw = data.get("input_kwargs")
+        for field in ("input_kwargs", "output_monitoring"):
+            if field not in data:
+                continue
+            raw = data[field]
             if isinstance(raw, str) and raw.strip():
                 try:
                     parsed = json.loads(raw.strip())
                 except json.JSONDecodeError as err:
-                    msg = f"Invalid input_kwargs JSON: {err}"
+                    msg = f"Invalid {field} JSON: {err}"
                     raise ValueError(msg) from None
                 if not isinstance(parsed, dict):
-                    msg = "input_kwargs must be a JSON object"
+                    msg = f"{field} must be a JSON object"
                     raise ValueError(msg)
-                data["input_kwargs"] = parsed
+                data[field] = parsed
             elif isinstance(raw, str) and not raw.strip():
-                data["input_kwargs"] = {}
-        if "enabled" in data and data["enabled"] is not None:
-            data["enabled"] = data["enabled"] in ("on", "true", "True", True)
+                data[field] = {}
         return data
 
 
@@ -93,7 +95,7 @@ class RequestJobsieDefinitionUpdate(JobsieDefinitionBase):
     retention: str | None = None
     input_kwargs: dict[str, Any] | None = None
     output_monitoring: dict[str, Any] | None = None
-    enabled: bool | None = None
+    status: JobsieDefinitionStatus | None = None
 
     @field_validator("cron")
     @classmethod

@@ -1,0 +1,36 @@
+<div id="trends-list" class="trends-list">
+{% for trend in trends %}
+  <section class="trend-card">
+    <div class="result-card-title-row">
+      <span class="result-card-id">#{{ trend.jobsie_id }}</span>
+      <h3 class="result-card-title">{{ trend.name }}</h3>
+    </div>
+    {% for monitor in trend.data.monitors %}
+    {% set has_numeric_values = monitor.data.value | select("number") | list | length > 0 %}
+    <section class="trend-monitor">
+      <h4 class="trend-monitor-title">{{ monitor.title }}</h4>
+      {% if not monitor.data.timestamp %}
+      <p class="trend-empty-state">No successful executions are available for this monitor yet.</p>
+      {% elif not has_numeric_values %}
+      <p class="trend-empty-state">No numeric values are available in the recent successful executions.</p>
+      {% else %}
+      <div class="trend-chart-container">
+        <canvas
+          data-trend-chart
+          data-title="{{ monitor.title }}"
+          data-unit="{{ monitor.unit or '' }}"
+          data-timezone="{{ timezone }}"
+          data-points="{{ {'timestamp': monitor.data.timestamp, 'value': monitor.data.value} | tojson | forceescape }}"
+          role="img"
+          aria-label="Line chart for {{ monitor.title }}">
+          Line chart for {{ monitor.title }}.
+        </canvas>
+      </div>
+      {% endif %}
+    </section>
+    {% endfor %}
+  </section>
+{% else %}
+  <p class="text-center">No Jobsies have output monitoring configured.</p>
+{% endfor %}
+</div>

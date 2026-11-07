@@ -6,10 +6,9 @@ from humanize import naturaltime
 from loguru import logger
 from pytz import timezone
 
-from jobsies.config import get_templates
 from jobsies.schemas.api.output import JobsieOutputInterface
 from jobsies.services.output import OutputService
-from jobsies.settings import get_settings
+from jobsies.settings import get_settings, get_templates
 
 router = APIRouter(prefix="/results", tags=["Web Components"])
 templates = get_templates()

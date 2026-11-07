@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/static/css/colors.css">
   <link rel="stylesheet" href="/static/css/sidebar.css">
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/cards.css">
+  <link rel="stylesheet" href="/static/css/forms.css">
   <link rel="stylesheet" href="/static/css/text.css">
   <link rel="stylesheet" href="/static/css/tables.css">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
@@ -46,17 +48,23 @@
           </span>
           Latest
         </a></li>
-        <!-- <li><a href="/trends" class="nav-link{% if active_page == 'trends' %} active{% endif %}">
+        <li><a href="/trends" class="nav-link{% if active_page == 'trends' %} active{% endif %}">
           <span class="nav-icon-circle">
             <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 3v18h18" /><path d="M20 18v3" /><path d="M16 16v5" /><path d="M12 13v8" /><path d="M8 16v5" /><path d="M3 11c6 0 5 -5 9 -5s3 5 9 5" /></svg>
           </span>
           Trends
-        </a></li> -->
+        </a></li>
         <li><a href="/definition" class="nav-link{% if active_page == 'definitions' %} active{% endif %}">
           <span class="nav-icon-circle">
             <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2l0 -9" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg>
           </span>
           Definitions
+        </a></li>
+        <li><a href="/configs" class="nav-link{% if active_page == 'configs' %} active{% endif %}">
+          <span class="nav-icon-circle">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
+          </span>
+          Configs
         </a></li>
         <li><a href="/worker" class="nav-link{% if active_page == 'worker' %} active{% endif %}">
           <span class="nav-icon-circle">
@@ -64,11 +72,11 @@
           </span>
           Worker
         </a></li>
-        <li><a href="/about" class="nav-link{% if active_page == 'about' %} active{% endif %}">
+        <li><a href="/documentation" class="nav-link{% if active_page == 'documentation' %} active{% endif %}">
           <span class="nav-icon-circle">
             <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
           </span>
-          About
+          Docs
         </a></li>
       </ul>
       <div class="sidebar-footer">
@@ -88,5 +96,6 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+  {% block page_scripts %}{% endblock %}
 </body>
 </html>

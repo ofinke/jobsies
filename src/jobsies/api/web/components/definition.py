@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from urllib.parse import parse_qs
 
@@ -8,10 +9,11 @@ from pydantic import ValidationError
 from pytz import timezone
 
 from jobsies.celery_app import wrapper_run_dynamic_jobsie
-from jobsies.config import get_templates
+from jobsies.jobs import get_jobsie_registry
 from jobsies.schemas.api.definition import RequestJobsieDefinitionCreate, RequestJobsieDefinitionUpdate
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.services import DefinitionService
-from jobsies.settings import get_settings
+from jobsies.settings import get_settings, get_templates
 
 # Static values
 router = APIRouter(prefix="/definition", tags=["Web Components"])
@@ -52,6 +54,22 @@ async def definition_get_table() -> HTMLResponse:
     return HTMLResponse(table_html + "\n" + status_bar)
 
 
+@router.get("/jobsies", response_class=HTMLResponse)
+async def definition_get_jobsies() -> HTMLResponse:
+    """Render the installed jobsie classes HTMX partial."""
+    jobsies = [
+        {
+            "name": name,
+            "docstring": jobsie_class.__doc__,
+            "config_class": jobsie_class.config_model.__name__ if jobsie_class.config_model is not None else None,
+        }
+        for name, jobsie_class in get_jobsie_registry().registry.items()
+    ]
+    jobsies_html = templates.get_template("components/definition_jobsies.html").render({"jobsies": jobsies})
+    logger.debug("Endpoint executed: GET /definition/jobsies")
+    return HTMLResponse(jobsies_html)
+
+
 @router.get("/create", response_class=HTMLResponse)
 async def definition_get_create_form(request: Request) -> HTMLResponse:
     """Render the jobsie definition creation dialog."""
@@ -81,11 +99,39 @@ async def definition_get_update_form(request: Request, definition_id: int) -> HT
     )
 
 
+@router.get("/{definition_id}/copy", response_class=HTMLResponse)
+async def definition_get_copy_form(request: Request, definition_id: int) -> HTMLResponse:
+    """Render a prefilled creation dialog copied from an existing definition."""
+    service = DefinitionService()
+    definition = service.get_definition(definition_id)
+    if not definition:
+        raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
+
+    form_data = {
+        "name": f"{definition.name} (copy)",
+        "subclass_name": definition.subclass_name,
+        "cron": definition.cron,
+        "retention": definition.retention,
+        "status": definition.status,
+        "input_kwargs": json.dumps(definition.input_kwargs, indent=2),
+        "output_monitoring": json.dumps(definition.output_monitoring, indent=2),
+    }
+    logger.debug(f"Endpoint executed: GET /definition/{definition_id}/copy")
+    return templates.TemplateResponse(
+        request=request,
+        name="components/definition_create_form.html",
+        context={
+            "subclasses": service.list_jobsie_types(),
+            "input_examples": service.get_input_examples(),
+            "form_data": form_data,
+        },
+    )
+
+
 @router.post("/create", response_class=HTMLResponse)
 async def definition_create(request: Request) -> HTMLResponse:
     """Create a new jobsie definition via HTMX form submission."""
     form_data = await _extract_form_data(request)
-    form_data["enabled"] = "enabled" in form_data
     logger.debug(f"Received form data for definition creation: {form_data}")
 
     service = DefinitionService()
@@ -130,7 +176,6 @@ async def definintion_update(request: Request, definition_id: int) -> HTMLRespon
         raise HTTPException(status_code=404, detail=f"Definition {definition_id} not found")
 
     form_data = await _extract_form_data(request)
-    form_data["enabled"] = "enabled" in form_data
     form_data.pop("subclass_name", None)
     logger.debug(f"Received form data for definition update: {form_data}")
 
@@ -181,6 +226,16 @@ async def definition_delete(definition_id: int) -> HTMLResponse:
 @router.post("/execute/{definition_id}", response_class=HTMLResponse)
 async def definition_execute(definition_id: int) -> HTMLResponse:
     """Schedules jobsie execution via HTMX and returns status bar."""
+    definition = DefinitionService().get_definition(definition_id)
+    if not definition:
+        msg = f"Jobsie definition with id {definition_id} not found"
+        logger.error(msg)
+        return HTMLResponse(_status_bar_html(msg, status_type="error"))
+    if definition.status == JobsieDefinitionStatus.UNAVAILABLE:
+        msg = f"Jobsie definition with id {definition_id} is unavailable"
+        logger.error(msg)
+        return HTMLResponse(_status_bar_html(msg, status_type="error"))
+
     try:
         task = wrapper_run_dynamic_jobsie.apply_async(args=[definition_id])
         logger.debug(f"Triggered jobsie id {definition_id} with task id {task.id}")

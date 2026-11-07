@@ -4,6 +4,7 @@ from typing import Any
 
 import pytest
 from freezegun import freeze_time
+from jobsies.schemas.enums import JobsieDefinitionStatus
 from jobsies.schemas.tables import TableJobsiesDefinition
 from jobsies.services import SchedulingService
 from pytz import timezone
@@ -30,7 +31,7 @@ def definition_factory(service: SchedulingService) -> Callable[..., TableJobsies
             "input_kwargs": {},
             "output_vars": {},
             "output_monitoring": {},
-            "enabled": True,
+            "status": JobsieDefinitionStatus.ENABLED,
         }
         values.update(overrides)
         definition = TableJobsiesDefinition(**values)
@@ -64,7 +65,7 @@ def test_get_active_task_configs_excludes_disabled_jobsies(
 ) -> None:
     """Test that only enabled definitions are returned as active configurations."""
     enabled = definition_factory(name="Enabled")
-    definition_factory(name="Disabled", enabled=False)
+    definition_factory(name="Disabled", status=JobsieDefinitionStatus.DISABLED)
 
     active_configs = service.get_active_task_configs()
 
@@ -77,7 +78,11 @@ def test_define_next_jobsies_does_not_schedule_disabled_jobsie(
 ) -> None:
     """Test that a disabled jobsie is absent from the scheduled jobsies."""
     enabled = definition_factory(name="Enabled", cron="0 * * * *")
-    disabled = definition_factory(name="Disabled", cron="0 * * * *", enabled=False)
+    disabled = definition_factory(
+        name="Disabled",
+        cron="0 * * * *",
+        status=JobsieDefinitionStatus.DISABLED,
+    )
 
     with freeze_time("2026-01-01 11:59:00", tz_offset=0):
         scheduled = service.define_next_jobsies(120)

@@ -1,9 +1,0 @@
-[
-    {
-        "name": "Example Jobsie",
-        "subclass_name": "ExampleJobsie",
-        "cron": "0 * * * *",
-        "input_kwargs": {},
-        "output_monitoring": {}
-    }
-]

@@ -1,9 +1,11 @@
-from functools import cache
+import functools
+from importlib.metadata import version
 
 import pytz
 from dotenv import find_dotenv
+from fastapi.templating import Jinja2Templates
 from loguru import logger
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,6 +33,25 @@ class Settings(BaseSettings):
         default="UTC",
         description="Timezone definition",
     )
+    encryption_key: SecretStr | None = Field(
+        default=None,
+        description="Optional secret string for configuration encryption.",
+    )
+
+    # Varibles below are not suppose to change. It will break the app
+    # but hey, if you want to, be my guest. Distinguished by _ after name
+    templates_location_: str = Field(
+        default="src/jobsies/templates",
+        description="Location of Jinja templates",
+    )
+    static_location_: str = Field(
+        default="src/jobsies/static",
+        description="Location of static files",
+    )
+    docs_location_: str = Field(
+        default="",
+        description="Location of markdown documentation files",
+    )
 
     @field_validator("tz_info")
     @classmethod
@@ -42,7 +63,14 @@ class Settings(BaseSettings):
         return v
 
 
-@cache
+@functools.cache
 def get_settings() -> Settings:
     """Retruns cached application settings."""
     return Settings()
+
+
+@functools.cache
+def get_templates() -> Jinja2Templates:
+    templates = Jinja2Templates(directory=get_settings().templates_location_)
+    templates.env.globals["app_version"] = version("jobsies")
+    return templates

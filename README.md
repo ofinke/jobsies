@@ -1,57 +1,36 @@
-🛠️ Jobsies is a self-hosted tool designed to automatically run simple jobs on the internet; scrape price of a product you are interested in, monitor websites for new events, or anything you are willing to program yourself.
+🛠️ `Jobsies` is a self-hosted application designed to run scheduled tasks (called jobsies) on your home server. These tasks can be anything you are willing to develop yourself, scrape price of a product you are interested in, or create reports on data from various sources.
+
+**Features:**
+- Simple HTMX based fronted to monitor results and plan your jobsies execution via cron based scheduler
+- Plugin system for jobsies. Develop and install only jobsies you want to have
+  - You want to implement your own jobsie? look at the [jobsies-template](https://github.com/ofinke/jobsies-template) repository for guide how to do that
 
 # Quickstart
 
-To run the project locally, docker installation is assumed. The project can be run fully locally without it, but you need to supply redis instance and include it in `.env` file. Project is mainly controlled via the included `Makefile`, run
+The application is designed to run in docker with several components: application, worker, redis and sqlite database. These definitions are declared in the `docker-compose.yml` file. To start the application, please first pull the repository, open it and prepare environmental variables
 
 ```bash
-make
+git clone https://github.com/ofinke/jobsies.git
 ```
-
-to see the available commands or, if you don't have make tools installed, just read the file.
-
-## Local development
-
-Clone the repository, install dependencies
 
 ```bash
-make init
+cd jobsies
+cp .env.example .env.container
 ```
-
-To run the application, first populate database with example jobsie
+And fill out the missing environmental variables in newly created `.env.container` file. Then start the application using
 
 ```bash
-make populate   # populates database with example jobsie, good before first run
+docker compose up --build -d
 ```
-
-Then, you can run run the app components separately (in different shells) by these commands
+Application will start and will be available by defaulf on port 8777: [http://127.0.0.1:8777](http://127.0.0.1:8777). Stop the whole stack by running
 
 ```bash
-make redis-up
-make run-worker
-make run-app
+docker compose down
 ```
 
-These commands creates redis instance using docker and starts both the worker and app. Application is then available at [localhost:8000](http://127.0.0.1:8000). Swagger documentation is available at [/docs](http://127.0.0.1:8000/docs). 
-
-## Containerized 
-
-Build and start the whole stack in docker (redis + worker + app) using
-
-```bash
-make up
-```
-
-The worker container mounts the local `./data` folder, so the database persists on the host. By default, the docker exposes app at the port 8777 - [http://127.0.0.1:8777](http://127.0.0.1:8777).
-
-Stop the whole stack by running
-
-```bash
-make down
-```
 # How to
 
-TBD (general introduction, how to create new jobsie).
+TBD
 
 # Roadmap
 
@@ -59,4 +38,4 @@ Goal is to develop dockerized system consisting of celery worker for processing 
 
 # AI Contribution
 
-This project was co-developed with [opencode](https://opencode.ai/) using various models, mostly GPT-5.6-Luna, DeepSeek v4 Flash, and Gemini-3.7-Flash. Contribution via PRs are welcomed, however fully AI generated and automated PRs will be rejected.
+This project was co-developed with [opencode](https://opencode.ai/) using various models, mostly GPT-6-Luna, GPT-5.6-Luna, DeepSeek v4 Flash, and Gemini-3.7-Flash.

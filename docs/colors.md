@@ -1,5 +1,3 @@
-# Overview
-
 I have zero experience in UI design and color theory, but I do have a nice book about colors (*a dictionary of color combinations*) and I like looking at pleasant and interesting color combinations. In Jobsies, the philosiphy is following:
 
 - 3 main colors, with following goals:

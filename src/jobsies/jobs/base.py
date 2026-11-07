@@ -1,24 +1,31 @@
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
+from jobsies.schemas.config.base import BaseConfig
 from jobsies.schemas.jobs.base import BaseJobsieInput, BaseJobsieOutput
 
 
 class BaseJobsie(ABC):
     """Base abstract class for Jobsies, all jobsies are children of this class."""
 
-    output_schema = BaseJobsieOutput
-    input_schema = BaseJobsieInput
+    # Required model attributes are validated when external Jobsies are registered.
+    input_model: ClassVar[type[BaseJobsieInput]]
+    output_model: ClassVar[type[BaseJobsieOutput]]
+    config_model: ClassVar[type[BaseConfig] | None] = None
 
     def __init__(self) -> None:
-        """Does something."""
-        super().__init__()
+        """
+        Initializes jobsie with default behaviour.
+
+        By default behaviour, jobsie result is stored in the database.
+        """
+        # False = store result in database, True = skip result
+        self.ignore_result: bool = False
 
     @abstractmethod
     def execute(self) -> BaseJobsieOutput:
-        """Actually does something."""
+        """
+        Contains jobsie execution logic.
 
-
-def get_jobsie_class(name: str) -> type[BaseJobsie]:
-    """Returns a subclass of BaseJobsie by its class name."""
-    mapping = {cls.__name__: cls for cls in BaseJobsie.__subclasses__()}
-    return mapping[name]
+        Returns instance of data validated by corresponding output_model
+        """

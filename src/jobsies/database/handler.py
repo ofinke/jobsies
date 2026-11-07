@@ -5,7 +5,7 @@ from loguru import logger
 from sqlalchemy import create_engine, select
 from sqlalchemy import update as sql_update
 from sqlalchemy.sql import Select
-from sqlmodel import Session, SQLModel, delete
+from sqlmodel import Session, delete
 
 from jobsies.schemas.tables.base import TableDefaultModel
 from jobsies.settings import get_settings
@@ -19,11 +19,6 @@ class DatabaseHandler:
     def __init__(self) -> None:
         """Initializes engine to database."""
         self.engine = create_engine(settings.db_url)
-
-        # Importing definitions of data models required to create table models.
-        import jobsies.schemas.tables  # noqa: F401, PLC0415
-
-        SQLModel.metadata.create_all(bind=self.engine)
 
     def store[T: TableDefaultModel](self, data: list[T]) -> None:
         """Stores data of type[BaseModel] into corresponding table in database."""

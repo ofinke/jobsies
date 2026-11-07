@@ -1,12 +1,16 @@
-.PHONY: init fix test populate redis run run-worker run-app stop help
+.PHONY: install init fix test populate redis redis-run redis-stop run run-worker run-app stop help
 .ONESHELL:
 
 REDIS_CONTAINER := jobsies-redis-dev
 
 .DEFAULT_GOAL := help
 
-init:  ## Initialize project (sync dependencies)
+install:  ## Install all project dependency groups
 	uv sync --all-groups
+
+init:  ## Install dependencies and populate the database
+	$(MAKE) install
+	$(MAKE) populate
 
 fix:  ## Run ruff fix on the codebase
 	uv run ruff check --fix
@@ -15,7 +19,7 @@ test:  ## Run pytest
 	uv run pytest --cov=jobsies
 
 populate: ## Populate database with default values
-	docker compose up -d redis
+	uv run python -m jobsies.database.setup
 
 redis-run: ## Run redis in docker
 	set -e
@@ -32,7 +36,7 @@ run-app:  ## Start FastAPI dev server via uvicorn
 	uv run uvicorn jobsies.fastapi_app:app --reload
 
 up:		## Starts the whole application using docker
-	docker compose up --build
+	docker compose up --build -d
 
 down:	## Stops the stack
 	docker compose down

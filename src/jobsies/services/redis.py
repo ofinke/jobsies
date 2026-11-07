@@ -2,13 +2,8 @@ import base64
 import functools
 import json
 from datetime import datetime
-from typing import Any
 
 import redis
-
-from jobsies.config import get_config
-
-config = get_config()
 
 
 class RedisHandler:
@@ -26,7 +21,7 @@ class RedisHandler:
         """Attempt to acquire an enqueue lock for the specified timeout."""
         return bool(self.client.set(lock_key, "enqueued", nx=True, ex=lock_timeout))
 
-    def client_status(self) -> dict[str, Any]:
+    def client_status(self) -> dict[str, object]:
         """Return Redis liveness and broker diagnostics."""
         try:
             alive = bool(self.client.ping())
@@ -64,6 +59,7 @@ class RedisHandler:
             scheduled_tasks.setdefault(jobsie_id, []).append(eta)
 
         return scheduled_tasks
+
 
 @functools.cache
 def get_redis_handler(url: str) -> RedisHandler:

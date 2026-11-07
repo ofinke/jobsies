@@ -13,6 +13,10 @@ class ExampleJobsie(BaseJobsie):
     input_model = BaseJobsieInput
     output_model = ExampleJobsieOutput
 
+    def __init__(self) -> None:
+        """Initializes jobsie."""
+        super().__init__()
+
     def execute(self) -> ExampleJobsieOutput:
         """Retrieves status and content of example.com."""
         logger.debug("Example jobsie executed!")

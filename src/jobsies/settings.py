@@ -1,5 +1,6 @@
 import functools
 from importlib.metadata import version
+from pathlib import Path
 
 import pytz
 from dotenv import find_dotenv
@@ -7,6 +8,10 @@ from fastapi.templating import Jinja2Templates
 from loguru import logger
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from jobsies.asset_paths import get_asset_path
+
+PACKAGE_ROOT = Path(__file__).resolve().parent
 
 
 class Settings(BaseSettings):
@@ -41,15 +46,15 @@ class Settings(BaseSettings):
     # Varibles below are not suppose to change. It will break the app
     # but hey, if you want to, be my guest. Distinguished by _ after name
     templates_location_: str = Field(
-        default="src/jobsies/templates",
+        default_factory=lambda: str(PACKAGE_ROOT / "templates"),
         description="Location of Jinja templates",
     )
     static_location_: str = Field(
-        default="src/jobsies/static",
+        default_factory=lambda: str(PACKAGE_ROOT / "static"),
         description="Location of static files",
     )
     docs_location_: str = Field(
-        default="",
+        default_factory=lambda: str(get_asset_path("docs")),
         description="Location of markdown documentation files",
     )
 

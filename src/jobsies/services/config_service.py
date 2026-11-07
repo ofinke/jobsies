@@ -125,9 +125,9 @@ class ConfigService:
 
     @staticmethod
     def _validate_config(config_model: str, config: dict) -> dict:
-        """Validate configuration values against their registered model and return JSON data."""
+        """Validate configuration values and return JSON data suitable for database storage."""
         config_class = get_config_class_registry().get(config_model)
-        return config_class.model_validate(config).model_dump(mode="json")
+        return config_class.model_validate(config).dump_for_storage()
 
     def get(self, name: str) -> BaseConfig:
         """Retrieve configuration by its name."""

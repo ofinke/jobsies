@@ -7,7 +7,7 @@
 
 # Quickstart
 
-The application is designed to run in docker with several components: application, worker, and redis. This definition is declared in the `docker-compose.yml` file. To start the application, please first pull the repository, open it and prepare environmental variables
+The application is designed to run in docker with several components: application, worker, redis and sqlite database. These definitions are declared in the `docker-compose.yml` file. To start the application, please first pull the repository, open it and prepare environmental variables
 
 ```bash
 git clone https://github.com/ofinke/jobsies.git

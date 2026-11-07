@@ -118,11 +118,13 @@ async def configs_get_update_form(request: Request, config_id: int) -> HTMLRespo
     if configuration is None:
         raise HTTPException(status_code=404, detail=f"Configuration {config_id} not found")
 
+    config_class = get_config_class_registry().get(configuration.config_model)
+    config = config_class.model_validate(configuration.config).model_dump(mode="json")
     form_data = {
         "name": configuration.name,
         "config_model": configuration.config_model,
         "description": configuration.description or "",
-        "config": json.dumps(configuration.config, indent=2),
+        "config": json.dumps(config, indent=2),
     }
     logger.debug(f"Endpoint executed: GET /configs/{config_id}/update")
     return templates.TemplateResponse(
@@ -143,11 +145,13 @@ async def configs_get_copy_form(request: Request, config_id: int) -> HTMLRespons
     if configuration is None:
         raise HTTPException(status_code=404, detail=f"Configuration {config_id} not found")
 
+    config_class = get_config_class_registry().get(configuration.config_model)
+    config = config_class.model_validate(configuration.config).model_dump(mode="json")
     form_data = {
         "name": f"{configuration.name} (copy)",
         "config_model": configuration.config_model,
         "description": configuration.description or "",
-        "config": json.dumps(configuration.config, indent=2),
+        "config": json.dumps(config, indent=2),
     }
     logger.debug(f"Endpoint executed: GET /configs/{config_id}/copy")
     return templates.TemplateResponse(

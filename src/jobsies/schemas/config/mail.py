@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 
 from .base import BaseConfig
 
@@ -11,7 +11,7 @@ class MailConfig(BaseConfig):
     username: str = Field(
         description="Username used to authenticate with the IMAP server.",
     )
-    password: str = Field(
+    password: SecretStr = Field(
         description="Password used to authenticate with the IMAP server.",
     )
     imap_host: str = Field(

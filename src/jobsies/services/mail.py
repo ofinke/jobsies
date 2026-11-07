@@ -52,7 +52,7 @@ class MailService:
         try:
             # Search a day early because IMAP search has date-only precision; the cutoff is checked below.
             with imaplib.IMAP4_SSL(self.config.imap_host, self.config.imap_port) as client:
-                client.login(self.config.username, self.config.password)
+                client.login(self.config.username, self.config.password.get_secret_value())
                 status, _ = client.select(self.config.mailbox, readonly=False)
                 if status != "OK":
                     msg = f"Could not select IMAP mailbox '{self.config.mailbox}'"
@@ -163,5 +163,5 @@ class MailService:
         email_message.set_content(message.body)
 
         with smtplib.SMTP_SSL(self.config.smtp_host, self.config.smtp_port) as client:
-            client.login(self.config.username, self.config.password)
+            client.login(self.config.username, self.config.password.get_secret_value())
             client.send_message(email_message)

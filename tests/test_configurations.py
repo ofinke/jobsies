@@ -1,9 +1,10 @@
+from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 from jobsies.exceptions import UnavailableConfigError
-from jobsies.schemas.config import AppConfig, BaseConfig
+from jobsies.schemas.config import AppConfig, BaseConfig, MailConfig
 from jobsies.schemas.tables import TableSharedConfigurations
 from jobsies.services.config_classes import ConfigClassRegistry
 from jobsies.services.config_service import ConfigService
@@ -53,6 +54,45 @@ def test_get_rejects_invalid_config_values(mock_db_handler: MagicMock) -> None:
 
     with pytest.raises(ValidationError):
         service.get("app-config")
+
+
+def test_dump_for_storage_reveals_secret_str_and_keeps_json_values() -> None:
+    """Reveal SecretStr values for storage while preserving JSON serialization of other fields."""
+    config = MailConfig(
+        username="mail-user",
+        password="mail-password",  # noqa: S106
+        imap_host="imap.example.com",
+        smtp_host="smtp.example.com",
+        lookup_period=timedelta(hours=6),
+        senders=["sender@example.com"],
+    )
+
+    assert config.model_dump(mode="json")["password"] == "**********"  # noqa: S105
+    stored_config = config.dump_for_storage()
+    assert stored_config["password"] == "mail-password"  # noqa: S105
+    assert stored_config["lookup_period"] == "PT6H"
+
+
+def test_validate_config_uses_storage_dump(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Validate config input and return unmasked secret values for database storage."""
+    monkeypatch.setattr(
+        "jobsies.services.config_service.get_config_class_registry",
+        lambda: SimpleNamespace(get=lambda _name: MailConfig),
+    )
+
+    config = ConfigService._validate_config(
+        "MailConfig",
+        {
+            "username": "mail-user",
+            "password": "mail-password",
+            "imap_host": "imap.example.com",
+            "smtp_host": "smtp.example.com",
+            "lookup_period": "PT6H",
+            "senders": ["sender@example.com"],
+        },
+    )
+
+    assert config["password"] == "mail-password"  # noqa: S105
 
 
 def test_get_reports_missing_configuration(mock_db_handler: MagicMock) -> None:

@@ -15,11 +15,8 @@ The development roughly follows this path
 
 # Finish before 0.3.0
 - deployment to pypi
-- Moving jobsies into separate plugins
-  - maybe update so that the plugins are not in the env file but a newline separated PLUGINS file? how to ensure that it is safely passed into the container?
 - Update readme and documentation
 - figure how I want to show jobsies defined outputs in the installed jobsies under jobsies definition
-- add into config new field "secret" which will be bool. This will ensure, that values never leave backend - to FE it will return scrambled values and wont allow to copy the config. It will be possible to set it up only on creating a new config.
 
 # Features
 

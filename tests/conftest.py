@@ -1,5 +1,6 @@
 from collections.abc import Generator
 
+import jobsies.services as jobsies_services
 import jobsies.services.config_service as jobsies_config
 import pytest
 from jobsies.database import get_db_handler
@@ -24,6 +25,7 @@ def _get_config_by_name_with_app_default(name: str) -> BaseConfig:
 
 
 jobsies_config.get_config_by_name = _get_config_by_name_with_app_default
+jobsies_services.get_config_by_name = _get_config_by_name_with_app_default
 
 
 @pytest.fixture(autouse=True)
